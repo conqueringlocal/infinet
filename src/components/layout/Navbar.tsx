@@ -53,7 +53,7 @@ const Navbar = () => {
             {navLinks.map(link => <Link key={link.path} to={link.path} className={cn('px-3 py-2 rounded-md text-sm font-medium transition-colors', location.pathname === link.path ? 'text-infinet-600 bg-infinet-50' : 'text-gray-700 hover:text-infinet-600 hover:bg-infinet-50')}>
                 {link.label}
               </Link>)}
-            <Button variant="accent" size="sm" className="ml-2" onClick={() => window.location.href = '/contact'}>Get in touch</Button>
+            <Button variant="accent" size="sm" className="ml-2" onClick={() => window.location.href = '/contact'}>Get in Touch</Button>
           </nav>
 
           {/* Mobile Menu Button */}
