@@ -2,7 +2,7 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 
-interface InteractiveCardProps extends React.HTMLAttributes<HTMLDivElement> {
+interface InteractiveCardProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'> {
   title?: React.ReactNode;
   description?: React.ReactNode;
   icon?: React.ReactNode;
