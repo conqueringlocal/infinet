@@ -14,6 +14,7 @@ const buttonVariants = cva(
         link: "text-infinet-600 underline-offset-4 hover:underline",
         secondary: "bg-infinet-100 text-infinet-900 hover:bg-infinet-200",
         destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+        accent: "bg-infinetYellow-400 text-gray-900 hover:bg-infinetYellow-500 shadow-sm",
       },
       size: {
         default: "h-10 px-5 py-2",

@@ -51,10 +51,11 @@ const Navbar = () => {
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center">
-            <span className="text-2xl font-bold text-infinet-800">
-              Infi-<span className="text-infinet-600">Net</span>
-            </span>
-            <span className="ml-1 text-xs tracking-wider text-infinet-500 mt-1">LLC</span>
+            <img 
+              src="/lovable-uploads/2d58718b-9a89-4dde-b37e-43621ecf8a95.png" 
+              alt="Infi-Net LLC" 
+              className="h-12" 
+            />
           </Link>
 
           {/* Desktop Navigation */}
@@ -74,7 +75,7 @@ const Navbar = () => {
               </Link>
             ))}
             <Button 
-              variant="default" 
+              variant="accent" 
               size="sm" 
               className="ml-2"
               onClick={() => window.location.href = '/contact'}
@@ -122,7 +123,7 @@ const Navbar = () => {
               </Link>
             ))}
             <Button 
-              variant="default" 
+              variant="accent" 
               size="sm" 
               className="mt-2"
               onClick={() => window.location.href = '/contact'}

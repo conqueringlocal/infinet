@@ -12,9 +12,13 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Company Info */}
           <div className="space-y-4">
-            <h3 className="text-xl font-bold">
-              Infi-<span className="text-infinet-400">Net</span> <span className="text-sm">LLC</span>
-            </h3>
+            <div className="flex items-center">
+              <img 
+                src="/lovable-uploads/2d58718b-9a89-4dde-b37e-43621ecf8a95.png" 
+                alt="Infi-Net LLC" 
+                className="h-12" 
+              />
+            </div>
             <p className="text-gray-300 max-w-xs">
               Fiber & Low-Voltage Solutions You Can Trust. Providing expert network infrastructure services in Lakeland, Florida and beyond.
             </p>
