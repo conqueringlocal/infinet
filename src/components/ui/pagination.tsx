@@ -37,13 +37,15 @@ PaginationItem.displayName = "PaginationItem"
 
 type PaginationLinkProps = {
   isActive?: boolean
+  children?: React.ReactNode
 } & Pick<ButtonProps, "size"> &
-  Omit<React.ComponentProps<"a">, "ref" | "size">
+  Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, "size">
 
 const PaginationLink = ({
   className,
   isActive,
   size = "icon",
+  children,
   ...props
 }: PaginationLinkProps) => (
   <Button
@@ -56,9 +58,8 @@ const PaginationLink = ({
       className
     )}
     asChild
-    {...props}
   >
-    <a>{props.children}</a>
+    <a {...props}>{children}</a>
   </Button>
 )
 PaginationLink.displayName = "PaginationLink"
