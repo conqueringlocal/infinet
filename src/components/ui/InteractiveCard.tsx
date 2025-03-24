@@ -1,94 +1,53 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface InteractiveCardProps extends React.HTMLAttributes<HTMLDivElement> {
   title?: React.ReactNode;
   description?: React.ReactNode;
-  footer?: React.ReactNode;
-  headerClassName?: string;
-  contentClassName?: string;
-  footerClassName?: string;
-  interactive?: boolean;
-  hoverEffect?: 'raise' | 'glow' | 'border' | 'none';
-  animation?: 'fadeIn' | 'slideUp' | 'none';
-  variant?: 'default' | 'glass';
+  icon?: React.ReactNode;
+  variant?: 'default' | 'accent' | 'outline' | 'ghost';
+  hoverEffect?: 'lift' | 'glow' | 'border' | 'none';
+  className?: string;
 }
 
 const InteractiveCard = React.forwardRef<HTMLDivElement, InteractiveCardProps>(
-  ({
-    className,
-    title,
-    description,
-    footer,
-    children,
-    headerClassName,
-    contentClassName,
-    footerClassName,
-    interactive = true,
-    hoverEffect = 'raise',
-    animation = 'none',
-    variant = 'default',
-    ...props
-  }, ref) => {
-    const hoverClasses = interactive ? {
-      raise: 'transition-all duration-300 hover:-translate-y-2 hover:shadow-lg',
-      glow: 'transition-all duration-300 hover:shadow-[0_0_15px_rgba(14,165,233,0.3)]',
-      border: 'transition-all duration-300 hover:border-infinet-400',
-      none: ''
-    }[hoverEffect] : '';
-    
-    const animationClasses = {
-      fadeIn: 'animate-fade-in',
-      slideUp: 'animate-fade-in-right',
-      none: ''
-    }[animation];
-    
-    const variantClasses = {
-      default: 'bg-card',
-      glass: 'glass-panel backdrop-blur-md bg-white/80 border border-white/20'
-    }[variant];
-    
+  ({ title, description, icon, variant = 'default', hoverEffect = 'lift', className, children, ...props }, ref) => {
     return (
-      <Card 
+      <div
         ref={ref}
         className={cn(
-          'overflow-hidden',
-          hoverClasses,
-          animationClasses,
-          variantClasses,
+          'rounded-lg p-5 transition-all duration-300',
+          // Variants
+          variant === 'default' && 'bg-white shadow-md',
+          variant === 'accent' && 'bg-infinet-50 border border-infinet-200',
+          variant === 'outline' && 'border border-gray-200',
+          variant === 'ghost' && 'bg-transparent',
+          // Hover effects
+          hoverEffect === 'lift' && 'hover:-translate-y-1 hover:shadow-lg',
+          hoverEffect === 'glow' && 'hover:shadow-[0_0_15px_rgba(21,202,219,0.3)]',
+          hoverEffect === 'border' && 'hover:border-infinet-400',
           className
         )}
         {...props}
       >
-        {title || description ? (
-          <CardHeader className={headerClassName}>
-            {title && typeof title === 'string' ? (
-              <CardTitle>{title}</CardTitle>
-            ) : (
-              title
-            )}
-            {description && typeof description === 'string' ? (
-              <CardDescription>{description}</CardDescription>
-            ) : (
-              description
-            )}
-          </CardHeader>
-        ) : null}
-        
-        {children && (
-          <CardContent className={cn('', contentClassName)}>
-            {children}
-          </CardContent>
+        {icon && (
+          <div className="mb-3 inline-flex items-center justify-center rounded-md bg-infinet-100 p-2 text-infinet-700">
+            {icon}
+          </div>
         )}
-        
-        {footer && (
-          <CardFooter className={cn('flex justify-between', footerClassName)}>
-            {footer}
-          </CardFooter>
+        {title && (
+          <h3 className="mb-2 font-semibold text-gray-900">
+            {title}
+          </h3>
         )}
-      </Card>
+        {description && (
+          <p className="text-sm text-gray-600">
+            {description}
+          </p>
+        )}
+        {children}
+      </div>
     );
   }
 );
