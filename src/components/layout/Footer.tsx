@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Phone, Mail, MapPin, Facebook, Twitter, Linkedin, ChevronRight } from 'lucide-react';
@@ -93,11 +94,11 @@ const Footer = () => {
               </li>
               <li className="flex items-center">
                 <Phone size={20} className="text-infinet-400 mr-3 flex-shrink-0" />
-                <a href="tel:+18631234567" className="text-gray-300 hover:text-infinet-400 transition-colors">(727) 417-7050</a>
+                <a href="tel:+17274177050" className="text-gray-300 hover:text-infinet-400 transition-colors">(727) 417-7050</a>
               </li>
               <li className="flex items-center">
                 <Mail size={20} className="text-infinet-400 mr-3 flex-shrink-0" />
-                <a href="mailto:info@infinetllc.com" className="text-gray-300 hover:text-infinet-400 transition-colors">info@infi-net.net</a>
+                <a href="mailto:info@infi-net.net" className="text-gray-300 hover:text-infinet-400 transition-colors">info@infi-net.net</a>
               </li>
             </ul>
           </div>

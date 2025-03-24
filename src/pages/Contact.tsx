@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
@@ -115,17 +114,17 @@ const Contact = () => {
                 {
                   icon: Phone,
                   title: 'Phone Number',
-                  content: '(863) 123-4567',
+                  content: '(727) 417-7050',
                   detail: 'Monday-Friday, 8am-6pm',
-                  link: 'tel:+18631234567',
+                  link: 'tel:+17274177050',
                   color: 'text-green-600 bg-green-100'
                 },
                 {
                   icon: Mail,
                   title: 'Email Address',
-                  content: 'info@infinetllc.com',
+                  content: 'info@infi-net.net',
                   detail: 'We respond promptly to all inquiries',
-                  link: 'mailto:info@infinetllc.com',
+                  link: 'mailto:info@infi-net.net',
                   color: 'text-purple-600 bg-purple-100'
                 }
               ].map((item, index) => (
