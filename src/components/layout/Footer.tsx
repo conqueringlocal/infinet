@@ -1,23 +1,15 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Phone, Mail, MapPin, Facebook, Twitter, Linkedin, ChevronRight } from 'lucide-react';
-
 const Footer = () => {
   const currentYear = new Date().getFullYear();
-
-  return (
-    <footer className="bg-gray-900 text-white pt-16 pb-8">
+  return <footer className="bg-gray-900 text-white pt-16 pb-8">
       <div className="container mx-auto px-4 md:px-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Company Info */}
           <div className="space-y-4">
             <div className="flex items-center">
-              <img 
-                src="/lovable-uploads/2d58718b-9a89-4dde-b37e-43621ecf8a95.png" 
-                alt="Infi-Net LLC" 
-                className="h-12" 
-              />
+              <img src="/lovable-uploads/2d58718b-9a89-4dde-b37e-43621ecf8a95.png" alt="Infi-Net LLC" className="h-12" />
             </div>
             <p className="text-gray-300 max-w-xs">
               Fiber & Low-Voltage Solutions You Can Trust. Providing expert network infrastructure services in Lakeland, Florida and beyond.
@@ -39,23 +31,27 @@ const Footer = () => {
           <div className="space-y-4">
             <h4 className="font-semibold text-lg text-white/90">Quick Links</h4>
             <ul className="space-y-2">
-              {[
-                { label: 'Home', path: '/' },
-                { label: 'About Us', path: '/about' },
-                { label: 'Our Services', path: '/services' },
-                { label: 'Projects', path: '/projects' },
-                { label: 'Contact Us', path: '/contact' },
-              ].map((link, index) => (
-                <li key={index}>
-                  <Link 
-                    to={link.path} 
-                    className="text-gray-400 hover:text-infinet-400 transition-colors flex items-center"
-                  >
+              {[{
+              label: 'Home',
+              path: '/'
+            }, {
+              label: 'About Us',
+              path: '/about'
+            }, {
+              label: 'Our Services',
+              path: '/services'
+            }, {
+              label: 'Projects',
+              path: '/projects'
+            }, {
+              label: 'Contact Us',
+              path: '/contact'
+            }].map((link, index) => <li key={index}>
+                  <Link to={link.path} className="text-gray-400 hover:text-infinet-400 transition-colors flex items-center">
                     <ChevronRight size={14} className="mr-1" />
                     {link.label}
                   </Link>
-                </li>
-              ))}
+                </li>)}
             </ul>
           </div>
 
@@ -63,23 +59,27 @@ const Footer = () => {
           <div className="space-y-4">
             <h4 className="font-semibold text-lg text-white/90">Our Services</h4>
             <ul className="space-y-2">
-              {[
-                { label: 'Fiber Optic Installations', path: '/services#fiber' },
-                { label: 'Low-Voltage Data Cabling', path: '/services#data-cabling' },
-                { label: 'Point-to-Point Applications', path: '/services#ptp' },
-                { label: 'Greenfield Site Builds', path: '/services#greenfield' },
-                { label: 'Brownfield Site Builds', path: '/services#brownfield' },
-              ].map((service, index) => (
-                <li key={index}>
-                  <Link 
-                    to={service.path} 
-                    className="text-gray-400 hover:text-infinet-400 transition-colors flex items-center"
-                  >
+              {[{
+              label: 'Fiber Optic Installations',
+              path: '/services#fiber'
+            }, {
+              label: 'Low-Voltage Data Cabling',
+              path: '/services#data-cabling'
+            }, {
+              label: 'Point-to-Point Applications',
+              path: '/services#ptp'
+            }, {
+              label: 'Greenfield Site Builds',
+              path: '/services#greenfield'
+            }, {
+              label: 'Brownfield Site Builds',
+              path: '/services#brownfield'
+            }].map((service, index) => <li key={index}>
+                  <Link to={service.path} className="text-gray-400 hover:text-infinet-400 transition-colors flex items-center">
                     <ChevronRight size={14} className="mr-1" />
                     {service.label}
                   </Link>
-                </li>
-              ))}
+                </li>)}
             </ul>
           </div>
 
@@ -93,15 +93,11 @@ const Footer = () => {
               </li>
               <li className="flex items-center">
                 <Phone size={20} className="text-infinet-400 mr-3 flex-shrink-0" />
-                <a href="tel:+18631234567" className="text-gray-300 hover:text-infinet-400 transition-colors">
-                  (863) 123-4567
-                </a>
+                <a href="tel:+18631234567" className="text-gray-300 hover:text-infinet-400 transition-colors">(727) 417-7050</a>
               </li>
               <li className="flex items-center">
                 <Mail size={20} className="text-infinet-400 mr-3 flex-shrink-0" />
-                <a href="mailto:info@infinetllc.com" className="text-gray-300 hover:text-infinet-400 transition-colors">
-                  info@infinetllc.com
-                </a>
+                <a href="mailto:info@infinetllc.com" className="text-gray-300 hover:text-infinet-400 transition-colors">info@infi-net.net</a>
               </li>
             </ul>
           </div>
@@ -118,8 +114,6 @@ const Footer = () => {
           </div>
         </div>
       </div>
-    </footer>
-  );
+    </footer>;
 };
-
 export default Footer;
