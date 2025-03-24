@@ -1,7 +1,7 @@
 
 import React, { useRef, useEffect } from 'react';
 import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'; // Fixed import with .js extension
 
 const Fiber3DModel = () => {
   const mountRef = useRef<HTMLDivElement>(null);
@@ -131,7 +131,8 @@ const Fiber3DModel = () => {
       
       // Animate light particles
       fiberCable.children.forEach(child => {
-        if (child.geometry.type === 'SphereGeometry') {
+        // Check if the child is a mesh with sphere geometry (our light particles)
+        if (child instanceof THREE.Mesh && child.geometry instanceof THREE.SphereGeometry) {
           const { direction, speed, originalY } = child.userData;
           child.position.y += direction * speed;
           

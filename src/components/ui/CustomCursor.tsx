@@ -59,7 +59,7 @@ const CustomCursor = () => {
           top: `${position.y}px`,
         }}
       />
-      <style jsx global>{`
+      <style dangerouslySetInnerHTML={{ __html: `
         * {
           cursor: none !important;
         }
@@ -69,7 +69,7 @@ const CustomCursor = () => {
             cursor: auto !important;
           }
         }
-      `}</style>
+      `}} />
     </>
   );
 };
