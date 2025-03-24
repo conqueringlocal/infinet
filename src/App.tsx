@@ -12,6 +12,9 @@ import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 import PageTransition from "./components/layout/PageTransition";
 import { useEffect } from "react";
+import { ThemeProvider } from "./hooks/useTheme";
+import ScrollProgressBar from "./components/ui/ScrollProgressBar";
+import Chatbot from "./components/ui/Chatbot";
 
 const queryClient = new QueryClient();
 
@@ -41,16 +44,20 @@ const AppRoutes = () => {
 };
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <ScrollToTop />
-        <AppRoutes />
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
+  <ThemeProvider defaultTheme="light">
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <ScrollProgressBar />
+          <ScrollToTop />
+          <AppRoutes />
+          <Chatbot />
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </ThemeProvider>
 );
 
 export default App;
