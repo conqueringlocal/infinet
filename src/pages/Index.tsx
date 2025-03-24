@@ -10,7 +10,6 @@ import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import ServiceFinder from '@/components/home/ServiceFinder';
-import Fiber3DModel from '@/components/home/Fiber3DModel';
 import FiberInfo from '@/components/home/FiberInfo';
 
 const Index = () => {
@@ -52,25 +51,17 @@ const Index = () => {
         <div className="py-16 md:py-24 bg-infinet-50 dark:bg-gray-800">
           <div className="container mx-auto px-4 md:px-6">
             <div className="text-center max-w-3xl mx-auto mb-12">
-              <span className="reveal text-sm font-semibold text-infinet-600 dark:text-infinet-400 uppercase tracking-wider">Interactive Experience</span>
+              <span className="reveal text-sm font-semibold text-infinet-600 dark:text-infinet-400 uppercase tracking-wider">Fiber Optic Technology</span>
               <h2 className="reveal text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mt-2">
-                Explore Fiber Optic Technology
+                Understanding Fiber Optics
               </h2>
               <p className="reveal text-gray-600 dark:text-gray-300 mt-4 text-lg">
-                Interact with our 3D fiber optic model and learn about the technology that powers our high-speed connectivity solutions.
+                Learn about the technology that powers our high-speed connectivity solutions.
               </p>
             </div>
             
-            <div className="grid md:grid-cols-2 gap-8 lg:gap-12 max-w-6xl mx-auto">
-              <div className="reveal md:order-1 order-2">
-                <Fiber3DModel />
-                <div className="mt-4 text-center text-sm text-gray-500 dark:text-gray-400">
-                  Rotate, zoom, and explore the 3D model. Adjust controls below to change visualization.
-                </div>
-              </div>
-              <div className="reveal md:order-2 order-1">
-                <FiberInfo />
-              </div>
+            <div className="max-w-5xl mx-auto">
+              <FiberInfo />
             </div>
           </div>
         </div>
