@@ -246,7 +246,7 @@ const Services = () => {
                     variant="secondary"
                     className="bg-white text-infinet-800 hover:bg-blue-50"
                   >
-                    Get a Free Quote
+                    Get in Touch
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </Link>

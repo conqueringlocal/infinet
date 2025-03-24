@@ -66,7 +66,7 @@ const Hero = () => {
             {/* CTA Buttons */}
             <div className="reveal flex flex-col sm:flex-row items-center justify-center gap-4 mt-8">
               <Button size="lg" variant="default" onClick={() => window.location.href = '/contact'}>
-                Get Connected Today
+                Get in Touch
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
               <Button variant="accent" size="lg" onClick={() => window.location.href = '/services'}>

@@ -69,7 +69,7 @@ const CtaSection = () => {
             <div className="reveal pt-6">
               <Link to="/contact">
                 <Button size="lg" variant="secondary" className="bg-white text-infinet-800 hover:bg-blue-50">
-                  Request a Quote
+                  Get in Touch
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
