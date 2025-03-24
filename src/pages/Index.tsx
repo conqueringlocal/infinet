@@ -13,6 +13,27 @@ const Index = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
     document.title = "Infi-Net LLC | Fiber & Low-Voltage Solutions You Can Trust";
+    
+    // Initialize intersection observer for revealing elements on scroll
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('active');
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+
+    // Observe all elements with the 'reveal' class
+    const revealElements = document.querySelectorAll('.reveal');
+    revealElements.forEach((el) => observer.observe(el));
+
+    return () => {
+      // Clean up the observer
+      revealElements.forEach((el) => observer.unobserve(el));
+    };
   }, []);
 
   return (
