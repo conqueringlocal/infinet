@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/Button';
@@ -38,7 +37,6 @@ const AboutPreview = () => {
     >
       <div className="container mx-auto px-4 md:px-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          {/* Image Column */}
           <div className="reveal order-2 lg:order-1">
             <div className="relative">
               <div className="absolute -top-4 -left-4 w-32 h-32 bg-infinet-100 rounded-lg -z-10"></div>
@@ -53,7 +51,6 @@ const AboutPreview = () => {
             </div>
           </div>
 
-          {/* Content Column */}
           <div className="space-y-6 order-1 lg:order-2">
             <div className="reveal">
               <span className="text-sm font-semibold text-infinet-600 uppercase tracking-wider">About Infi-NET LLC</span>
@@ -81,7 +78,9 @@ const AboutPreview = () => {
 
             <div className="reveal pt-4">
               <Link to="/about">
-                <Button>
+                <Button 
+                  className="w-full md:w-auto flex items-center justify-center"
+                >
                   Learn More About Us
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
