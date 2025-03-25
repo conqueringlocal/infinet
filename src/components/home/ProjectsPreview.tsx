@@ -104,16 +104,17 @@ const ProjectsPreview = () => {
         </div>
 
         <div className="reveal text-center mt-12">
-          <Link to="/projects">
-            <Button 
-              size="lg" 
-              variant="outline" 
-              className="w-full md:w-auto flex items-center justify-center"
-            >
+          <Button 
+            variant="default" 
+            size="lg" 
+            className="w-full md:w-auto px-8 flex items-center justify-center" 
+            asChild
+          >
+            <Link to="/projects" className="flex items-center justify-center">
               View All Projects
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </Link>
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </Link>
+          </Button>
         </div>
       </div>
     </section>
