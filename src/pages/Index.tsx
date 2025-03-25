@@ -9,8 +9,6 @@ import CtaSection from '@/components/home/CtaSection';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import ServiceFinder from '@/components/home/ServiceFinder';
-import FiberInfo from '@/components/home/FiberInfo';
-import BusinessBenefits from '@/components/home/BusinessBenefits';
 import NationwideService from '@/components/home/NationwideService';
 
 const Index = () => {
@@ -46,24 +44,6 @@ const Index = () => {
       <main className="flex-grow">
         <Hero />
         <AboutPreview />
-        <div className="py-16 md:py-24 bg-infinet-50">
-          <div className="container mx-auto px-4 md:px-6">
-            <div className="text-center max-w-3xl mx-auto mb-12">
-              <span className="reveal text-sm font-semibold text-infinet-600 uppercase tracking-wider">Business Solutions</span>
-              <h2 className="reveal text-3xl md:text-4xl font-bold text-gray-900 mt-2">
-                Business Network Solutions
-              </h2>
-              <p className="reveal text-gray-600 mt-4 text-lg">
-                Tailored infrastructure that powers business growth and innovation.
-              </p>
-            </div>
-            
-            <div className="max-w-5xl mx-auto">
-              <FiberInfo />
-            </div>
-          </div>
-        </div>
-        <BusinessBenefits />
         <ServicesSection />
         <NationwideService />
         <ServiceFinder />
