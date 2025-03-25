@@ -18,7 +18,7 @@ const FiberInfo = () => {
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-infinet-50 dark:bg-infinet-900/20 p-4 rounded-lg">
               <div className="font-bold text-3xl text-infinet-600 dark:text-infinet-400 mb-1">99.9%</div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">Uptime guarantee</div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">Network reliability</div>
             </div>
             <div className="bg-infinet-50 dark:bg-infinet-900/20 p-4 rounded-lg">
               <div className="font-bold text-3xl text-infinet-600 dark:text-infinet-400 mb-1">35+</div>
