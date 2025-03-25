@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
@@ -61,7 +60,6 @@ const ProjectsPreview = () => {
       className="py-16 md:py-24 bg-gray-50"
     >
       <div className="container mx-auto px-4 md:px-6">
-        {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
           <span className="reveal text-sm font-semibold text-infinet-600 uppercase tracking-wider">Our Work</span>
           <h2 className="reveal text-3xl md:text-4xl font-bold text-gray-900 mt-2">
@@ -72,7 +70,6 @@ const ProjectsPreview = () => {
           </p>
         </div>
 
-        {/* Projects Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {projects.map((project, index) => (
             <div 
@@ -106,10 +103,13 @@ const ProjectsPreview = () => {
           ))}
         </div>
 
-        {/* CTA Button */}
         <div className="reveal text-center mt-12">
           <Link to="/projects">
-            <Button size="lg" variant="outline">
+            <Button 
+              size="lg" 
+              variant="outline" 
+              className="w-full md:w-auto flex items-center justify-center"
+            >
               View All Projects
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>

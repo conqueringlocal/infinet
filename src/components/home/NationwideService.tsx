@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
@@ -83,7 +82,11 @@ const NationwideService = () => {
               Our team has the expertise and resources to deliver high-quality fiber and low-voltage solutions anywhere in the United States.
             </p>
             <Link to="/contact">
-              <Button variant="default" size="lg">
+              <Button 
+                variant="default" 
+                size="lg" 
+                className="w-full md:w-auto flex items-center justify-center"
+              >
                 Discuss Your Project
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
