@@ -7,12 +7,12 @@ import { cn } from '@/lib/utils';
 
 // Featured states where Infi-NET has completed projects
 const featuredStates = [
-  { name: 'Florida', abbr: 'FL', color: 'bg-blue-500' },
-  { name: 'Texas', abbr: 'TX', color: 'bg-red-500' },
-  { name: 'Virginia', abbr: 'VA', color: 'bg-purple-500' },
-  { name: 'Massachusetts', abbr: 'MA', color: 'bg-green-500' },
-  { name: 'Colorado', abbr: 'CO', color: 'bg-yellow-500' },
-  { name: 'California', abbr: 'CA', color: 'bg-orange-500' }
+  { name: 'Florida', abbr: 'FL', color: '#1E88E5' }, // Blue
+  { name: 'Texas', abbr: 'TX', color: '#E53935' },   // Red
+  { name: 'Virginia', abbr: 'VA', color: '#8E24AA' }, // Purple
+  { name: 'Massachusetts', abbr: 'MA', color: '#43A047' }, // Green
+  { name: 'Colorado', abbr: 'CO', color: '#FDD835' }, // Yellow
+  { name: 'California', abbr: 'CA', color: '#FB8C00' }  // Orange
 ];
 
 const NationwideService = () => {
@@ -67,7 +67,7 @@ const NationwideService = () => {
                   "rounded-lg shadow-md overflow-hidden transform transition-all duration-300 hover:-translate-y-1 hover:shadow-lg",
                   "flex items-center justify-center text-white font-semibold py-6 text-center"
                 )}
-                style={{ backgroundColor: state.color.startsWith('bg-') ? `var(--${state.color.substring(3)})` : state.color }}
+                style={{ backgroundColor: state.color }}
               >
                 <span className="text-lg md:text-xl">{state.name}</span>
               </div>
