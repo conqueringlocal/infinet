@@ -54,10 +54,10 @@ const Index = () => {
             <div className="text-center max-w-3xl mx-auto mb-12">
               <span className="reveal text-sm font-semibold text-infinet-600 dark:text-infinet-400 uppercase tracking-wider">Business Solutions</span>
               <h2 className="reveal text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mt-2">
-                Enterprise Connectivity Solutions
+                Business Network Solutions
               </h2>
               <p className="reveal text-gray-600 dark:text-gray-300 mt-4 text-lg">
-                Tailored infrastructure solutions that power business growth and innovation.
+                Tailored infrastructure that powers business growth and innovation.
               </p>
             </div>
             

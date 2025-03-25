@@ -11,9 +11,9 @@ const FiberInfo = () => {
       {/* Business Solutions Section */}
       <div className="grid md:grid-cols-2 gap-8 items-center">
         <div className="space-y-6">
-          <h3 className="text-2xl font-bold text-gray-900 dark:text-white">Enterprise-Grade Connectivity Solutions</h3>
+          <h3 className="text-2xl font-bold text-gray-900 dark:text-white">Enterprise Connectivity</h3>
           <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
-            Infi-Net provides tailored connectivity infrastructure that meets the demands of modern businesses. Our solutions deliver reliability, security, and the performance your organization needs to stay competitive.
+            Infi-Net delivers reliable infrastructure solutions that meet the demands of modern businesses, with industry-leading uptime and dedicated technical expertise.
           </p>
           
           <div className="grid grid-cols-2 gap-4">
@@ -52,28 +52,24 @@ const FiberInfo = () => {
           <div className="grid md:grid-cols-2 gap-6">
             <div>
               <p className="text-gray-600 dark:text-gray-300 mb-4">
-                We understand that different industries have unique connectivity requirements. Our expert team develops customized solutions that address the specific challenges and needs of your sector.
+                We develop customized solutions that address the specific connectivity requirements of your industry.
               </p>
               <ul className="space-y-3 text-sm text-gray-600 dark:text-gray-400">
                 <li className="flex items-start gap-2">
                   <span className="font-semibold text-infinet-700 dark:text-infinet-400 min-w-24">Healthcare:</span> 
-                  <span>Secure, reliable networks for critical patient data and telemedicine applications</span>
+                  <span>Secure networks for patient data and telemedicine</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="font-semibold text-infinet-700 dark:text-infinet-400 min-w-24">Education:</span> 
-                  <span>Scalable infrastructure supporting digital learning environments and campus-wide connectivity</span>
+                  <span>Campus-wide connectivity for digital learning</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="font-semibold text-infinet-700 dark:text-infinet-400 min-w-24">Manufacturing:</span> 
-                  <span>Industrial-grade networks enabling IoT, automation, and real-time monitoring</span>
+                  <span>Industrial networks for IoT and automation</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="font-semibold text-infinet-700 dark:text-infinet-400 min-w-24">Finance:</span> 
-                  <span>Ultra-low latency solutions for trading and high-security data transmission</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="font-semibold text-infinet-700 dark:text-infinet-400 min-w-24">Hospitality:</span> 
-                  <span>Guest and operations networks that enhance experience and efficiency</span>
+                  <span>Low-latency solutions for secure transactions</span>
                 </li>
               </ul>
             </div>
@@ -84,7 +80,7 @@ const FiberInfo = () => {
                 </div>
                 <h5 className="font-semibold text-gray-900 dark:text-white">Consultation Services</h5>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Our expert team evaluates your current infrastructure and business requirements to develop a customized solution that optimizes performance while controlling costs.
+                  Our team evaluates your infrastructure and requirements to develop cost-effective solutions.
                 </p>
                 <Button variant="default" size="sm" className="mt-2" onClick={() => window.location.href = '/contact'}>
                   Schedule a Consultation
