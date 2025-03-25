@@ -67,7 +67,7 @@ const NationwideService = () => {
                   "rounded-lg shadow-md overflow-hidden transform transition-all duration-300 hover:-translate-y-1 hover:shadow-lg",
                   "flex items-center justify-center text-white font-semibold py-6 text-center"
                 )}
-                style={{ backgroundColor: `var(--${state.color.substring(3)})` }}
+                style={{ backgroundColor: state.color.startsWith('bg-') ? `var(--${state.color.substring(3)})` : state.color }}
               >
                 <span className="text-lg md:text-xl">{state.name}</span>
               </div>
