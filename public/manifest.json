@@ -1,0 +1,17 @@
+
+{
+  "name": "Infi-NET LLC",
+  "short_name": "Infi-NET",
+  "description": "Professional fiber optic and low-voltage solutions for businesses across the United States",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#00B5D8",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    }
+  ]
+}

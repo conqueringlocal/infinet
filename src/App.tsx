@@ -30,6 +30,26 @@ const ScrollToTop = () => {
   
   useEffect(() => {
     window.scrollTo(0, 0);
+    
+    // Update document title based on current page
+    let pageTitle = "Infi-NET LLC | Fiber & Low-Voltage Solutions";
+    
+    if (pathname === "/about") {
+      pageTitle = "About Us | Infi-NET LLC";
+    } else if (pathname === "/services") {
+      pageTitle = "Our Services | Infi-NET LLC";
+    } else if (pathname === "/projects") {
+      pageTitle = "Our Projects | Infi-NET LLC";
+    } else if (pathname === "/contact") {
+      pageTitle = "Contact Us | Infi-NET LLC";
+    } else if (pathname.includes("/service/")) {
+      const service = pathname.split("/").pop();
+      if (service) {
+        pageTitle = `${service.charAt(0).toUpperCase() + service.slice(1)} Services | Infi-NET LLC`;
+      }
+    }
+    
+    document.title = pageTitle;
   }, [pathname]);
   
   return null;

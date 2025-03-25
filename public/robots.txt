@@ -30,4 +30,4 @@ Allow: /
 User-agent: Twitterbot
 Allow: /
 
-Sitemap: https://infi-net.com/sitemap.xml
+Sitemap: https://infi-net.net/sitemap.xml
