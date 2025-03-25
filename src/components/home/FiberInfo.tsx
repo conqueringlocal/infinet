@@ -13,7 +13,7 @@ const FiberInfo = () => {
         <div className="space-y-6">
           <h3 className="text-2xl font-bold text-gray-900 dark:text-white">Enterprise Connectivity</h3>
           <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
-            Infi-Net delivers reliable infrastructure solutions that meet the demands of modern businesses, with industry-leading uptime and dedicated technical expertise.
+            Infi-NET delivers reliable infrastructure solutions that meet the demands of modern businesses, with industry-leading uptime and dedicated technical expertise.
           </p>
           
           <div className="grid grid-cols-2 gap-4">

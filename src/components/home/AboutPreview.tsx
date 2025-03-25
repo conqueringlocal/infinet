@@ -56,13 +56,13 @@ const AboutPreview = () => {
           {/* Content Column */}
           <div className="space-y-6 order-1 lg:order-2">
             <div className="reveal">
-              <span className="text-sm font-semibold text-infinet-600 uppercase tracking-wider">About Infi-Net LLC</span>
+              <span className="text-sm font-semibold text-infinet-600 uppercase tracking-wider">About Infi-NET LLC</span>
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mt-2">Connecting Florida with Precision and Expertise</h2>
             </div>
 
             <div className="reveal">
               <p className="text-gray-600 text-lg">
-                Founded on principles of quality and reliability, Infi-Net LLC brings over 35 years of combined experience to every project. Based in Lakeland, Florida, we specialize in fiber optic installations, low-voltage data cabling, and point-to-point applications for businesses across industries.
+                Founded on principles of quality and reliability, Infi-NET LLC brings over 35 years of combined experience to every project. Based in Lakeland, Florida, we specialize in fiber optic installations, low-voltage data cabling, and point-to-point applications for businesses across industries.
               </p>
             </div>
 

@@ -50,11 +50,11 @@ const CtaSection = () => {
         <div className="max-w-4xl mx-auto">
           <div className="text-center space-y-6">
             <h2 className="reveal text-3xl md:text-4xl font-bold leading-tight">
-              Work With Infi-Net LLC
+              Work With Infi-NET LLC
             </h2>
             
             <p className="reveal text-lg text-blue-100 max-w-3xl mx-auto">
-              Whether you need expert fiber optic installations, low-voltage cabling, or customized network solutions, Infi-Net LLC is here to deliver. With a commitment to precision, reliability, and customer satisfaction, we ensure your projects are completed on time and to the highest standards. Let's build the future of connectivity together!
+              Whether you need expert fiber optic installations, low-voltage cabling, or customized network solutions, Infi-NET LLC is here to deliver. With a commitment to precision, reliability, and customer satisfaction, we ensure your projects are completed on time and to the highest standards. Let's build the future of connectivity together!
             </p>
             
             <div className="reveal pt-4 flex flex-wrap justify-center gap-6">

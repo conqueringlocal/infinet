@@ -10,7 +10,7 @@ const Footer = () => {
           {/* Company Info */}
           <div className="space-y-4">
             <div className="flex items-center">
-              <img src="/lovable-uploads/2d58718b-9a89-4dde-b37e-43621ecf8a95.png" alt="Infi-Net LLC" className="h-12" />
+              <img src="/lovable-uploads/2d58718b-9a89-4dde-b37e-43621ecf8a95.png" alt="Infi-NET LLC" className="h-12" />
             </div>
             <p className="text-gray-300 max-w-xs">
               Fiber & Low-Voltage Solutions You Can Trust. Providing expert network infrastructure services in Lakeland, Florida and beyond.
@@ -108,7 +108,7 @@ const Footer = () => {
 
         {/* Bottom Section */}
         <div className="flex flex-col md:flex-row justify-between items-center text-sm text-gray-400">
-          <p>© {currentYear} Infi-Net LLC. All rights reserved.</p>
+          <p>© {currentYear} Infi-NET LLC. All rights reserved.</p>
           <div className="mt-4 md:mt-0 space-x-4">
             <a href="#" className="hover:text-infinet-400 transition-colors">Privacy Policy</a>
             <a href="#" className="hover:text-infinet-400 transition-colors">Terms of Service</a>

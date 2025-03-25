@@ -16,7 +16,7 @@ import BusinessBenefits from '@/components/home/BusinessBenefits';
 const Index = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
-    document.title = "Infi-Net LLC | Fiber & Low-Voltage Solutions You Can Trust";
+    document.title = "Infi-NET LLC | Fiber & Low-Voltage Solutions You Can Trust";
     
     // Initialize intersection observer for revealing elements on scroll
     const observer = new IntersectionObserver(

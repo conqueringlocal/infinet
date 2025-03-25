@@ -11,7 +11,7 @@ const BusinessBenefits = () => {
         <div className="text-center max-w-3xl mx-auto mb-10">
           <span className="reveal text-sm font-semibold text-infinet-600 dark:text-infinet-400 uppercase tracking-wider">Business Solutions</span>
           <h2 className="reveal text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mt-2">
-            Why Businesses Choose Infi-Net
+            Why Businesses Choose Infi-NET
           </h2>
           <p className="reveal text-gray-600 dark:text-gray-300 mt-4 text-lg">
             Companies across industries trust our expertise, reliability, and commitment to delivering superior connectivity solutions.
