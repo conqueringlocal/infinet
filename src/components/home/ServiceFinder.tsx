@@ -119,14 +119,14 @@ const ServiceFinder = () => {
   const selectedService = services.find(service => service.id === selected);
 
   return (
-    <section className="py-16 md:py-24 bg-gray-50 dark:bg-gray-900">
+    <section className="py-16 md:py-24 bg-gray-50">
       <div className="container mx-auto px-4 md:px-6">
         <div className="text-center max-w-3xl mx-auto mb-12">
-          <span className="text-sm font-semibold text-infinet-600 dark:text-infinet-400 uppercase tracking-wider">Find Your Solution</span>
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mt-2">
+          <span className="text-sm font-semibold text-infinet-600 uppercase tracking-wider">Find Your Solution</span>
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mt-2">
             Discover the Perfect Service for Your Needs
           </h2>
-          <p className="text-gray-600 dark:text-gray-300 mt-4 text-lg">
+          <p className="text-gray-600 mt-4 text-lg">
             We offer a wide range of connectivity solutions. Explore our services to find the perfect match for your requirements.
           </p>
         </div>
@@ -142,16 +142,16 @@ const ServiceFinder = () => {
               {services.map((service) => (
                 <motion.div
                   key={service.id}
-                  className="bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 p-6 flex flex-col relative overflow-hidden"
+                  className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 p-6 flex flex-col relative overflow-hidden"
                   onClick={() => handleSelect(service.id)}
                   whileHover={{ y: -5, scale: 1.02 }}
                   transition={{ type: "spring", stiffness: 400, damping: 10 }}
                 >
                   <div className="mb-4">
-                    <service.icon className="h-10 w-10 text-infinet-600 dark:text-infinet-400" />
+                    <service.icon className="h-10 w-10 text-infinet-600" />
                   </div>
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">{service.title}</h3>
-                  <p className="text-gray-600 dark:text-gray-300 mb-4 flex-grow">{service.description}</p>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">{service.title}</h3>
+                  <p className="text-gray-600 mb-4 flex-grow">{service.description}</p>
                   <Button variant="outline" className="w-full mt-2" asChild>
                     <Link to={service.path}>Learn More</Link>
                   </Button>
@@ -160,7 +160,7 @@ const ServiceFinder = () => {
             </motion.div>
           ) : (
             <motion.div
-              className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-8"
+              className="bg-white rounded-xl shadow-xl p-8"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
@@ -168,22 +168,22 @@ const ServiceFinder = () => {
               {selectedService && (
                 <div className="space-y-6">
                   <div className="flex flex-col md:flex-row md:items-center gap-6">
-                    <div className="bg-infinet-50 dark:bg-infinet-900/30 p-6 rounded-full">
-                      <selectedService.icon className="h-16 w-16 text-infinet-600 dark:text-infinet-400" />
+                    <div className="bg-infinet-50 p-6 rounded-full">
+                      <selectedService.icon className="h-16 w-16 text-infinet-600" />
                     </div>
                     <div>
-                      <h3 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">{selectedService.title}</h3>
-                      <p className="text-lg text-gray-600 dark:text-gray-300 mt-2">{selectedService.description}</p>
+                      <h3 className="text-2xl md:text-3xl font-bold text-gray-900">{selectedService.title}</h3>
+                      <p className="text-lg text-gray-600 mt-2">{selectedService.description}</p>
                     </div>
                   </div>
                   
-                  <div className="pt-6 border-t border-gray-200 dark:border-gray-700">
-                    <h4 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Key Features</h4>
+                  <div className="pt-6 border-t border-gray-200">
+                    <h4 className="text-xl font-semibold text-gray-900 mb-4">Key Features</h4>
                     <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       {selectedService.features.map((feature, index) => (
                         <li key={index} className="flex items-start">
-                          <CheckCircle className="h-5 w-5 text-infinet-600 dark:text-infinet-400 mt-0.5 mr-2 flex-shrink-0" />
-                          <span className="text-gray-700 dark:text-gray-200">{feature}</span>
+                          <CheckCircle className="h-5 w-5 text-infinet-600 mt-0.5 mr-2 flex-shrink-0" />
+                          <span className="text-gray-700">{feature}</span>
                         </li>
                       ))}
                     </ul>
