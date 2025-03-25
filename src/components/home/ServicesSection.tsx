@@ -12,7 +12,7 @@ const services = [
     description: 'High-speed, high-capacity fiber optic cabling solutions designed for reliability and future-proofing your network infrastructure.',
     icon: Network,
     color: 'bg-blue-50 text-blue-600',
-    link: '/services#fiber'
+    link: '/service/fiber'
   },
   {
     id: 'data-cabling',
@@ -20,7 +20,7 @@ const services = [
     description: 'Professional CAT5e, CAT6, and CAT6A installations with meticulous attention to detail and comprehensive testing.',
     icon: Cable,
     color: 'bg-green-50 text-green-600',
-    link: '/services#data-cabling'
+    link: '/service/structured'
   },
   {
     id: 'ptp',
@@ -28,7 +28,7 @@ const services = [
     description: 'Connect multiple buildings or facilities with secure, high-bandwidth point-to-point solutions tailored to your specific needs.',
     icon: Radio,
     color: 'bg-purple-50 text-purple-600',
-    link: '/services#ptp'
+    link: '/service/ptp'
   }
 ];
 

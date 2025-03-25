@@ -22,7 +22,8 @@ const serviceCategories = [
       'Fiber-to-the-desk solutions',
       'Outdoor fiber installations and aerial fiber deployments'
     ],
-    image: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80'
+    image: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+    path: '/service/fiber'
   },
   {
     id: 'data-cabling',
@@ -38,7 +39,8 @@ const serviceCategories = [
       'Data center cabling',
       'Audio/video cabling solutions'
     ],
-    image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80'
+    image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+    path: '/service/structured'
   },
   {
     id: 'ptp',
@@ -54,7 +56,8 @@ const serviceCategories = [
       'High-bandwidth PTP links',
       'Secure transmission systems'
     ],
-    image: 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80'
+    image: 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+    path: '/service/ptp'
   },
   {
     id: 'greenfield',
@@ -70,7 +73,8 @@ const serviceCategories = [
       'Future-proof cabling systems',
       'Complete documentation and as-builts'
     ],
-    image: 'https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80'
+    image: 'https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+    path: '/service/network'
   },
   {
     id: 'brownfield',
@@ -86,7 +90,8 @@ const serviceCategories = [
       'Systematic cable replacement',
       '24/7 implementation options'
     ],
-    image: 'https://images.unsplash.com/photo-1531297484001-80022131f5a1?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80'
+    image: 'https://images.unsplash.com/photo-1531297484001-80022131f5a1?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+    path: '/service/network'
   },
   {
     id: 'other',
@@ -102,7 +107,8 @@ const serviceCategories = [
       'Maintenance and support plans',
       'Site surveys and assessments'
     ],
-    image: 'https://images.unsplash.com/photo-1605810230434-7631ac76ec81?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80'
+    image: 'https://images.unsplash.com/photo-1605810230434-7631ac76ec81?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+    path: '/service/maintenance'
   }
 ];
 
@@ -197,9 +203,9 @@ const Services = () => {
                     </div>
                     
                     <div className="pt-4">
-                      <Link to="/contact">
+                      <Link to={service.path}>
                         <Button variant="default">
-                          Request This Service
+                          Learn More About This Service
                           <ArrowRight className="ml-2 h-4 w-4" />
                         </Button>
                       </Link>

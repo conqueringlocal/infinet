@@ -12,6 +12,7 @@ type ServiceOption = {
   description: string;
   icon: React.ElementType;
   features: string[];
+  path: string;
 };
 
 const services: ServiceOption[] = [
@@ -26,7 +27,8 @@ const services: ServiceOption[] = [
       'Longer transmission distances',
       'Enhanced security',
       'Future-proof installation'
-    ]
+    ],
+    path: '/service/fiber'
   },
   {
     id: 'structured',
@@ -39,7 +41,8 @@ const services: ServiceOption[] = [
       'Scalable infrastructure',
       'Enhanced reliability',
       'Industry standard compliance'
-    ]
+    ],
+    path: '/service/structured'
   },
   {
     id: 'wireless',
@@ -52,7 +55,8 @@ const services: ServiceOption[] = [
       'Outdoor connectivity options',
       'Wireless distribution systems',
       'Managed WiFi services'
-    ]
+    ],
+    path: '/service/wireless'
   },
   {
     id: 'ptp',
@@ -65,7 +69,8 @@ const services: ServiceOption[] = [
       'High-bandwidth connections',
       'No recurring lease costs',
       'Rapid deployment options'
-    ]
+    ],
+    path: '/service/ptp'
   },
   {
     id: 'network',
@@ -78,7 +83,8 @@ const services: ServiceOption[] = [
       'Security implementation',
       'Performance optimization',
       'Documentation & training'
-    ]
+    ],
+    path: '/service/network'
   },
   {
     id: 'maintenance',
@@ -91,7 +97,8 @@ const services: ServiceOption[] = [
       'Rapid emergency response',
       'Regular performance testing',
       'System upgrades & patches'
-    ]
+    ],
+    path: '/service/maintenance'
   }
 ];
 
@@ -145,7 +152,9 @@ const ServiceFinder = () => {
                   </div>
                   <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">{service.title}</h3>
                   <p className="text-gray-600 dark:text-gray-300 mb-4 flex-grow">{service.description}</p>
-                  <Button variant="outline" className="w-full mt-2">Learn More</Button>
+                  <Button variant="outline" className="w-full mt-2" asChild>
+                    <Link to={service.path}>Learn More</Link>
+                  </Button>
                 </motion.div>
               ))}
             </motion.div>
@@ -182,7 +191,7 @@ const ServiceFinder = () => {
                   
                   <div className="flex flex-col sm:flex-row gap-4 pt-6">
                     <Button variant="default" size="lg" asChild>
-                      <Link to="/contact">Request a Quote</Link>
+                      <Link to={selectedService.path}>View Service Details</Link>
                     </Button>
                     <Button variant="outline" size="lg" onClick={handleReset}>
                       View Other Services
