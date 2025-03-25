@@ -10,15 +10,15 @@ const FiberInfo = () => {
       {/* Business Solutions Section */}
       <div className="grid md:grid-cols-2 gap-8 items-center">
         <div className="space-y-6">
-          <h3 className="text-2xl font-bold text-gray-900 dark:text-white">Enterprise Connectivity</h3>
-          <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+          <h3 className="text-2xl font-bold text-gray-900">Enterprise Connectivity</h3>
+          <p className="text-gray-600 leading-relaxed">
             Infi-NET delivers reliable infrastructure solutions that meet the demands of modern businesses, with industry-leading uptime and dedicated technical expertise.
           </p>
           
           <div className="flex flex-col">
-            <div className="bg-infinet-50 dark:bg-infinet-900/20 p-4 rounded-lg max-w-[200px] space-y-1">
-              <div className="font-bold text-3xl text-infinet-600 dark:text-infinet-400">35+</div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">Years combined experience</div>
+            <div className="p-4 max-w-[200px] space-y-1">
+              <div className="font-bold text-3xl text-infinet-600">35+</div>
+              <div className="text-sm text-gray-600">Years combined experience</div>
             </div>
           </div>
           
