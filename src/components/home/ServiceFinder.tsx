@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/Button';
-import { Cable, Network, Radio, Wifi, Server, RefreshCw, CheckCircle } from 'lucide-react';
+import { Cable, Network, Radio, Wifi, Server, RefreshCw, CheckCircle, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Link } from 'react-router-dom';
 
@@ -201,6 +201,21 @@ const ServiceFinder = () => {
               )}
             </motion.div>
           )}
+          
+          {/* View All Services Button */}
+          <div className="mt-12 text-center">
+            <Button 
+              variant="default" 
+              size="lg" 
+              className="px-8" 
+              asChild
+            >
+              <Link to="/services">
+                View All Services
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Link>
+            </Button>
+          </div>
         </div>
       </div>
     </section>
