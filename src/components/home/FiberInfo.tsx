@@ -15,14 +15,10 @@ const FiberInfo = () => {
             Infi-NET delivers reliable infrastructure solutions that meet the demands of modern businesses, with industry-leading uptime and dedicated technical expertise.
           </p>
           
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-infinet-50 dark:bg-infinet-900/20 p-4 rounded-lg">
-              <div className="font-bold text-3xl text-infinet-600 dark:text-infinet-400 mb-1">99.9%</div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">Installation accuracy</div>
-            </div>
-            <div className="bg-infinet-50 dark:bg-infinet-900/20 p-4 rounded-lg">
-              <div className="font-bold text-3xl text-infinet-600 dark:text-infinet-400 mb-1">35+</div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">Years combined experience</div>
+          <div className="flex justify-center">
+            <div className="bg-infinet-50 dark:bg-infinet-900/20 p-4 rounded-lg max-w-[200px] w-full">
+              <div className="font-bold text-3xl text-infinet-600 dark:text-infinet-400 mb-1 text-center">35+</div>
+              <div className="text-sm text-gray-600 dark:text-gray-400 text-center">Years combined experience</div>
             </div>
           </div>
           
