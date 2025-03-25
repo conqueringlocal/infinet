@@ -71,10 +71,10 @@ const WhyChooseUs = () => {
   return (
     <section 
       ref={sectionRef}
-      className="py-16 md:py-24 bg-white"
+      className="py-12 px-4 md:py-24 md:px-6 lg:px-24 bg-white"
     >
       {/* Section Header */}
-      <div className="text-center max-w-3xl mx-auto mb-16">
+      <div className="text-center max-w-3xl mx-auto mb-12">
         <span className="reveal text-sm font-semibold text-infinet-600 uppercase tracking-wider">Why Choose Us</span>
         <h2 className="reveal text-3xl md:text-4xl font-bold text-gray-900 mt-2">
           What Sets Infi-Net Apart
@@ -85,7 +85,7 @@ const WhyChooseUs = () => {
       </div>
 
       {/* Features Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-10">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-10 px-4 md:px-0">
         {features.map((feature, index) => (
           <div 
             key={index}
