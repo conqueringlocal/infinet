@@ -12,6 +12,7 @@ import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import ServiceFinder from '@/components/home/ServiceFinder';
 import FiberInfo from '@/components/home/FiberInfo';
 import BusinessBenefits from '@/components/home/BusinessBenefits';
+import NationwideService from '@/components/home/NationwideService';
 
 const Index = () => {
   useEffect(() => {
@@ -68,6 +69,7 @@ const Index = () => {
         </div>
         <BusinessBenefits />
         <ServicesSection />
+        <NationwideService />
         <ServiceFinder />
         <WhyChooseUs />
         <ProjectsPreview />

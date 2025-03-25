@@ -13,7 +13,7 @@ const Footer = () => {
               <img src="/lovable-uploads/2d58718b-9a89-4dde-b37e-43621ecf8a95.png" alt="Infi-NET LLC" className="h-12" />
             </div>
             <p className="text-gray-300 max-w-xs">
-              Fiber & Low-Voltage Solutions You Can Trust. Providing expert network infrastructure services in Lakeland, Florida and beyond.
+              Fiber & Low-Voltage Solutions You Can Trust. Providing expert network infrastructure services nationwide across the United States.
             </p>
             <div className="flex space-x-4 pt-2">
               <a href="#" className="text-gray-400 hover:text-infinet-400 transition-colors">
@@ -90,7 +90,7 @@ const Footer = () => {
             <ul className="space-y-4">
               <li className="flex items-start">
                 <MapPin size={20} className="text-infinet-400 mt-1 mr-3 flex-shrink-0" />
-                <span className="text-gray-300">Lakeland, Florida</span>
+                <span className="text-gray-300">Nationwide Service, Based in Lakeland, Florida</span>
               </li>
               <li className="flex items-center">
                 <Phone size={20} className="text-infinet-400 mr-3 flex-shrink-0" />

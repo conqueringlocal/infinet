@@ -153,7 +153,7 @@ const Services = () => {
             <div className="max-w-3xl mx-auto text-center">
               <h1 className="reveal text-4xl md:text-5xl font-bold mb-4">Our Services</h1>
               <p className="reveal text-xl text-blue-100">
-                Comprehensive fiber optic and low-voltage solutions delivered with expertise and precision.
+                Comprehensive fiber optic and low-voltage solutions delivered with expertise and precision nationwide.
               </p>
             </div>
           </div>
@@ -164,7 +164,7 @@ const Services = () => {
           <div className="container mx-auto px-4 md:px-6">
             <div className="max-w-4xl mx-auto text-center">
               <p className="reveal text-lg text-gray-600">
-                At Infi-Net LLC, we offer a comprehensive range of network infrastructure services tailored to your specific needs. From fiber optic installations to structured cabling and point-to-point applications, our certified technicians deliver quality solutions designed for reliability, performance, and scalability.
+                At Infi-NET LLC, we offer a comprehensive range of network infrastructure services tailored to your specific needs across the United States. From fiber optic installations to structured cabling and point-to-point applications, our certified technicians deliver quality solutions designed for reliability, performance, and scalability.
               </p>
             </div>
           </div>
@@ -243,7 +243,7 @@ const Services = () => {
                 Ready to Discuss Your Project?
               </h2>
               <p className="reveal text-xl text-blue-100 mb-8">
-                Contact us today for a free consultation and quote on your fiber optic or low-voltage needs.
+                Contact us today for a free consultation and quote on your fiber optic or low-voltage needs. We serve clients nationwide across all 50 states.
               </p>
               <div className="reveal">
                 <Link to="/contact">

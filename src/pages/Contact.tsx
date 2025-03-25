@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
@@ -107,15 +108,15 @@ const Contact = () => {
                 {
                   icon: MapPin,
                   title: 'Our Location',
-                  content: 'Lakeland, Florida',
-                  detail: 'Serving clients throughout Florida',
+                  content: 'Nationwide Service',
+                  detail: 'Based in Lakeland, Florida with projects across the United States',
                   color: 'text-blue-600 bg-blue-100'
                 },
                 {
                   icon: Phone,
                   title: 'Phone Number',
                   content: '(727) 417-7050',
-                  detail: 'Monday-Friday, 8am-6pm',
+                  detail: 'Monday-Friday, 8am-6pm ET',
                   link: 'tel:+17274177050',
                   color: 'text-green-600 bg-green-100'
                 },
@@ -332,24 +333,24 @@ const Contact = () => {
         <section className="py-16 bg-white">
           <div className="container mx-auto px-4 md:px-6">
             <div className="max-w-3xl mx-auto text-center">
-              <h2 className="reveal text-3xl font-bold text-gray-900 mb-6">Service Areas</h2>
+              <h2 className="reveal text-3xl font-bold text-gray-900 mb-6">Nationwide Service</h2>
               <p className="reveal text-lg text-gray-600 mb-8">
-                Based in Lakeland, we provide fiber optic and low-voltage services throughout Florida, including:
+                Based in Lakeland, Florida, we provide fiber optic and low-voltage services throughout the entire United States, including:
               </p>
               
               <div className="reveal grid grid-cols-2 md:grid-cols-4 gap-4 text-center max-w-2xl mx-auto">
                 {[
-                  'Tampa', 'Orlando', 'Lakeland', 'Miami', 
-                  'Jacksonville', 'St. Petersburg', 'Fort Myers', 'Sarasota'
-                ].map((city, index) => (
+                  'Florida', 'Texas', 'California', 'Virginia', 
+                  'Massachusetts', 'Colorado', 'New York', 'Illinois'
+                ].map((state, index) => (
                   <div key={index} className="bg-gray-50 py-3 px-2 rounded-md shadow-sm">
-                    <span className="font-medium text-gray-800">{city}</span>
+                    <span className="font-medium text-gray-800">{state}</span>
                   </div>
                 ))}
               </div>
               
               <p className="reveal text-gray-600 mt-6">
-                Don't see your location? <a href="#" className="text-infinet-600 hover:text-infinet-700">Contact us</a> to see if we serve your area.
+                We serve clients across all 50 states. <Link to="/contact" className="text-infinet-600 hover:text-infinet-700">Contact us</Link> to discuss your project needs.
               </p>
             </div>
           </div>
