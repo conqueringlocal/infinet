@@ -1,10 +1,9 @@
 
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { ArrowRight, CheckCircle2, Building2, Clock, Briefcase, Award } from 'lucide-react';
+import { ArrowRight, Building2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Separator } from '@/components/ui/separator';
-import { InteractiveCard } from '@/components/ui/InteractiveCard';
 
 const FiberInfo = () => {
   return (
@@ -95,67 +94,6 @@ const FiberInfo = () => {
           </div>
         </CardContent>
       </Card>
-      
-      {/* Business Benefits Section */}
-      <div className="mt-10">
-        <h4 className="text-xl font-semibold text-gray-900 dark:text-white mb-6 text-center">Why Businesses Choose Infi-Net</h4>
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <InteractiveCard variant="default" hoverEffect="lift" className="text-center">
-            <div className="flex flex-col items-center">
-              <div className="bg-infinet-100 dark:bg-infinet-900/40 p-3 rounded-full mb-3">
-                <Briefcase className="h-6 w-6 text-infinet-600 dark:text-infinet-400" />
-              </div>
-              <h4 className="font-semibold text-gray-900 dark:text-white">Turnkey Solutions</h4>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                End-to-end design, installation, and maintenance services
-              </p>
-            </div>
-          </InteractiveCard>
-          
-          <InteractiveCard variant="default" hoverEffect="lift" className="text-center">
-            <div className="flex flex-col items-center">
-              <div className="bg-infinetYellow-100 dark:bg-infinetYellow-900/40 p-3 rounded-full mb-3">
-                <Clock className="h-6 w-6 text-infinetYellow-600 dark:text-infinetYellow-400" />
-              </div>
-              <h4 className="font-semibold text-gray-900 dark:text-white">Minimal Disruption</h4>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                Implementation strategies designed to minimize business impact
-              </p>
-            </div>
-          </InteractiveCard>
-          
-          <InteractiveCard variant="default" hoverEffect="lift" className="text-center">
-            <div className="flex flex-col items-center">
-              <div className="bg-infinet-100 dark:bg-infinet-900/40 p-3 rounded-full mb-3">
-                <CheckCircle2 className="h-6 w-6 text-infinet-600 dark:text-infinet-400" />
-              </div>
-              <h4 className="font-semibold text-gray-900 dark:text-white">Quality Assurance</h4>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                Rigorous testing and certification of all installations
-              </p>
-            </div>
-          </InteractiveCard>
-          
-          <InteractiveCard variant="default" hoverEffect="lift" className="text-center">
-            <div className="flex flex-col items-center">
-              <div className="bg-infinetYellow-100 dark:bg-infinetYellow-900/40 p-3 rounded-full mb-3">
-                <Award className="h-6 w-6 text-infinetYellow-600 dark:text-infinetYellow-400" />
-              </div>
-              <h4 className="font-semibold text-gray-900 dark:text-white">Certified Expertise</h4>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                Industry-certified technicians with proven experience
-              </p>
-            </div>
-          </InteractiveCard>
-        </div>
-        
-        <div className="mt-8 text-center">
-          <Button size="lg" variant="default" onClick={() => window.location.href = '/contact'}>
-            Contact Our Business Solutions Team
-            <ArrowRight className="ml-2 h-4 w-4" />
-          </Button>
-        </div>
-      </div>
     </div>
   );
 };

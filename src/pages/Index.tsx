@@ -11,6 +11,7 @@ import Footer from '@/components/layout/Footer';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import ServiceFinder from '@/components/home/ServiceFinder';
 import FiberInfo from '@/components/home/FiberInfo';
+import BusinessBenefits from '@/components/home/BusinessBenefits';
 
 const Index = () => {
   useEffect(() => {
@@ -65,6 +66,7 @@ const Index = () => {
             </div>
           </div>
         </div>
+        <BusinessBenefits />
         <ServicesSection />
         <ServiceFinder />
         <WhyChooseUs />
