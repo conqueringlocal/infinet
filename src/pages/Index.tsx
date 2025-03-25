@@ -51,12 +51,12 @@ const Index = () => {
         <div className="py-16 md:py-24 bg-infinet-50 dark:bg-gray-800">
           <div className="container mx-auto px-4 md:px-6">
             <div className="text-center max-w-3xl mx-auto mb-12">
-              <span className="reveal text-sm font-semibold text-infinet-600 dark:text-infinet-400 uppercase tracking-wider">Fiber Optic Technology</span>
+              <span className="reveal text-sm font-semibold text-infinet-600 dark:text-infinet-400 uppercase tracking-wider">Business Solutions</span>
               <h2 className="reveal text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mt-2">
-                Understanding Fiber Optics
+                Enterprise Connectivity Solutions
               </h2>
               <p className="reveal text-gray-600 dark:text-gray-300 mt-4 text-lg">
-                Learn about the technology that powers our high-speed connectivity solutions.
+                Tailored infrastructure solutions that power business growth and innovation.
               </p>
             </div>
             
