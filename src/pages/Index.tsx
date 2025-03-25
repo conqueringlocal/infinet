@@ -8,7 +8,6 @@ import ProjectsPreview from '@/components/home/ProjectsPreview';
 import CtaSection from '@/components/home/CtaSection';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
-import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import ServiceFinder from '@/components/home/ServiceFinder';
 import FiberInfo from '@/components/home/FiberInfo';
 import BusinessBenefits from '@/components/home/BusinessBenefits';
@@ -43,9 +42,6 @@ const Index = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <div className="fixed top-5 right-5 z-50">
-        <ThemeToggle />
-      </div>
       <Navbar />
       <main className="flex-grow">
         <Hero />
