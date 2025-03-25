@@ -31,9 +31,9 @@ const FiberInfo = () => {
         <div className="relative">
           <div className="absolute inset-0 bg-gradient-to-r from-infinet-500/30 to-infinetYellow-400/30 rounded-lg transform rotate-3 blur-[2px]"></div>
           <img 
-            src="/lovable-uploads/f3e6c9f7-b849-4255-84ee-0d5681586a86.png"
-            alt="Enterprise Network Infrastructure" 
-            className="w-full h-auto rounded-lg shadow-xl relative z-10"
+            src="https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80"
+            alt="Business Professional using technology" 
+            className="w-full h-auto rounded-lg shadow-xl relative z-10 object-cover"
           />
         </div>
       </div>
