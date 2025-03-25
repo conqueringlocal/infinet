@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/Button';
@@ -152,8 +151,15 @@ const ServiceFinder = () => {
                   </div>
                   <h3 className="text-xl font-semibold text-gray-900 mb-2">{service.title}</h3>
                   <p className="text-gray-600 mb-4 flex-grow">{service.description}</p>
-                  <Button variant="outline" className="w-full mt-2" asChild>
-                    <Link to={service.path}>Learn More</Link>
+                  <Button 
+                    variant="outline" 
+                    className="w-full md:w-auto mt-2 flex items-center justify-center" 
+                    asChild
+                  >
+                    <Link to={service.path} className="flex items-center justify-center">
+                      Learn More
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
                   </Button>
                 </motion.div>
               ))}
@@ -202,7 +208,6 @@ const ServiceFinder = () => {
             </motion.div>
           )}
           
-          {/* View All Services Button */}
           <div className="mt-12 text-center">
             <Button 
               variant="default" 
@@ -223,4 +228,3 @@ const ServiceFinder = () => {
 };
 
 export default ServiceFinder;
-
