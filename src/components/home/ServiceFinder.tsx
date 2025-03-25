@@ -207,10 +207,10 @@ const ServiceFinder = () => {
             <Button 
               variant="default" 
               size="lg" 
-              className="px-8" 
+              className="w-full md:w-auto px-8 flex items-center justify-center" 
               asChild
             >
-              <Link to="/services">
+              <Link to="/services" className="flex items-center justify-center">
                 View All Services
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
@@ -223,3 +223,4 @@ const ServiceFinder = () => {
 };
 
 export default ServiceFinder;
+
