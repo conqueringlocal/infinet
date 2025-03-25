@@ -7,12 +7,12 @@ import { cn } from '@/lib/utils';
 
 // Featured states where Infi-NET has completed projects
 const featuredStates = [
-  { name: 'Florida', abbr: 'FL', color: '#15cadb' },      // infinet-500
-  { name: 'Texas', abbr: 'TX', color: '#0ca1b7' },        // infinet-600
-  { name: 'Virginia', abbr: 'VA', color: '#0f8194' },     // infinet-700
-  { name: 'Massachusetts', abbr: 'MA', color: '#156979' }, // infinet-800
-  { name: 'Colorado', abbr: 'CO', color: '#bee100' },     // infinetYellow-500
-  { name: 'California', abbr: 'CA', color: '#9cb600' }    // infinetYellow-600
+  { name: 'Florida', abbr: 'FL' },
+  { name: 'Texas', abbr: 'TX' },
+  { name: 'Virginia', abbr: 'VA' },
+  { name: 'Massachusetts', abbr: 'MA' },
+  { name: 'Colorado', abbr: 'CO' },
+  { name: 'California', abbr: 'CA' }
 ];
 
 const NationwideService = () => {
@@ -65,9 +65,9 @@ const NationwideService = () => {
                 key={index}
                 className={cn(
                   "rounded-lg shadow-md overflow-hidden transform transition-all duration-300 hover:-translate-y-1 hover:shadow-lg",
-                  "flex items-center justify-center text-white font-semibold py-6 text-center"
+                  "flex items-center justify-center bg-white text-gray-900 font-semibold py-6 text-center",
+                  "border border-infinet-200"
                 )}
-                style={{ backgroundColor: state.color }}
               >
                 <span className="text-lg md:text-xl">{state.name}</span>
               </div>
