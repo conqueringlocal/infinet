@@ -7,12 +7,12 @@ import { cn } from '@/lib/utils';
 
 // Featured states where Infi-NET has completed projects
 const featuredStates = [
-  { name: 'Florida', abbr: 'FL', color: '#1E88E5' }, // Blue
-  { name: 'Texas', abbr: 'TX', color: '#E53935' },   // Red
-  { name: 'Virginia', abbr: 'VA', color: '#8E24AA' }, // Purple
-  { name: 'Massachusetts', abbr: 'MA', color: '#43A047' }, // Green
-  { name: 'Colorado', abbr: 'CO', color: '#FDD835' }, // Yellow
-  { name: 'California', abbr: 'CA', color: '#FB8C00' }  // Orange
+  { name: 'Florida', abbr: 'FL', color: '#15cadb' },      // infinet-500
+  { name: 'Texas', abbr: 'TX', color: '#0ca1b7' },        // infinet-600
+  { name: 'Virginia', abbr: 'VA', color: '#0f8194' },     // infinet-700
+  { name: 'Massachusetts', abbr: 'MA', color: '#156979' }, // infinet-800
+  { name: 'Colorado', abbr: 'CO', color: '#bee100' },     // infinetYellow-500
+  { name: 'California', abbr: 'CA', color: '#9cb600' }    // infinetYellow-600
 ];
 
 const NationwideService = () => {
