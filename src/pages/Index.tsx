@@ -46,14 +46,14 @@ const Index = () => {
       <main className="flex-grow">
         <Hero />
         <AboutPreview />
-        <div className="py-16 md:py-24 bg-infinet-50 dark:bg-gray-800">
+        <div className="py-16 md:py-24 bg-infinet-50">
           <div className="container mx-auto px-4 md:px-6">
             <div className="text-center max-w-3xl mx-auto mb-12">
-              <span className="reveal text-sm font-semibold text-infinet-600 dark:text-infinet-400 uppercase tracking-wider">Business Solutions</span>
-              <h2 className="reveal text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mt-2">
+              <span className="reveal text-sm font-semibold text-infinet-600 uppercase tracking-wider">Business Solutions</span>
+              <h2 className="reveal text-3xl md:text-4xl font-bold text-gray-900 mt-2">
                 Business Network Solutions
               </h2>
-              <p className="reveal text-gray-600 dark:text-gray-300 mt-4 text-lg">
+              <p className="reveal text-gray-600 mt-4 text-lg">
                 Tailored infrastructure that powers business growth and innovation.
               </p>
             </div>

@@ -1,9 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/Button';
-import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -67,7 +67,7 @@ const Navbar = () => {
   }, [location]);
 
   return (
-    <header className={cn('fixed top-0 left-0 right-0 z-50 transition-all duration-300', scrolled ? 'bg-white/90 dark:bg-gray-900/90 backdrop-blur-md py-3 shadow-md' : 'bg-transparent py-5')}>
+    <header className={cn('fixed top-0 left-0 right-0 z-50 transition-all duration-300', scrolled ? 'bg-white/90 backdrop-blur-md py-3 shadow-md' : 'bg-transparent py-5')}>
       {/* Gradient Loading Animation */}
       <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-infinetYellow-400 to-infinet-500"></div>
       
@@ -134,12 +134,10 @@ const Navbar = () => {
               )
             )}
             <Button variant="accent" size="sm" className="ml-2" onClick={() => window.location.href = '/contact'}>Get in Touch</Button>
-            <ThemeToggle />
           </nav>
 
-          <div className="md:hidden flex items-center space-x-2">
-            <ThemeToggle />
-            <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-gray-700 dark:text-gray-300 hover:text-infinet-600 dark:hover:text-infinet-400" aria-label="Toggle menu">
+          <div className="md:hidden flex items-center">
+            <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-gray-700 hover:text-infinet-600" aria-label="Toggle menu">
               {isMenuOpen ? <X size={24} className="transition-transform duration-300 transform rotate-90" /> : <Menu size={24} className="transition-transform duration-300" />}
             </button>
           </div>
@@ -147,7 +145,7 @@ const Navbar = () => {
       </div>
 
       {/* Mobile Menu */}
-      <div className={cn('md:hidden absolute top-full left-0 right-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-lg transition-all duration-300 transform', isMenuOpen ? 'translate-y-0 opacity-100' : '-translate-y-10 opacity-0 pointer-events-none')}>
+      <div className={cn('md:hidden absolute top-full left-0 right-0 bg-white border-b border-gray-200 shadow-lg transition-all duration-300 transform', isMenuOpen ? 'translate-y-0 opacity-100' : '-translate-y-10 opacity-0 pointer-events-none')}>
         <div className="container mx-auto px-4 py-3">
           <nav className="flex flex-col space-y-1">
             {navLinks.map(link => 
