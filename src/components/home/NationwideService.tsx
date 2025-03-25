@@ -4,19 +4,21 @@ import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 // Featured states where Infi-NET has completed projects
 const featuredStates = [
   { name: 'Florida', abbr: 'FL' },
   { name: 'Texas', abbr: 'TX' },
   { name: 'Virginia', abbr: 'VA' },
-  { name: 'Massachusetts', abbr: 'MA' },
+  { name: 'Massachusetts', abbr: 'MA', displayMobile: 'Mass.' },
   { name: 'Colorado', abbr: 'CO' },
   { name: 'California', abbr: 'CA' }
 ];
 
 const NationwideService = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -69,7 +71,9 @@ const NationwideService = () => {
                   "border border-infinet-200"
                 )}
               >
-                <span className="text-lg md:text-xl">{state.name}</span>
+                <span className="text-lg md:text-xl">
+                  {isMobile && state.displayMobile ? state.displayMobile : state.name}
+                </span>
               </div>
             ))}
           </div>
