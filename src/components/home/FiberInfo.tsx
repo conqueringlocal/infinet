@@ -17,8 +17,8 @@ const FiberInfo = () => {
           
           <div className="flex justify-start">
             <div className="bg-infinet-50 dark:bg-infinet-900/20 p-4 rounded-lg max-w-[200px] w-full">
-              <div className="font-bold text-3xl text-infinet-600 dark:text-infinet-400 mb-1 text-center">35+</div>
-              <div className="text-sm text-gray-600 dark:text-gray-400 text-center">Years combined experience</div>
+              <div className="font-bold text-3xl text-infinet-600 dark:text-infinet-400 mb-1 text-left">35+</div>
+              <div className="text-sm text-gray-600 dark:text-gray-400 text-left">Years combined experience</div>
             </div>
           </div>
           
