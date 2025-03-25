@@ -1,7 +1,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, MapPin } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
 
@@ -54,27 +54,22 @@ const NationwideService = () => {
             <h2 className="reveal text-3xl md:text-4xl font-bold text-gray-900 mt-2 mb-4">
               Nationwide Service
             </h2>
-            <p className="reveal text-gray-600 max-w-3xl mx-auto text-lg">
+            <p className="reveal text-gray-600 max-w-3xl mx-auto text-lg mb-8">
               From Florida to California, Texas to Massachusetts — Infi-NET delivers expert fiber and low-voltage solutions across the United States.
             </p>
           </div>
           
-          <div className="reveal grid grid-cols-2 md:grid-cols-3 gap-6 mb-10">
+          <div className="reveal grid grid-cols-3 md:grid-cols-6 gap-4 md:gap-6 mb-12">
             {featuredStates.map((state, index) => (
               <div 
                 key={index}
-                className="bg-white rounded-lg shadow-md overflow-hidden transform transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+                className={cn(
+                  "rounded-lg shadow-md overflow-hidden transform transition-all duration-300 hover:-translate-y-1 hover:shadow-lg",
+                  "flex items-center justify-center text-white font-semibold py-6 text-center"
+                )}
+                style={{ backgroundColor: `var(--${state.color.substring(3)})` }}
               >
-                <div className={cn("h-3", state.color)}></div>
-                <div className="p-6">
-                  <div className="flex items-start mb-3">
-                    <MapPin className="h-5 w-5 text-infinet-600 mt-1 mr-2 flex-shrink-0" />
-                    <h3 className="font-semibold text-xl text-gray-900">{state.name}</h3>
-                  </div>
-                  <p className="text-gray-600">
-                    Completed projects in {state.name} with expertise in fiber installations and network infrastructure.
-                  </p>
-                </div>
+                <span className="text-lg md:text-xl">{state.name}</span>
               </div>
             ))}
           </div>
