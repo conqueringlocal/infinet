@@ -32,7 +32,7 @@ const MaintenancePage = () => {
               </p>
               <Link to="/contact">
                 <Button size="lg" className="bg-white text-infinet-800 hover:bg-blue-50">
-                  Request a Consultation
+                  Get in Touch
                 </Button>
               </Link>
             </div>
@@ -120,10 +120,10 @@ const MaintenancePage = () => {
               <div className="lg:col-span-1">
                 <div className="bg-gray-50 rounded-xl p-6 shadow-sm sticky top-24">
                   <h3 className="text-xl font-semibold text-gray-900 mb-4">Ready to Get Started?</h3>
-                  <p className="text-gray-700 mb-6">Contact us today to discuss your maintenance and support needs and receive a customized solution.</p>
+                  <p className="text-gray-700 mb-6">Contact us today to discuss your maintenance and support needs.</p>
                   <Link to="/contact" className="block">
                     <Button className="w-full" size="lg">
-                      Request a Quote
+                      Get in Touch
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                   </Link>
@@ -170,7 +170,7 @@ const MaintenancePage = () => {
                 variant="secondary"
                 className="bg-white text-infinet-800 hover:bg-blue-50"
               >
-                Contact Us Today
+                Get in Touch
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
