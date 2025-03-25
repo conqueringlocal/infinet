@@ -1,5 +1,6 @@
 
 import React, { useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom'; // Added missing import
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { Phone, Mail, MapPin, CheckCircle, Send, ArrowRight } from 'lucide-react';
