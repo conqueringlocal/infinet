@@ -12,7 +12,6 @@ type ServiceOption = {
   description: string;
   icon: React.ElementType;
   features: string[];
-  recommended: boolean;
 };
 
 const services: ServiceOption[] = [
@@ -27,8 +26,7 @@ const services: ServiceOption[] = [
       'Longer transmission distances',
       'Enhanced security',
       'Future-proof installation'
-    ],
-    recommended: true
+    ]
   },
   {
     id: 'structured',
@@ -41,8 +39,7 @@ const services: ServiceOption[] = [
       'Scalable infrastructure',
       'Enhanced reliability',
       'Industry standard compliance'
-    ],
-    recommended: false
+    ]
   },
   {
     id: 'wireless',
@@ -55,8 +52,7 @@ const services: ServiceOption[] = [
       'Outdoor connectivity options',
       'Wireless distribution systems',
       'Managed WiFi services'
-    ],
-    recommended: false
+    ]
   },
   {
     id: 'ptp',
@@ -69,8 +65,7 @@ const services: ServiceOption[] = [
       'High-bandwidth connections',
       'No recurring lease costs',
       'Rapid deployment options'
-    ],
-    recommended: false
+    ]
   },
   {
     id: 'network',
@@ -83,8 +78,7 @@ const services: ServiceOption[] = [
       'Security implementation',
       'Performance optimization',
       'Documentation & training'
-    ],
-    recommended: false
+    ]
   },
   {
     id: 'maintenance',
@@ -97,8 +91,7 @@ const services: ServiceOption[] = [
       'Rapid emergency response',
       'Regular performance testing',
       'System upgrades & patches'
-    ],
-    recommended: false
+    ]
   }
 ];
 
@@ -142,21 +135,11 @@ const ServiceFinder = () => {
               {services.map((service) => (
                 <motion.div
                   key={service.id}
-                  className={cn(
-                    "bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 p-6 flex flex-col relative overflow-hidden",
-                    service.recommended && "ring-2 ring-infinet-500 dark:ring-infinet-400"
-                  )}
+                  className="bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 p-6 flex flex-col relative overflow-hidden"
                   onClick={() => handleSelect(service.id)}
                   whileHover={{ y: -5, scale: 1.02 }}
                   transition={{ type: "spring", stiffness: 400, damping: 10 }}
                 >
-                  {service.recommended && (
-                    <div className="absolute top-0 right-0">
-                      <div className="bg-infinet-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">
-                        POPULAR
-                      </div>
-                    </div>
-                  )}
                   <div className="mb-4">
                     <service.icon className="h-10 w-10 text-infinet-600 dark:text-infinet-400" />
                   </div>
