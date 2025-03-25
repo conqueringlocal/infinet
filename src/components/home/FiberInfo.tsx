@@ -31,8 +31,8 @@ const FiberInfo = () => {
         <div className="relative">
           <div className="absolute inset-0 bg-gradient-to-r from-infinet-500/30 to-infinetYellow-400/30 rounded-lg transform rotate-3 blur-[2px]"></div>
           <img 
-            src="/lovable-uploads/2d58718b-9a89-4dde-b37e-43621ecf8a95.png"
-            alt="Business Network Infrastructure" 
+            src="/lovable-uploads/f3e6c9f7-b849-4255-84ee-0d5681586a86.png"
+            alt="Enterprise Network Infrastructure" 
             className="w-full h-auto rounded-lg shadow-xl relative z-10"
           />
         </div>
