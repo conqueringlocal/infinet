@@ -1,7 +1,6 @@
 
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { ArrowRight, Building2 } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Separator } from '@/components/ui/separator';
 
@@ -42,54 +41,6 @@ const FiberInfo = () => {
           />
         </div>
       </div>
-      
-      <Separator className="my-10 bg-infinet-100 dark:bg-infinet-900/30" />
-      
-      {/* Industry Solutions */}
-      <Card className="bg-white/80 dark:bg-gray-900/60 backdrop-blur-sm border border-gray-200 dark:border-gray-800">
-        <CardContent className="p-6">
-          <h4 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Tailored Solutions For Every Industry</h4>
-          <div className="grid md:grid-cols-2 gap-6">
-            <div>
-              <p className="text-gray-600 dark:text-gray-300 mb-4">
-                We develop customized solutions that address the specific connectivity requirements of your industry.
-              </p>
-              <ul className="space-y-3 text-sm text-gray-600 dark:text-gray-400">
-                <li className="flex items-start gap-2">
-                  <span className="font-semibold text-infinet-700 dark:text-infinet-400 min-w-24">Healthcare:</span> 
-                  <span>Secure networks for patient data and telemedicine</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="font-semibold text-infinet-700 dark:text-infinet-400 min-w-24">Education:</span> 
-                  <span>Campus-wide connectivity for digital learning</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="font-semibold text-infinet-700 dark:text-infinet-400 min-w-24">Manufacturing:</span> 
-                  <span>Industrial networks for IoT and automation</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="font-semibold text-infinet-700 dark:text-infinet-400 min-w-24">Finance:</span> 
-                  <span>Low-latency solutions for secure transactions</span>
-                </li>
-              </ul>
-            </div>
-            <div className="rounded-lg bg-gradient-to-br from-infinet-50 to-infinetYellow-50 dark:from-infinet-900/20 dark:to-infinetYellow-900/20 p-6 flex flex-col justify-center">
-              <div className="text-center space-y-2">
-                <div className="inline-block p-4 bg-white dark:bg-gray-800 rounded-full shadow-md mb-2">
-                  <Building2 className="h-12 w-12 text-infinet-500" />
-                </div>
-                <h5 className="font-semibold text-gray-900 dark:text-white">Consultation Services</h5>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Our team evaluates your infrastructure and requirements to develop cost-effective solutions.
-                </p>
-                <Button variant="default" size="sm" className="mt-2" onClick={() => window.location.href = '/contact'}>
-                  Schedule a Consultation
-                </Button>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 };
