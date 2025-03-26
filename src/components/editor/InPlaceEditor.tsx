@@ -28,18 +28,22 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
     const authStatus = localStorage.getItem('edit_authenticated');
     if (authStatus === 'true') {
       setIsLoggedIn(true);
-      setEditMode(true);
-      console.log('User is already logged in, edit mode enabled');
+      setEditMode(isEnabled); // Only activate edit mode if we're on an edit URL
+      console.log('User is already logged in, edit mode enabled:', isEnabled);
     } else if (isEnabled) {
+      // Show login dialog only if not logged in and on an edit URL
       setLoginDialogOpen(true);
       console.log('Showing login dialog');
     }
 
     // Add edit mode class to body when in edit mode
-    if (isEnabled && isLoggedIn && editMode) {
+    if (isEnabled && isLoggedIn) {
       console.log('Enabling edit mode');
       document.body.classList.add('edit-mode');
-      initializeEditables();
+      // Initialize editables after a short delay to ensure DOM is ready
+      setTimeout(() => {
+        initializeEditables();
+      }, 500);
     } else {
       document.body.classList.remove('edit-mode');
     }
@@ -65,6 +69,20 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
         description: "You can now edit the page content",
       });
       console.log('Login successful, edit mode enabled');
+      
+      // Force a re-render by adding a timestamp to the URL
+      // This helps ensure editables are initialized
+      const timestamp = Date.now();
+      if (location.search) {
+        navigate(`${location.pathname}?${location.search}&t=${timestamp}`);
+      } else {
+        navigate(`${location.pathname}?t=${timestamp}`);
+      }
+      
+      // Initialize editables after login
+      setTimeout(() => {
+        initializeEditables();
+      }, 500);
     } else {
       toast({
         title: "Login failed",
@@ -165,9 +183,12 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
 
   // If not enabled (not in edit mode URL), don't show anything
   if (!isEnabled) {
+    console.log('Edit mode not enabled, not rendering editor UI');
     return null;
   }
 
+  console.log('Rendering InPlaceEditor with isEnabled =', isEnabled);
+  
   return (
     <>
       <Dialog open={loginDialogOpen} onOpenChange={setLoginDialogOpen}>

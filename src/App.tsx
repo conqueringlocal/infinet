@@ -74,12 +74,11 @@ const PageWrapper = ({ Component }: { Component: React.ComponentType<any> }) => 
   const location = useLocation();
   const navigate = useNavigate();
   
-  // Check if we're in edit mode by looking for /edit at the end of the path
-  // Special case for root path - need to handle both '/edit' and '/' paths
-  const isRootPath = location.pathname === '/' || location.pathname === '/edit';
-  const isEditMode = location.pathname.endsWith('/edit') || location.pathname === '/edit';
+  // Check if we're in edit mode by looking for /edit at the end of the path or if it's exactly '/edit'
+  const isEditMode = location.pathname.endsWith('/edit');
   
   // Get the base path without /edit for component rendering
+  // Special case for root path - '/edit' should render the Index component
   const basePath = isEditMode 
     ? location.pathname === '/edit' ? '/' : location.pathname.slice(0, -5)
     : location.pathname;
@@ -88,9 +87,8 @@ const PageWrapper = ({ Component }: { Component: React.ComponentType<any> }) => 
     // Log the current path and edit mode status
     console.log('Current path:', location.pathname);
     console.log('Edit mode:', isEditMode);
-    console.log('Is root path:', isRootPath);
     console.log('Base path for rendering:', basePath);
-  }, [location.pathname, isEditMode, basePath, isRootPath]);
+  }, [location.pathname, isEditMode, basePath]);
   
   return (
     <>
@@ -103,13 +101,14 @@ const PageWrapper = ({ Component }: { Component: React.ComponentType<any> }) => 
 const AppRoutes = () => {
   const location = useLocation();
   
-  // Special handling for root path with edit
-  const isRootWithEdit = location.pathname === '/edit';
+  // Determine if we're in edit mode
+  const isEditMode = location.pathname.endsWith('/edit');
   
-  // For all other paths, remove '/edit' from the path for route matching
-  const basePath = isRootWithEdit 
-    ? '/' 
-    : location.pathname.endsWith('/edit')
+  // For all paths, we need to get the base path for route matching
+  // For the root edit path ('/edit'), we want to match the '/' route
+  const basePath = location.pathname === '/edit'
+    ? '/'
+    : isEditMode
       ? location.pathname.slice(0, -5)
       : location.pathname;
     

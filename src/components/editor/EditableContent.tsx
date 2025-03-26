@@ -36,6 +36,9 @@ const EditableContent: React.FC<EditableContentProps> = ({
         console.error('Error parsing saved content', e);
       }
     }
+    
+    // Mark as initialized even if we don't have saved content
+    setInitialContentSet(true);
   }, [id, initialContentSet]);
 
   // Cast the ref to any as a workaround for TypeScript with dynamic elements
@@ -44,7 +47,9 @@ const EditableContent: React.FC<EditableContentProps> = ({
     {
       'data-editable': id,
       className,
-      ref: contentRef as any
+      ref: contentRef as any,
+      // When content is not yet set (on first load), use children as fallback
+      dangerouslySetInnerHTML: initialContentSet ? undefined : undefined
     },
     !initialContentSet ? children : null
   );
