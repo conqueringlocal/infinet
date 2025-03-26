@@ -72,16 +72,17 @@ const ScrollToTop = () => {
 // Enhanced PageWrapper component to handle edit mode
 const PageWrapper = ({ Component }: { Component: React.ComponentType<any> }) => {
   const location = useLocation();
-  const navigate = useNavigate();
   
   // Check if we're in edit mode by looking for /edit at the end of the path or if it's exactly '/edit'
-  const isEditMode = location.pathname.endsWith('/edit');
+  const isEditMode = location.pathname === '/edit' || location.pathname.endsWith('/edit');
   
   // Get the base path without /edit for component rendering
   // Special case for root path - '/edit' should render the Index component
-  const basePath = isEditMode 
-    ? location.pathname === '/edit' ? '/' : location.pathname.slice(0, -5)
-    : location.pathname;
+  const basePath = location.pathname === '/edit' 
+    ? '/' 
+    : isEditMode 
+      ? location.pathname.slice(0, -5) 
+      : location.pathname;
   
   useEffect(() => {
     // Log the current path and edit mode status
@@ -102,7 +103,7 @@ const AppRoutes = () => {
   const location = useLocation();
   
   // Determine if we're in edit mode
-  const isEditMode = location.pathname.endsWith('/edit');
+  const isEditMode = location.pathname === '/edit' || location.pathname.endsWith('/edit');
   
   // For all paths, we need to get the base path for route matching
   // For the root edit path ('/edit'), we want to match the '/' route
@@ -111,6 +112,8 @@ const AppRoutes = () => {
     : isEditMode
       ? location.pathname.slice(0, -5)
       : location.pathname;
+      
+  console.log('AppRoutes - basePath:', basePath);
     
   return (
     <PageTransition>

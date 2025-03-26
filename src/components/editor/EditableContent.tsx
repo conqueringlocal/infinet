@@ -31,27 +31,30 @@ const EditableContent: React.FC<EditableContentProps> = ({
           contentRef.current.innerHTML = contentMap[id];
           console.log(`Loaded saved content for "${id}"`);
           setInitialContentSet(true);
+        } else {
+          // If we don't have saved content for this ID, mark as initialized
+          setInitialContentSet(true);
         }
       } catch (e) {
         console.error('Error parsing saved content', e);
+        setInitialContentSet(true);
       }
+    } else {
+      // No saved content at all, mark as initialized
+      setInitialContentSet(true);
     }
-    
-    // Mark as initialized even if we don't have saved content
-    setInitialContentSet(true);
   }, [id, initialContentSet]);
 
-  // Cast the ref to any as a workaround for TypeScript with dynamic elements
+  // Create the element with appropriate props
   return React.createElement(
     Tag,
     {
       'data-editable': id,
       className,
       ref: contentRef as any,
-      // When content is not yet set (on first load), use children as fallback
-      dangerouslySetInnerHTML: initialContentSet ? undefined : undefined
+      // Always render children initially, don't use dangerouslySetInnerHTML for initial render
     },
-    !initialContentSet ? children : null
+    children
   );
 };
 

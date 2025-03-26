@@ -28,18 +28,22 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
     const authStatus = localStorage.getItem('edit_authenticated');
     if (authStatus === 'true') {
       setIsLoggedIn(true);
-      setEditMode(isEnabled); // Only activate edit mode if we're on an edit URL
-      console.log('User is already logged in, edit mode enabled:', isEnabled);
+      
+      if (isEnabled) {
+        setEditMode(true);
+        console.log('User is logged in and edit mode is enabled');
+      }
     } else if (isEnabled) {
       // Show login dialog only if not logged in and on an edit URL
       setLoginDialogOpen(true);
-      console.log('Showing login dialog');
+      console.log('Showing login dialog for edit mode');
     }
 
     // Add edit mode class to body when in edit mode
     if (isEnabled && isLoggedIn) {
-      console.log('Enabling edit mode');
+      console.log('Enabling edit mode on body');
       document.body.classList.add('edit-mode');
+      
       // Initialize editables after a short delay to ensure DOM is ready
       setTimeout(() => {
         initializeEditables();
@@ -51,7 +55,18 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
     return () => {
       document.body.classList.remove('edit-mode');
     };
-  }, [isEnabled, isLoggedIn, editMode]);
+  }, [isEnabled, isLoggedIn]);
+
+  // Effect to handle edit mode changes
+  useEffect(() => {
+    if (editMode && isLoggedIn) {
+      document.body.classList.add('edit-mode');
+      initializeEditables();
+      console.log('Edit mode activated, initializing editables');
+    } else {
+      document.body.classList.remove('edit-mode');
+    }
+  }, [editMode, isLoggedIn]);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
