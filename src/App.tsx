@@ -68,28 +68,20 @@ const ScrollToTop = () => {
   return null;
 };
 
+// This wrapper decides whether to show the editor based on URL
 const PageWrapper = ({ Component }: { Component: React.ComponentType<any> }) => {
   const location = useLocation();
+  console.log('PageWrapper - Current path:', location.pathname);
   
   // Check if we're in edit mode (URL ends with /edit)
-  const isEditPath = location.pathname === '/edit' || location.pathname.endsWith('/edit');
-  console.log('PageWrapper - Current path:', location.pathname);
-  console.log('PageWrapper - Is edit path:', isEditPath);
-  
-  // Determine the base path (the path without /edit) for rendering the correct component
-  const basePath = location.pathname === '/edit' 
-    ? '/' 
-    : isEditPath 
-      ? location.pathname.slice(0, -5) 
-      : location.pathname;
-  
-  console.log('PageWrapper - Base path for rendering:', basePath);
+  const isEditMode = location.pathname === '/edit' || location.pathname.endsWith('/edit');
+  console.log('PageWrapper - Edit mode enabled:', isEditMode);
   
   return (
     <>
       <Component />
-      {/* Pass isEnabled prop to InPlaceEditor based on URL */}
-      <InPlaceEditor isEnabled={isEditPath} />
+      {/* Always render the InPlaceEditor, but it will only show its UI if enabled */}
+      <InPlaceEditor isEnabled={isEditMode} />
     </>
   );
 };
@@ -97,18 +89,16 @@ const PageWrapper = ({ Component }: { Component: React.ComponentType<any> }) => 
 const AppRoutes = () => {
   const location = useLocation();
   
-  // Check if we're in edit mode
-  const isEditPath = location.pathname === '/edit' || location.pathname.endsWith('/edit');
-  console.log('AppRoutes - Current path:', location.pathname);
-  console.log('AppRoutes - Is edit path:', isEditPath);
+  // Get the base path for rendering the correct component
+  // This removes the /edit suffix if present
+  const getBasePath = (path: string) => {
+    if (path === '/edit') return '/';
+    if (path.endsWith('/edit')) return path.slice(0, -5);
+    return path;
+  };
   
-  // Get the base path for routing
-  const basePath = location.pathname === '/edit'
-    ? '/'
-    : isEditPath
-      ? location.pathname.slice(0, -5)
-      : location.pathname;
-      
+  const basePath = getBasePath(location.pathname);
+  console.log('AppRoutes - Current path:', location.pathname);
   console.log('AppRoutes - Using path for routing:', basePath);
     
   return (

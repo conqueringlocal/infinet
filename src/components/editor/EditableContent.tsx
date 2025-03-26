@@ -19,12 +19,12 @@ const EditableContent: React.FC<EditableContentProps> = ({
   
   // Debug logging to help diagnose issues
   useEffect(() => {
-    console.log(`EditableContent ${id} mounted`);
+    console.log(`EditableContent ${id} mounted with tag: ${tag}`);
     
     return () => {
       console.log(`EditableContent ${id} unmounted`);
     };
-  }, [id]);
+  }, [id, tag]);
   
   useEffect(() => {
     // Only run once to avoid overwriting user edits
@@ -56,6 +56,7 @@ const EditableContent: React.FC<EditableContentProps> = ({
       ref={contentRef as React.RefObject<any>}
       data-editable={id}
       className={className}
+      suppressContentEditableWarning={true}
     >
       {children}
     </TagName>
