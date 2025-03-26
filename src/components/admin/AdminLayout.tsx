@@ -1,6 +1,6 @@
 
 import React, { useEffect } from 'react';
-import { useNavigate, Link, Outlet } from 'react-router-dom';
+import { useNavigate, Link, Outlet, useLocation } from 'react-router-dom';
 import { 
   Sidebar, 
   SidebarHeader, 
@@ -29,14 +29,17 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 const AdminLayout = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const location = useLocation();
 
-  // Check if user is authenticated
+  // Check if user is authenticated - skip check for setup page
   useEffect(() => {
+    const isSetupPage = location.pathname === '/admin/setup';
     const isAuthenticated = localStorage.getItem('admin_authenticated') === 'true';
-    if (!isAuthenticated) {
+    
+    if (!isAuthenticated && !isSetupPage) {
       navigate('/admin/login');
     }
-  }, [navigate]);
+  }, [navigate, location.pathname]);
 
   const handleLogout = () => {
     localStorage.removeItem('admin_authenticated');
@@ -46,6 +49,11 @@ const AdminLayout = () => {
     });
     navigate('/admin/login');
   };
+
+  // If on setup page, render only the setup component without the admin layout
+  if (location.pathname === '/admin/setup') {
+    return <Outlet />;
+  }
 
   return (
     <div className="min-h-screen bg-gray-100 flex">

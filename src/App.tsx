@@ -159,13 +159,13 @@ const AppRoutes = () => {
         
         {/* Admin routes */}
         <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin/setup" element={<SetupPage />} />
         <Route path="/admin" element={<AdminLayout />}>
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="pages" element={<AdminPages />} />
           <Route path="media" element={<AdminMedia />} />
           <Route path="users" element={<AdminUsers />} />
           <Route path="settings" element={<AdminSettings />} />
-          <Route path="setup" element={<SetupPage />} />
           <Route path="" element={<AdminDashboard />} />
         </Route>
         
