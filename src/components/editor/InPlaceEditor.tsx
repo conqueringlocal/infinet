@@ -20,6 +20,7 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
   const [editMode, setEditMode] = useState(false);
   const [currentImageElement, setCurrentImageElement] = useState<HTMLImageElement | null>(null);
   const [newImageUrl, setNewImageUrl] = useState('');
+  const [contentChanged, setContentChanged] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -83,6 +84,23 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
       document.body.classList.remove('edit-mode');
     };
   }, [editMode, isLoggedIn]);
+
+  // Periodically check for changes to mark content as changed
+  useEffect(() => {
+    if (editMode) {
+      const checkForChanges = () => {
+        const editableElements = document.querySelectorAll('[data-editable]');
+        editableElements.forEach(el => {
+          el.addEventListener('input', () => {
+            setContentChanged(true);
+          });
+        });
+      };
+      
+      // Add change detection after elements are initialized
+      setTimeout(checkForChanges, 1000);
+    }
+  }, [editMode]);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -165,14 +183,19 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
         el.addEventListener('focus', () => el.classList.add('editing'));
         el.addEventListener('blur', () => el.classList.remove('editing'));
         
+        // Mark content as changed when edited
+        el.addEventListener('input', () => setContentChanged(true));
+        
         console.log(`Element ${id} is now editable as text`);
       } else if (type === 'image') {
         // For images, we need click handler to open image dialog
         el.classList.add('editable-image');
         el.addEventListener('click', (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          openImageDialog(el as HTMLImageElement);
+          if (editMode) {
+            e.preventDefault();
+            e.stopPropagation();
+            openImageDialog(el as HTMLImageElement);
+          }
         });
         
         console.log(`Element ${id} is now editable as image`);
@@ -205,6 +228,7 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
     if (currentImageElement && newImageUrl) {
       currentImageElement.src = newImageUrl;
       setImageDialogOpen(false);
+      setContentChanged(true);
       
       toast({
         title: "Image updated",
@@ -250,14 +274,25 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
     // Save to localStorage
     localStorage.setItem('page_content', JSON.stringify(contentToSave));
     
-    // Also save to sessionStorage for redundancy
-    sessionStorage.setItem('page_content', JSON.stringify(contentToSave));
+    try {
+      // Also save to sessionStorage for redundancy
+      sessionStorage.setItem('page_content', JSON.stringify(contentToSave));
+      
+      // Send to server if this were a real CMS
+      // For now we'll just simulate a server save with a delay
+      setTimeout(() => {
+        console.log('Content saved to "server"');
+        toast({
+          title: "Changes saved",
+          description: "Your content has been updated successfully",
+        });
+      }, 800);
+    } catch (e) {
+      console.error('Error saving content', e);
+    }
     
-    toast({
-      title: "Changes saved",
-      description: "Your content has been updated successfully",
-    });
-
+    setContentChanged(false);
+    
     // Turn off edit mode after saving
     setEditMode(false);
     
@@ -419,14 +454,18 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
               size="sm" 
               onClick={saveChanges}
               className="bg-green-600 hover:bg-green-700"
+              disabled={!contentChanged}
             >
               <Save className="h-4 w-4 mr-2" />
-              Save Changes
+              {contentChanged ? "Save Changes" : "No Changes"}
             </Button>
             <Button 
               size="sm" 
               variant="secondary"
-              onClick={() => setEditMode(false)}
+              onClick={() => {
+                setEditMode(false);
+                setContentChanged(false);
+              }}
             >
               <X className="h-4 w-4 mr-2" />
               Cancel
@@ -455,6 +494,7 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
         
         .edit-mode [data-editable]:hover {
           outline: 2px dashed #0070f3;
+          cursor: pointer;
         }
         
         .edit-mode [data-editable].editing {
@@ -463,7 +503,7 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
         }
         
         .edit-mode [data-editable-type="image"] {
-          cursor: pointer;
+          cursor: pointer !important;
         }
         
         .edit-mode [data-editable]::before {

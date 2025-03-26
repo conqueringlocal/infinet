@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/Button';
 import { ArrowRight } from 'lucide-react';
@@ -73,7 +74,9 @@ const FiberCmsInfo = () => {
                     className="group"
                     variant="default"
                   >
-                    Access Admin Dashboard
+                    <EditableContent id="cms-button-text" tag="span">
+                      Access Admin Dashboard
+                    </EditableContent>
                     <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                   </Button>
                 </Link>
@@ -100,7 +103,7 @@ const FiberCmsInfo = () => {
         <EditableContent
           id="fiber-cms-image-1"
           type="image"
-          imageSrc="/assets/cms-preview-1.jpg"
+          imageSrc="/lovable-uploads/9197edbf-232c-40b9-844b-12a37c0bbe4a.png"
           imageAlt="CMS Preview 1"
           className="w-72 h-auto object-cover"
         />
@@ -110,7 +113,7 @@ const FiberCmsInfo = () => {
         <EditableContent
           id="fiber-cms-image-2"
           type="image"
-          imageSrc="/assets/cms-preview-2.jpg"
+          imageSrc="/lovable-uploads/f3e6c9f7-b849-4255-84ee-0d5681586a86.png"
           imageAlt="CMS Preview 2"
           className="w-72 h-auto object-cover"
         />

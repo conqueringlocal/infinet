@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 
 interface EditableContentProps {
   id: string;
-  children?: React.ReactNode; // Make children optional
+  children?: React.ReactNode;
   className?: string;
   tag?: keyof JSX.IntrinsicElements;
   type?: 'text' | 'image';
@@ -33,7 +33,7 @@ const EditableContent: React.FC<EditableContentProps> = ({
     };
   }, [id, tag, type]);
   
-  // Load saved content from localStorage
+  // Load saved content from localStorage on mount
   useEffect(() => {
     // Only run once to avoid overwriting user edits
     if (initialContentSet) return;
@@ -50,7 +50,7 @@ const EditableContent: React.FC<EditableContentProps> = ({
           if (type === 'text' && contentRef.current) {
             contentRef.current.innerHTML = contentMap[id];
             console.log(`Loaded saved text content for "${id}"`);
-          } else if (type === 'image' && contentMap[id].startsWith('data:image') || contentMap[id].startsWith('http')) {
+          } else if (type === 'image' && (contentMap[id].startsWith('data:image') || contentMap[id].startsWith('http'))) {
             setImageSource(contentMap[id]);
             console.log(`Loaded saved image source for "${id}"`);
           }
@@ -79,7 +79,7 @@ const EditableContent: React.FC<EditableContentProps> = ({
         data-editable={id}
         data-editable-type="image"
         data-original-src={imageSrc}
-        className={className}
+        className={`editable-image ${className}`}
       />
     );
   }
@@ -90,7 +90,7 @@ const EditableContent: React.FC<EditableContentProps> = ({
       ref={contentRef as React.RefObject<any>}
       data-editable={id}
       data-editable-type="text"
-      className={className}
+      className={`editable-text ${className}`}
       suppressContentEditableWarning={true}
     >
       {children}
