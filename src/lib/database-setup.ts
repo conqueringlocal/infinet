@@ -8,63 +8,67 @@ export const initializeDatabase = async (): Promise<{ success: boolean; message:
   try {
     console.log('Initializing database...');
     
-    // Instead of checking existing tables, we'll try to create them directly
-    // and handle any errors that occur
-    
+    // Create user_profiles table
     console.log('Creating user_profiles table...');
-    const { error: profilesError } = await supabase.rpc('execute_sql', {
-      sql_query: `
-        CREATE TABLE IF NOT EXISTS public.user_profiles (
-          id UUID PRIMARY KEY,
-          email TEXT NOT NULL,
-          display_name TEXT,
-          full_name TEXT,
-          role TEXT NOT NULL DEFAULT 'viewer',
-          created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-          updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-          avatar_url TEXT,
-          bio TEXT,
-          settings JSONB
-        );
+    const { error: userProfilesError } = await supabase
+      .from('user_profiles')
+      .select('id')
+      .limit(1);
+    
+    if (userProfilesError) {
+      if (userProfilesError.code === '42P01') { // Table doesn't exist
+        console.log('Table user_profiles does not exist, creating it...');
         
-        -- RLS policies for user_profiles
-        ALTER TABLE public.user_profiles ENABLE ROW LEVEL SECURITY;
+        const { error: createTableError } = await supabase
+          .query(`
+            CREATE TABLE IF NOT EXISTS public.user_profiles (
+              id UUID PRIMARY KEY,
+              email TEXT NOT NULL,
+              display_name TEXT,
+              full_name TEXT,
+              role TEXT NOT NULL DEFAULT 'viewer',
+              created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+              updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+              avatar_url TEXT,
+              bio TEXT,
+              settings JSONB
+            );
+            
+            -- RLS policies for user_profiles
+            ALTER TABLE public.user_profiles ENABLE ROW LEVEL SECURITY;
+          `);
         
-        -- Allow users to see all profiles
-        DO $$
-        BEGIN
-          IF NOT EXISTS (
-            SELECT 1 FROM pg_policies 
-            WHERE tablename = 'user_profiles' AND policyname = 'Users can view all profiles'
-          ) THEN
+        if (createTableError) {
+          console.error('Error creating user_profiles table:', createTableError);
+          return { success: false, message: `Error creating user_profiles table: ${createTableError.message}` };
+        }
+        
+        // Create policies one at a time
+        const { error: viewPolicyError } = await supabase
+          .query(`
             CREATE POLICY "Users can view all profiles" 
               ON public.user_profiles FOR SELECT 
               USING (true);
-          END IF;
-        END
-        $$;
+          `);
         
-        -- Users can update their own profile
-        DO $$
-        BEGIN
-          IF NOT EXISTS (
-            SELECT 1 FROM pg_policies 
-            WHERE tablename = 'user_profiles' AND policyname = 'Users can update own profile'
-          ) THEN
+        if (viewPolicyError) {
+          console.error('Error creating view policy:', viewPolicyError);
+          // Continue even if policy creation fails, as the table is more important
+        }
+        
+        const { error: updatePolicyError } = await supabase
+          .query(`
             CREATE POLICY "Users can update own profile" 
               ON public.user_profiles FOR UPDATE 
               USING (auth.uid() = id);
-          END IF;
-        END
-        $$;
+          `);
         
-        -- Only admins can update other profiles
-        DO $$
-        BEGIN
-          IF NOT EXISTS (
-            SELECT 1 FROM pg_policies 
-            WHERE tablename = 'user_profiles' AND policyname = 'Admins can update any profile'
-          ) THEN
+        if (updatePolicyError) {
+          console.error('Error creating update policy:', updatePolicyError);
+        }
+        
+        const { error: adminPolicyError } = await supabase
+          .query(`
             CREATE POLICY "Admins can update any profile" 
               ON public.user_profiles FOR UPDATE 
               USING (
@@ -73,66 +77,73 @@ export const initializeDatabase = async (): Promise<{ success: boolean; message:
                   WHERE id = auth.uid() AND role = 'admin'
                 )
               );
-          END IF;
-        END
-        $$;
-      `
-    });
-    
-    if (profilesError) {
-      console.error('Error creating user_profiles table:', profilesError);
-      return { success: false, message: `Error creating user_profiles table: ${profilesError.message}` };
+          `);
+        
+        if (adminPolicyError) {
+          console.error('Error creating admin policy:', adminPolicyError);
+        }
+      } else {
+        console.error('Error checking user_profiles table:', userProfilesError);
+        return { success: false, message: `Error checking user_profiles table: ${userProfilesError.message}` };
+      }
     }
     
+    // Create page_assignments table
     console.log('Creating page_assignments table...');
-    const { error: assignmentsError } = await supabase.rpc('execute_sql', {
-      sql_query: `
-        CREATE TABLE IF NOT EXISTS public.page_assignments (
-          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-          user_id UUID NOT NULL,
-          page_path TEXT NOT NULL,
-          created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-          UNIQUE(user_id, page_path)
-        );
+    const { error: assignmentsError } = await supabase
+      .from('page_assignments')
+      .select('id')
+      .limit(1);
+    
+    if (assignmentsError) {
+      if (assignmentsError.code === '42P01') { // Table doesn't exist
+        console.log('Table page_assignments does not exist, creating it...');
         
-        -- Add foreign key if it doesn't exist
-        DO $$
-        BEGIN
-          IF NOT EXISTS (
-            SELECT 1 FROM pg_constraint 
-            WHERE conname = 'page_assignments_user_id_fkey'
-          ) THEN
+        const { error: createTableError } = await supabase
+          .query(`
+            CREATE TABLE IF NOT EXISTS public.page_assignments (
+              id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+              user_id UUID NOT NULL,
+              page_path TEXT NOT NULL,
+              created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+              UNIQUE(user_id, page_path)
+            );
+          `);
+        
+        if (createTableError) {
+          console.error('Error creating page_assignments table:', createTableError);
+          return { success: false, message: `Error creating page_assignments table: ${createTableError.message}` };
+        }
+        
+        // Add foreign key constraint
+        const { error: foreignKeyError } = await supabase
+          .query(`
             ALTER TABLE public.page_assignments 
             ADD CONSTRAINT page_assignments_user_id_fkey 
             FOREIGN KEY (user_id) REFERENCES public.user_profiles(id) ON DELETE CASCADE;
-          END IF;
-        END
-        $$;
+            
+            -- RLS policies for page_assignments
+            ALTER TABLE public.page_assignments ENABLE ROW LEVEL SECURITY;
+          `);
         
-        -- RLS policies for page_assignments
-        ALTER TABLE public.page_assignments ENABLE ROW LEVEL SECURITY;
+        if (foreignKeyError) {
+          console.error('Error adding foreign key constraint:', foreignKeyError);
+        }
         
-        -- Users can view their own assignments
-        DO $$
-        BEGIN
-          IF NOT EXISTS (
-            SELECT 1 FROM pg_policies 
-            WHERE tablename = 'page_assignments' AND policyname = 'Users can view own assignments'
-          ) THEN
+        // Create policies one at a time
+        const { error: viewOwnPolicyError } = await supabase
+          .query(`
             CREATE POLICY "Users can view own assignments" 
               ON public.page_assignments FOR SELECT 
               USING (auth.uid() = user_id);
-          END IF;
-        END
-        $$;
+          `);
         
-        -- Allow admins and editors to view all assignments
-        DO $$
-        BEGIN
-          IF NOT EXISTS (
-            SELECT 1 FROM pg_policies 
-            WHERE tablename = 'page_assignments' AND policyname = 'Admins and editors can view all assignments'
-          ) THEN
+        if (viewOwnPolicyError) {
+          console.error('Error creating view own policy:', viewOwnPolicyError);
+        }
+        
+        const { error: viewAllPolicyError } = await supabase
+          .query(`
             CREATE POLICY "Admins and editors can view all assignments" 
               ON public.page_assignments FOR SELECT 
               USING (
@@ -141,17 +152,14 @@ export const initializeDatabase = async (): Promise<{ success: boolean; message:
                   WHERE id = auth.uid() AND role IN ('admin', 'editor')
                 )
               );
-          END IF;
-        END
-        $$;
+          `);
         
-        -- Only admins can modify assignments
-        DO $$
-        BEGIN
-          IF NOT EXISTS (
-            SELECT 1 FROM pg_policies 
-            WHERE tablename = 'page_assignments' AND policyname = 'Only admins can modify assignments'
-          ) THEN
+        if (viewAllPolicyError) {
+          console.error('Error creating view all policy:', viewAllPolicyError);
+        }
+        
+        const { error: modifyPolicyError } = await supabase
+          .query(`
             CREATE POLICY "Only admins can modify assignments" 
               ON public.page_assignments 
               USING (
@@ -160,70 +168,77 @@ export const initializeDatabase = async (): Promise<{ success: boolean; message:
                   WHERE id = auth.uid() AND role = 'admin'
                 )
               );
-          END IF;
-        END
-        $$;
-      `
-    });
-    
-    if (assignmentsError) {
-      console.error('Error creating page_assignments table:', assignmentsError);
-      return { success: false, message: `Error creating page_assignments table: ${assignmentsError.message}` };
+          `);
+        
+        if (modifyPolicyError) {
+          console.error('Error creating modify policy:', modifyPolicyError);
+        }
+      } else {
+        console.error('Error checking page_assignments table:', assignmentsError);
+        return { success: false, message: `Error checking page_assignments table: ${assignmentsError.message}` };
+      }
     }
     
+    // Create page_content table
     console.log('Creating page_content table...');
-    const { error: contentError } = await supabase.rpc('execute_sql', {
-      sql_query: `
-        CREATE TABLE IF NOT EXISTS public.page_content (
-          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-          page_path TEXT NOT NULL,
-          content JSONB NOT NULL,
-          created_by UUID,
-          created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-          updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-          published BOOLEAN DEFAULT false,
-          version INT DEFAULT 1,
-          UNIQUE(page_path, version)
-        );
+    const { error: contentError } = await supabase
+      .from('page_content')
+      .select('id')
+      .limit(1);
+    
+    if (contentError) {
+      if (contentError.code === '42P01') { // Table doesn't exist
+        console.log('Table page_content does not exist, creating it...');
         
-        -- Add foreign key if it doesn't exist
-        DO $$
-        BEGIN
-          IF NOT EXISTS (
-            SELECT 1 FROM pg_constraint 
-            WHERE conname = 'page_content_created_by_fkey'
-          ) THEN
+        const { error: createTableError } = await supabase
+          .query(`
+            CREATE TABLE IF NOT EXISTS public.page_content (
+              id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+              page_path TEXT NOT NULL,
+              content JSONB NOT NULL,
+              created_by UUID,
+              created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+              updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+              published BOOLEAN DEFAULT false,
+              version INT DEFAULT 1,
+              UNIQUE(page_path, version)
+            );
+          `);
+        
+        if (createTableError) {
+          console.error('Error creating page_content table:', createTableError);
+          return { success: false, message: `Error creating page_content table: ${createTableError.message}` };
+        }
+        
+        // Add foreign key constraint
+        const { error: foreignKeyError } = await supabase
+          .query(`
             ALTER TABLE public.page_content 
             ADD CONSTRAINT page_content_created_by_fkey 
             FOREIGN KEY (created_by) REFERENCES public.user_profiles(id);
-          END IF;
-        END
-        $$;
+            
+            -- RLS policies for page_content
+            ALTER TABLE public.page_content ENABLE ROW LEVEL SECURITY;
+          `);
         
-        -- RLS policies for page_content
-        ALTER TABLE public.page_content ENABLE ROW LEVEL SECURITY;
+        if (foreignKeyError) {
+          console.error('Error adding foreign key constraint:', foreignKeyError);
+        }
         
-        -- Anyone can view published content
-        DO $$
-        BEGIN
-          IF NOT EXISTS (
-            SELECT 1 FROM pg_policies 
-            WHERE tablename = 'page_content' AND policyname = 'Anyone can view published content'
-          ) THEN
+        // Create policies one at a time
+        const { error: publishedPolicyError } = await supabase
+          .query(`
             CREATE POLICY "Anyone can view published content" 
               ON public.page_content FOR SELECT 
               USING (published = true);
-          END IF;
-        END
-        $$;
+          `);
         
-        -- Users with edit_content permission can view all content
-        DO $$
-        BEGIN
-          IF NOT EXISTS (
-            SELECT 1 FROM pg_policies 
-            WHERE tablename = 'page_content' AND policyname = 'Editors can view all content'
-          ) THEN
+        if (publishedPolicyError) {
+          console.error('Error creating published content policy:', publishedPolicyError);
+        }
+        
+        const { error: editorViewPolicyError } = await supabase
+          .query(`
             CREATE POLICY "Editors can view all content" 
               ON public.page_content FOR SELECT 
               USING (
@@ -232,17 +247,14 @@ export const initializeDatabase = async (): Promise<{ success: boolean; message:
                   WHERE id = auth.uid() AND role IN ('admin', 'editor', 'contributor')
                 )
               );
-          END IF;
-        END
-        $$;
+          `);
         
-        -- Only users with publish_content permission can publish
-        DO $$
-        BEGIN
-          IF NOT EXISTS (
-            SELECT 1 FROM pg_policies 
-            WHERE tablename = 'page_content' AND policyname = 'Only editors and admins can publish'
-          ) THEN
+        if (editorViewPolicyError) {
+          console.error('Error creating editor view policy:', editorViewPolicyError);
+        }
+        
+        const { error: publishPolicyError } = await supabase
+          .query(`
             CREATE POLICY "Only editors and admins can publish" 
               ON public.page_content FOR UPDATE 
               USING (
@@ -251,17 +263,14 @@ export const initializeDatabase = async (): Promise<{ success: boolean; message:
                   WHERE id = auth.uid() AND role IN ('admin', 'editor')
                 )
               );
-          END IF;
-        END
-        $$;
+          `);
         
-        -- Contributors can create and update their own content
-        DO $$
-        BEGIN
-          IF NOT EXISTS (
-            SELECT 1 FROM pg_policies 
-            WHERE tablename = 'page_content' AND policyname = 'Contributors can create and update their content'
-          ) THEN
+        if (publishPolicyError) {
+          console.error('Error creating publish policy:', publishPolicyError);
+        }
+        
+        const { error: contributorPolicyError } = await supabase
+          .query(`
             CREATE POLICY "Contributors can create and update their content" 
               ON public.page_content 
               USING (
@@ -270,55 +279,63 @@ export const initializeDatabase = async (): Promise<{ success: boolean; message:
                   WHERE id = auth.uid() AND role IN ('admin', 'editor', 'contributor')
                 )
               );
-          END IF;
-        END
-        $$;
-      `
-    });
-    
-    if (contentError) {
-      console.error('Error creating page_content table:', contentError);
-      return { success: false, message: `Error creating page_content table: ${contentError.message}` };
+          `);
+        
+        if (contributorPolicyError) {
+          console.error('Error creating contributor policy:', contributorPolicyError);
+        }
+      } else {
+        console.error('Error checking page_content table:', contentError);
+        return { success: false, message: `Error checking page_content table: ${contentError.message}` };
+      }
     }
     
-    // Create page_analytics table for visitor tracking
+    // Create page_analytics table
     console.log('Creating page_analytics table...');
-    const { error: analyticsError } = await supabase.rpc('execute_sql', {
-      sql_query: `
-        CREATE TABLE IF NOT EXISTS public.page_analytics (
-          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-          page_path TEXT NOT NULL,
-          viewed_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-          session_id TEXT,
-          referrer TEXT,
-          user_agent TEXT,
-          device_type TEXT
-        );
+    const { error: analyticsError } = await supabase
+      .from('page_analytics')
+      .select('id')
+      .limit(1);
+    
+    if (analyticsError) {
+      if (analyticsError.code === '42P01') { // Table doesn't exist
+        console.log('Table page_analytics does not exist, creating it...');
         
-        -- RLS policies for page_analytics
-        ALTER TABLE public.page_analytics ENABLE ROW LEVEL SECURITY;
+        const { error: createTableError } = await supabase
+          .query(`
+            CREATE TABLE IF NOT EXISTS public.page_analytics (
+              id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+              page_path TEXT NOT NULL,
+              viewed_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+              session_id TEXT,
+              referrer TEXT,
+              user_agent TEXT,
+              device_type TEXT
+            );
+            
+            -- RLS policies for page_analytics
+            ALTER TABLE public.page_analytics ENABLE ROW LEVEL SECURITY;
+          `);
         
-        -- Anyone can insert analytics
-        DO $$
-        BEGIN
-          IF NOT EXISTS (
-            SELECT 1 FROM pg_policies 
-            WHERE tablename = 'page_analytics' AND policyname = 'Anyone can insert analytics'
-          ) THEN
+        if (createTableError) {
+          console.error('Error creating page_analytics table:', createTableError);
+          return { success: false, message: `Error creating page_analytics table: ${createTableError.message}` };
+        }
+        
+        // Create policies one at a time
+        const { error: insertPolicyError } = await supabase
+          .query(`
             CREATE POLICY "Anyone can insert analytics" 
               ON public.page_analytics FOR INSERT 
               WITH CHECK (true);
-          END IF;
-        END
-        $$;
+          `);
         
-        -- Only admins can view analytics
-        DO $$
-        BEGIN
-          IF NOT EXISTS (
-            SELECT 1 FROM pg_policies 
-            WHERE tablename = 'page_analytics' AND policyname = 'Only admins can view analytics'
-          ) THEN
+        if (insertPolicyError) {
+          console.error('Error creating insert policy:', insertPolicyError);
+        }
+        
+        const { error: viewPolicyError } = await supabase
+          .query(`
             CREATE POLICY "Only admins can view analytics" 
               ON public.page_analytics FOR SELECT 
               USING (
@@ -327,15 +344,15 @@ export const initializeDatabase = async (): Promise<{ success: boolean; message:
                   WHERE id = auth.uid() AND role = 'admin'
                 )
               );
-          END IF;
-        END
-        $$;
-      `
-    });
-    
-    if (analyticsError) {
-      console.error('Error creating page_analytics table:', analyticsError);
-      return { success: false, message: `Error creating page_analytics table: ${analyticsError.message}` };
+          `);
+        
+        if (viewPolicyError) {
+          console.error('Error creating view policy:', viewPolicyError);
+        }
+      } else {
+        console.error('Error checking page_analytics table:', analyticsError);
+        return { success: false, message: `Error checking page_analytics table: ${analyticsError.message}` };
+      }
     }
     
     console.log('Database initialized successfully!');
