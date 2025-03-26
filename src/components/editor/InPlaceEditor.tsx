@@ -28,7 +28,8 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
     const authStatus = localStorage.getItem('edit_authenticated');
     if (authStatus === 'true') {
       setIsLoggedIn(true);
-      console.log('User is already logged in');
+      setEditMode(true);
+      console.log('User is already logged in, edit mode enabled');
     } else if (isEnabled) {
       setLoginDialogOpen(true);
       console.log('Showing login dialog');
@@ -85,9 +86,14 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
     
     // Navigate to the non-edit version of the page
     const currentPath = location.pathname;
-    const basePath = currentPath.endsWith('/edit') 
-      ? currentPath.slice(0, -5) 
-      : currentPath;
+    let basePath = currentPath;
+    
+    // Handle special case for root path with edit
+    if (currentPath === '/edit') {
+      basePath = '/';
+    } else if (currentPath.endsWith('/edit')) {
+      basePath = currentPath.slice(0, -5);
+    }
       
     navigate(basePath);
     console.log('User logged out, navigating to:', basePath);
@@ -142,9 +148,14 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
     
     // Navigate to the non-edit version to see changes
     const currentPath = location.pathname;
-    const basePath = currentPath.endsWith('/edit') 
-      ? currentPath.slice(0, -5) 
-      : currentPath;
+    let basePath = currentPath;
+    
+    // Handle special case for root path
+    if (currentPath === '/edit') {
+      basePath = '/';
+    } else if (currentPath.endsWith('/edit')) {
+      basePath = currentPath.slice(0, -5);
+    }
       
     setTimeout(() => {
       navigate(basePath);

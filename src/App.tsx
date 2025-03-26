@@ -59,6 +59,8 @@ const ScrollToTop = () => {
       }
     } else if (pathname.includes("/admin")) {
       pageTitle = "Admin Dashboard | Conquering Local CMS";
+    } else if (pathname === "/edit") {
+      pageTitle = "Edit Mode | Infi-NET LLC";
     }
     
     document.title = pageTitle;
@@ -73,19 +75,22 @@ const PageWrapper = ({ Component }: { Component: React.ComponentType<any> }) => 
   const navigate = useNavigate();
   
   // Check if we're in edit mode by looking for /edit at the end of the path
-  const isEditMode = location.pathname.endsWith('/edit');
+  // Special case for root path - need to handle both '/edit' and '/' paths
+  const isRootPath = location.pathname === '/' || location.pathname === '/edit';
+  const isEditMode = location.pathname.endsWith('/edit') || location.pathname === '/edit';
   
   // Get the base path without /edit for component rendering
   const basePath = isEditMode 
-    ? location.pathname.slice(0, -5) // Remove /edit
+    ? location.pathname === '/edit' ? '/' : location.pathname.slice(0, -5)
     : location.pathname;
   
   useEffect(() => {
     // Log the current path and edit mode status
     console.log('Current path:', location.pathname);
     console.log('Edit mode:', isEditMode);
+    console.log('Is root path:', isRootPath);
     console.log('Base path for rendering:', basePath);
-  }, [location.pathname, isEditMode, basePath]);
+  }, [location.pathname, isEditMode, basePath, isRootPath]);
   
   return (
     <>
@@ -98,10 +103,15 @@ const PageWrapper = ({ Component }: { Component: React.ComponentType<any> }) => 
 const AppRoutes = () => {
   const location = useLocation();
   
-  // Remove '/edit' from the path for route matching
-  const basePath = location.pathname.endsWith('/edit')
-    ? location.pathname.slice(0, -5)
-    : location.pathname;
+  // Special handling for root path with edit
+  const isRootWithEdit = location.pathname === '/edit';
+  
+  // For all other paths, remove '/edit' from the path for route matching
+  const basePath = isRootWithEdit 
+    ? '/' 
+    : location.pathname.endsWith('/edit')
+      ? location.pathname.slice(0, -5)
+      : location.pathname;
     
   return (
     <PageTransition>
