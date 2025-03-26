@@ -18,14 +18,30 @@ const CMSSetup: React.FC = () => {
   const { toast } = useToast();
   const sqlRef = useRef<HTMLPreElement>(null);
 
-  // Improved SQL extraction to ensure we get complete SQL statements
+  // Enhanced SQL extraction to handle multiple table creations
   const extractSqlFromErrorMessage = (message: string) => {
     if (message.includes('CREATE TABLE')) {
-      // Find the SQL section starting with CREATE TABLE
-      const sqlStartIdx = message.indexOf('CREATE TABLE');
+      // Find all SQL sections starting with CREATE TABLE
+      const sqlSections = [];
+      let remainingText = message;
       
-      // Return the full SQL block
-      return message.substring(sqlStartIdx);
+      while (remainingText.includes('CREATE TABLE')) {
+        const sqlStartIdx = remainingText.indexOf('CREATE TABLE');
+        const nextTableIdx = remainingText.indexOf('CREATE TABLE', sqlStartIdx + 12);
+        
+        if (nextTableIdx !== -1) {
+          // Extract this table's SQL
+          sqlSections.push(remainingText.substring(sqlStartIdx, nextTableIdx));
+          remainingText = remainingText.substring(nextTableIdx);
+        } else {
+          // This is the last or only table
+          sqlSections.push(remainingText.substring(sqlStartIdx));
+          break;
+        }
+      }
+      
+      // Join all SQL sections
+      return sqlSections.join('\n\n');
     }
     return null;
   };
@@ -150,6 +166,7 @@ const CMSSetup: React.FC = () => {
                 <p className="text-xs text-gray-500 mt-2">
                   After running this SQL in your Supabase dashboard, return here and try again. 
                   Note: Remove the "IF NOT EXISTS" phrases from the policy creation lines if you encounter syntax errors.
+                  Run each table creation separately if you encounter any issues.
                 </p>
               </div>
             )}
