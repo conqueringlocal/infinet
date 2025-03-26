@@ -2,21 +2,19 @@
 import { supabase } from '../supabase';
 
 /**
- * Execute SQL statements directly on the database
- * This function uses the Supabase stored procedure approach
+ * Execute SQL statements directly on the database using Supabase Functions
  */
 export const executeSql = async (sqlQuery: string): Promise<{ success: boolean; message: string }> => {
   try {
-    // Use the rpc function to execute SQL (this assumes the function exists in Supabase)
-    // Instead of trying to POST directly to the REST API, we'll use Supabase's query builder
-    const { data, error } = await supabase
-      .from('_manual_sql')
-      .insert({ query: sqlQuery })
-      .select('success')
-      .maybeSingle();
+    console.log('Executing SQL via Supabase Functions:', sqlQuery.substring(0, 100) + '...');
+    
+    // Use Supabase Functions to execute SQL
+    const { data, error } = await supabase.functions.invoke('execute-sql', {
+      body: { sql: sqlQuery }
+    });
     
     if (error) {
-      console.error('Error executing SQL:', error);
+      console.error('Error executing SQL via Functions:', error);
       return { 
         success: false, 
         message: `Error executing SQL: ${error.message}` 
@@ -34,11 +32,12 @@ export const executeSql = async (sqlQuery: string): Promise<{ success: boolean; 
 };
 
 /**
- * Alternative method to execute SQL using Supabase functions
- * This can be used if the above method doesn't work
+ * Execute SQL using Supabase RPC
  */
 export const executeRawSql = async (sqlQuery: string): Promise<{ success: boolean; message: string }> => {
   try {
+    console.log('Executing SQL via RPC:', sqlQuery.substring(0, 100) + '...');
+    
     // Call a Supabase function to execute the SQL
     const { data, error } = await supabase.rpc('execute_sql', { 
       sql_query: sqlQuery 
@@ -63,11 +62,12 @@ export const executeRawSql = async (sqlQuery: string): Promise<{ success: boolea
 };
 
 /**
- * A simpler method that creates tables using Supabase's native query builder
- * This is more limited but safer for basic table operations
+ * A simpler method that creates tables using Supabase's insert approach
  */
 export const createTable = async (tableName: string, schema: Record<string, string>): Promise<{ success: boolean; message: string }> => {
   try {
+    console.log(`Creating table ${tableName} with schema:`, schema);
+    
     // First check if the table exists
     const { error: checkError } = await supabase
       .from(tableName)
@@ -76,44 +76,21 @@ export const createTable = async (tableName: string, schema: Record<string, stri
     
     // If table doesn't exist, we'll get a specific error code
     if (checkError && checkError.code === '42P01') {
-      console.log(`Table ${tableName} doesn't exist, will try to create it via direct DDL`);
+      console.log(`Table ${tableName} doesn't exist, attempting to create it`);
       
-      // Since we can't create tables with the query builder directly,
-      // we have to fall back to using the auth.uid() function which is available in Supabase
-      const { error: authError } = await supabase.auth.signInWithPassword({
-        email: 'admin@example.com',
-        password: 'admin123',
+      // Try using a function to create the table
+      const { data, error } = await supabase.functions.invoke('create-table', {
+        body: { 
+          tableName: tableName,
+          schema: schema
+        }
       });
       
-      if (authError) {
-        console.error('Error authenticating to create table:', authError);
+      if (error) {
+        console.error(`Error creating table ${tableName} via Functions:`, error);
         return { 
           success: false, 
-          message: `Authentication failed: ${authError.message}` 
-        };
-      }
-      
-      // Now we can try a direct SQL approach with the admin user
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        return { 
-          success: false, 
-          message: 'Failed to get authenticated session for table creation' 
-        };
-      }
-      
-      // Use the service role key (this would be in a secure environment only)
-      const { error: sqlError } = await supabase.rpc('create_table', { 
-        table_name: tableName,
-        table_schema: JSON.stringify(schema)
-      });
-      
-      if (sqlError) {
-        console.error(`Error creating table ${tableName}:`, sqlError);
-        return { 
-          success: false, 
-          message: `Error creating table: ${sqlError.message}` 
+          message: `Error creating table: ${error.message}` 
         };
       }
       
@@ -138,31 +115,22 @@ export const createTable = async (tableName: string, schema: Record<string, stri
 };
 
 /**
- * Simple function to execute direct SQL using the Supabase REST API
- * This is more reliable but requires proper authentication
+ * Create a table directly using SQL string
  */
-export const executeSqlDirect = async (sqlQuery: string): Promise<{ success: boolean; message: string }> => {
+export const createTableWithSql = async (
+  tableName: string, 
+  sqlDefinition: string
+): Promise<{ success: boolean; message: string }> => {
   try {
-    // Instead of using the .query() method which doesn't exist,
-    // we'll use a custom Supabase Edge Function or send to an RPC
-    const { data, error } = await supabase.functions.invoke('execute-sql', {
-      body: { sql: sqlQuery }
-    });
+    console.log(`Creating table ${tableName} with direct SQL`);
     
-    if (error) {
-      console.error('Error executing SQL directly:', error);
-      return { 
-        success: false, 
-        message: `Error executing SQL: ${error.message}` 
-      };
-    }
-
-    return { success: true, message: 'SQL executed successfully' };
+    const result = await executeSql(sqlDefinition);
+    return result;
   } catch (error) {
-    console.error('Error executing SQL directly:', error);
+    console.error(`Error creating table ${tableName} with SQL:`, error);
     return { 
       success: false, 
-      message: error instanceof Error ? error.message : 'Unknown error executing SQL' 
+      message: error instanceof Error ? error.message : `Unknown error creating table ${tableName}` 
     };
   }
 };
