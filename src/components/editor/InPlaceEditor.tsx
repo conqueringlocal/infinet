@@ -21,51 +21,53 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Set up the editor on initial load
   useEffect(() => {
     console.log('InPlaceEditor: isEnabled =', isEnabled);
     
-    // Check if already logged in
+    // Check if already logged in from localStorage
     const authStatus = localStorage.getItem('edit_authenticated');
+    
     if (authStatus === 'true') {
+      console.log('User is already logged in');
       setIsLoggedIn(true);
       
+      // If we're on an edit URL, activate edit mode
       if (isEnabled) {
+        console.log('Edit mode enabled via URL');
         setEditMode(true);
-        console.log('User is logged in and edit mode is enabled');
+        
+        // This timeout ensures DOM is fully loaded before we initialize editables
+        setTimeout(() => {
+          initializeEditables();
+        }, 300);
       }
     } else if (isEnabled) {
-      // Show login dialog only if not logged in and on an edit URL
+      // Not logged in but on edit URL - show login dialog
+      console.log('Not logged in but on edit URL - showing login dialog');
       setLoginDialogOpen(true);
-      console.log('Showing login dialog for edit mode');
     }
+  }, [isEnabled]);
 
-    // Add edit mode class to body when in edit mode
-    if (isEnabled && isLoggedIn) {
-      console.log('Enabling edit mode on body');
+  // Effect for handling edit mode changes
+  useEffect(() => {
+    console.log('Edit mode changed to:', editMode, 'isLoggedIn:', isLoggedIn);
+    
+    if (editMode && isLoggedIn) {
+      console.log('Activating edit mode on body');
       document.body.classList.add('edit-mode');
       
-      // Initialize editables after a short delay to ensure DOM is ready
+      // Initialize editables whenever edit mode is activated
       setTimeout(() => {
         initializeEditables();
-      }, 500);
+      }, 300);
     } else {
       document.body.classList.remove('edit-mode');
     }
-
+    
     return () => {
       document.body.classList.remove('edit-mode');
     };
-  }, [isEnabled, isLoggedIn]);
-
-  // Effect to handle edit mode changes
-  useEffect(() => {
-    if (editMode && isLoggedIn) {
-      document.body.classList.add('edit-mode');
-      initializeEditables();
-      console.log('Edit mode activated, initializing editables');
-    } else {
-      document.body.classList.remove('edit-mode');
-    }
   }, [editMode, isLoggedIn]);
 
   const handleLogin = (e: React.FormEvent) => {
@@ -79,32 +81,24 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
       setIsLoggedIn(true);
       setLoginDialogOpen(false);
       setEditMode(true); // Automatically enable edit mode after login
+      
       toast({
         title: "Login successful",
         description: "You can now edit the page content",
       });
-      console.log('Login successful, edit mode enabled');
       
-      // Force a re-render by adding a timestamp to the URL
-      // This helps ensure editables are initialized
-      const timestamp = Date.now();
-      if (location.search) {
-        navigate(`${location.pathname}?${location.search}&t=${timestamp}`);
-      } else {
-        navigate(`${location.pathname}?t=${timestamp}`);
-      }
+      console.log('Login successful, edit mode enabled');
       
       // Initialize editables after login
       setTimeout(() => {
         initializeEditables();
-      }, 500);
+      }, 300);
     } else {
       toast({
         title: "Login failed",
         description: "Invalid email or password",
         variant: "destructive",
       });
-      console.log('Login failed');
     }
   };
 
@@ -112,6 +106,7 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
     localStorage.removeItem('edit_authenticated');
     setIsLoggedIn(false);
     setEditMode(false);
+    
     toast({
       title: "Logged out",
       description: "You've been logged out successfully",
@@ -121,7 +116,6 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
     const currentPath = location.pathname;
     let basePath = currentPath;
     
-    // Handle special case for root path with edit
     if (currentPath === '/edit') {
       basePath = '/';
     } else if (currentPath.endsWith('/edit')) {
@@ -129,7 +123,6 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
     }
       
     navigate(basePath);
-    console.log('User logged out, navigating to:', basePath);
   };
 
   const initializeEditables = () => {
@@ -138,13 +131,14 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
     const editableElements = document.querySelectorAll('[data-editable]');
     console.log('Found', editableElements.length, 'editable elements');
     
+    if (editableElements.length === 0) {
+      console.warn('No editable elements found on the page. Check if EditableContent components are being rendered.');
+    }
+    
     editableElements.forEach(el => {
+      console.log('Setting up editable:', el.getAttribute('data-editable'));
       el.setAttribute('contenteditable', 'true');
       el.classList.add('editable-content');
-      
-      // Get the editable ID
-      const id = el.getAttribute('data-editable');
-      console.log('Initialized editable element:', id);
       
       // Add focus/blur styling
       el.addEventListener('focus', () => el.classList.add('editing'));
@@ -153,7 +147,6 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
   };
 
   const saveChanges = () => {
-    // In a real implementation, this would send data to a backend
     console.log('Saving changes...');
     
     const editableElements = document.querySelectorAll('[data-editable]');
@@ -177,13 +170,11 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
 
     // Turn off edit mode after saving
     setEditMode(false);
-    console.log('Changes saved, edit mode disabled');
     
     // Navigate to the non-edit version to see changes
     const currentPath = location.pathname;
     let basePath = currentPath;
     
-    // Handle special case for root path
     if (currentPath === '/edit') {
       basePath = '/';
     } else if (currentPath.endsWith('/edit')) {
@@ -192,17 +183,13 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
       
     setTimeout(() => {
       navigate(basePath);
-      console.log('Navigating to view saved changes:', basePath);
     }, 1000);
   };
 
   // If not enabled (not in edit mode URL), don't show anything
   if (!isEnabled) {
-    console.log('Edit mode not enabled, not rendering editor UI');
     return null;
   }
-
-  console.log('Rendering InPlaceEditor with isEnabled =', isEnabled);
   
   return (
     <>

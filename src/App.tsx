@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -41,7 +40,6 @@ const ScrollToTop = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
     
-    // Update document title based on current page
     let pageTitle = "Infi-NET LLC | Fiber & Low-Voltage Solutions";
     
     if (pathname === "/about") {
@@ -69,32 +67,27 @@ const ScrollToTop = () => {
   return null;
 };
 
-// Enhanced PageWrapper component to handle edit mode
 const PageWrapper = ({ Component }: { Component: React.ComponentType<any> }) => {
   const location = useLocation();
   
-  // Check if we're in edit mode by looking for /edit at the end of the path or if it's exactly '/edit'
-  const isEditMode = location.pathname === '/edit' || location.pathname.endsWith('/edit');
+  const isEditPath = location.pathname === '/edit' || location.pathname.endsWith('/edit');
   
-  // Get the base path without /edit for component rendering
-  // Special case for root path - '/edit' should render the Index component
   const basePath = location.pathname === '/edit' 
     ? '/' 
-    : isEditMode 
+    : isEditPath 
       ? location.pathname.slice(0, -5) 
       : location.pathname;
   
   useEffect(() => {
-    // Log the current path and edit mode status
-    console.log('Current path:', location.pathname);
-    console.log('Edit mode:', isEditMode);
-    console.log('Base path for rendering:', basePath);
-  }, [location.pathname, isEditMode, basePath]);
+    console.log('PageWrapper - Current path:', location.pathname);
+    console.log('PageWrapper - Edit mode:', isEditPath);
+    console.log('PageWrapper - Base path for rendering:', basePath);
+  }, [location.pathname, isEditPath, basePath]);
   
   return (
     <>
       <Component />
-      <InPlaceEditor isEnabled={isEditMode} />
+      <InPlaceEditor isEnabled={isEditPath} />
     </>
   );
 };
@@ -102,18 +95,15 @@ const PageWrapper = ({ Component }: { Component: React.ComponentType<any> }) => 
 const AppRoutes = () => {
   const location = useLocation();
   
-  // Determine if we're in edit mode
-  const isEditMode = location.pathname === '/edit' || location.pathname.endsWith('/edit');
+  const isEditPath = location.pathname === '/edit' || location.pathname.endsWith('/edit');
   
-  // For all paths, we need to get the base path for route matching
-  // For the root edit path ('/edit'), we want to match the '/' route
   const basePath = location.pathname === '/edit'
     ? '/'
-    : isEditMode
+    : isEditPath
       ? location.pathname.slice(0, -5)
       : location.pathname;
       
-  console.log('AppRoutes - basePath:', basePath);
+  console.log('AppRoutes - Using path for routing:', basePath);
     
   return (
     <PageTransition>
@@ -124,7 +114,6 @@ const AppRoutes = () => {
         <Route path="/projects" element={<PageWrapper Component={Projects} />} />
         <Route path="/contact" element={<PageWrapper Component={Contact} />} />
         
-        {/* Individual service routes */}
         <Route path="/service/fiber" element={<PageWrapper Component={FiberServicePage} />} />
         <Route path="/service/structured" element={<PageWrapper Component={StructuredCablingPage} />} />
         <Route path="/service/wireless" element={<PageWrapper Component={WirelessPage} />} />
@@ -132,7 +121,6 @@ const AppRoutes = () => {
         <Route path="/service/network" element={<PageWrapper Component={NetworkPage} />} />
         <Route path="/service/maintenance" element={<PageWrapper Component={MaintenancePage} />} />
         
-        {/* Admin routes */}
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin" element={<AdminLayout />}>
           <Route path="dashboard" element={<AdminDashboard />} />
@@ -140,7 +128,6 @@ const AppRoutes = () => {
           <Route path="media" element={<AdminMedia />} />
           <Route path="users" element={<AdminUsers />} />
           <Route path="settings" element={<AdminSettings />} />
-          {/* Redirect /admin to /admin/dashboard */}
           <Route path="" element={<AdminDashboard />} />
         </Route>
         
