@@ -14,7 +14,8 @@ export const assignUserToPage = async (
         user_id: userId,
         page_id: pageId,
         role: role,
-        created_at: new Date().toISOString()
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       });
     
     if (error) throw error;

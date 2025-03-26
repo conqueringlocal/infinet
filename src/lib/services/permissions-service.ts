@@ -1,6 +1,6 @@
 
 import { supabase } from '../supabase';
-import { Permission, UserProfile } from '../types/user-types';
+import { Permission } from '../types/user-types';
 import { getCurrentUserProfile } from './user-profile-service';
 
 // Check if current user has specific permission
@@ -61,7 +61,7 @@ export const canEditPage = async (pageId: string): Promise<boolean> => {
     if (profile.role === 'contributor') {
       const { data, error } = await supabase
         .from('page_assignments')
-        .select('*')
+        .select('id')
         .eq('user_id', profile.id)
         .eq('page_id', pageId);
       

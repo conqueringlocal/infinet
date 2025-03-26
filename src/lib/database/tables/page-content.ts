@@ -98,12 +98,12 @@ export const initializePageContentTable = async (): Promise<{ success: boolean; 
       if (checkError.code === '42P01') { // Table doesn't exist code
         console.log('Table page_content does not exist, creating it...');
         
-        // Try direct fetch approach
+        // Use direct fetch approach for creating the table
+        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://gqcfneuiruffgpwhkecy.supabase.co';
+        const apiKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdxY2ZuZXVpcnVmZmdwd2hrZWN5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI5NjUyNzAsImV4cCI6MjA1ODU0MTI3MH0.Wm8coMFjXv8TA2bQfiXoDYjzml92iTPSDuZOlPJhD_0';
+        
         try {
-          const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://gqcfneuiruffgpwhkecy.supabase.co';
-          const apiKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdxY2ZuZXVpcnVmZmdwd2hrZWN5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI5NjUyNzAsImV4cCI6MjA1ODU0MTI3MH0.Wm8coMFjXv8TA2bQfiXoDYjzml92iTPSDuZOlPJhD_0';
-          
-          // First create the table structure
+          // First create just the table structure
           const tableResponse = await fetch(`${supabaseUrl}/rest/v1/`, {
             method: 'POST',
             headers: {
@@ -117,11 +117,43 @@ export const initializePageContentTable = async (): Promise<{ success: boolean; 
             })
           });
           
-          if (tableResponse.ok) {
-            console.log('Successfully created page_content table via direct fetch');
+          if (!tableResponse.ok) {
+            throw new Error('Failed to create page_content table');
+          }
+          
+          console.log('Successfully created page_content table');
+          
+          // Add basic policies
+          const basicPolicyResponse = await fetch(`${supabaseUrl}/rest/v1/`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'apikey': apiKey,
+              'Authorization': `Bearer ${apiKey}`,
+              'Prefer': 'return=minimal'
+            },
+            body: JSON.stringify({ 
+              query: BASIC_POLICIES_SQL 
+            })
+          });
+          
+          if (!basicPolicyResponse.ok) {
+            console.warn('Failed to add basic policies, but table was created');
+          } else {
+            console.log('Successfully added basic policies');
+          }
+          
+          // Check if page_assignments exists before adding editor policies
+          const { error: assignmentsCheckError } = await supabase
+            .from('page_assignments')
+            .select('id')
+            .limit(1);
+          
+          if (!assignmentsCheckError) {
+            console.log('page_assignments table exists, adding editor policies');
             
-            // Add basic policies first
-            const basicPolicyResponse = await fetch(`${supabaseUrl}/rest/v1/`, {
+            // Add editor policies that depend on page_assignments
+            const editorPolicyResponse = await fetch(`${supabaseUrl}/rest/v1/`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -130,55 +162,24 @@ export const initializePageContentTable = async (): Promise<{ success: boolean; 
                 'Prefer': 'return=minimal'
               },
               body: JSON.stringify({ 
-                query: BASIC_POLICIES_SQL 
+                query: EDITOR_POLICIES_SQL 
               })
             });
             
-            if (basicPolicyResponse.ok) {
-              console.log('Basic policies added successfully');
-              
-              // Check if page_assignments exists before adding editor policies
-              const { error: assignmentsCheckError } = await supabase
-                .from('page_assignments')
-                .select('id')
-                .limit(1);
-              
-              if (!assignmentsCheckError) {
-                console.log('page_assignments table exists, adding editor policies');
-                
-                // Add editor policies that depend on page_assignments
-                const editorPolicyResponse = await fetch(`${supabaseUrl}/rest/v1/`, {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                    'apikey': apiKey,
-                    'Authorization': `Bearer ${apiKey}`,
-                    'Prefer': 'return=minimal'
-                  },
-                  body: JSON.stringify({ 
-                    query: EDITOR_POLICIES_SQL 
-                  })
-                });
-                
-                if (!editorPolicyResponse.ok) {
-                  console.warn('Failed to add editor policies, but table and basic policies were created');
-                }
-              } else {
-                console.log('page_assignments table does not exist yet, skipping editor policies');
-              }
-              
-              return { success: true, message: 'Page content table and policies created successfully' };
+            if (!editorPolicyResponse.ok) {
+              console.warn('Failed to add editor policies, but table and basic policies were created');
             } else {
-              console.warn('Failed to add basic policies, but table was created');
-              return { success: true, message: 'Page content table created, but policies may need manual setup' };
+              console.log('Successfully added editor policies');
             }
           } else {
-            throw new Error('Failed to create table via direct fetch');
+            console.log('page_assignments table does not exist yet, skipping editor policies');
           }
-        } catch (error) {
-          console.warn('Failed to create table via direct fetch:', error);
           
-          // If all automated approaches fail, return the complete SQL for manual creation
+          return { success: true, message: 'Page content table created successfully' };
+        } catch (error) {
+          console.error('Error creating page_content table:', error);
+          
+          // Return the complete SQL for manual creation
           return { 
             success: false, 
             message: 'Could not automatically create the page_content table. Please create it manually in the Supabase dashboard using this SQL:\n\n' + 
@@ -193,9 +194,8 @@ export const initializePageContentTable = async (): Promise<{ success: boolean; 
       }
     } else {
       console.log('page_content table already exists');
+      return { success: true, message: 'Page content table already exists' };
     }
-    
-    return { success: true, message: 'Page content table initialized successfully' };
   } catch (error) {
     console.error('Error initializing page_content table:', error);
     return { 

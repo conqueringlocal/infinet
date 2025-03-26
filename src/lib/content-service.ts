@@ -1,6 +1,6 @@
 
 import { supabase } from './supabase';
-import { hasPermission } from './user-service';
+import { hasPermission } from './services/permissions-service';
 
 export interface ContentExport {
   version: number;
@@ -12,13 +12,13 @@ export interface ContentExport {
 /**
  * Get content for a specific page
  */
-export const getPageContent = async (pagePath: string): Promise<Record<string, string> | null> => {
+export const getPageContent = async (pageId: string): Promise<Record<string, string> | null> => {
   try {
     // Try to get the latest published version
     const { data: publishedData, error: publishedError } = await supabase
       .from('page_content')
-      .select('content')
-      .eq('page_path', pagePath)
+      .select('content_data')
+      .eq('page_id', pageId)
       .eq('published', true)
       .order('version', { ascending: false })
       .limit(1)
@@ -30,7 +30,7 @@ export const getPageContent = async (pagePath: string): Promise<Record<string, s
     }
     
     if (publishedData) {
-      return publishedData.content as Record<string, string>;
+      return publishedData.content_data as Record<string, string>;
     }
     
     // If user has edit permission, try to get the latest draft
@@ -39,8 +39,8 @@ export const getPageContent = async (pagePath: string): Promise<Record<string, s
     if (canEdit) {
       const { data: draftData, error: draftError } = await supabase
         .from('page_content')
-        .select('content')
-        .eq('page_path', pagePath)
+        .select('content_data')
+        .eq('page_id', pageId)
         .order('version', { ascending: false })
         .limit(1)
         .maybeSingle();
@@ -51,7 +51,7 @@ export const getPageContent = async (pagePath: string): Promise<Record<string, s
       }
       
       if (draftData) {
-        return draftData.content as Record<string, string>;
+        return draftData.content_data as Record<string, string>;
       }
     }
     
@@ -66,19 +66,22 @@ export const getPageContent = async (pagePath: string): Promise<Record<string, s
  * Save content for a specific page
  */
 export const savePageContent = async (
-  pagePath: string,
-  content: Record<string, string>,
+  pageId: string,
+  contentData: Record<string, string>,
   userId?: string
 ): Promise<boolean> => {
   try {
     // Check if the user can publish content
     const canPublish = await hasPermission('publish_content');
     
+    // Generate a unique content_id for this content
+    const contentId = `content_${Date.now()}`;
+    
     // Get the latest version number for this page
     const { data: versionData, error: versionError } = await supabase
       .from('page_content')
       .select('version')
-      .eq('page_path', pagePath)
+      .eq('page_id', pageId)
       .order('version', { ascending: false })
       .limit(1)
       .maybeSingle();
@@ -94,9 +97,12 @@ export const savePageContent = async (
     const { error: insertError } = await supabase
       .from('page_content')
       .insert({
-        page_path: pagePath,
-        content,
+        page_id: pageId,
+        content_id: contentId,
+        content_type: 'page',
+        content_data: contentData,
         created_by: userId,
+        updated_by: userId,
         published: canPublish, // Auto-publish if user has permission
         version: newVersion
       });
@@ -161,24 +167,15 @@ export const importPageContent = async (
       return { success: false, message: 'Missing page URL or content' };
     }
     
-    // Clean up the path
-    let pagePath = pageUrl;
-    if (pagePath.startsWith('/')) {
-      pagePath = pagePath.slice(1);
-    }
-    if (pagePath.endsWith('/')) {
-      pagePath = pagePath.slice(0, -1);
-    }
-    if (pagePath === '') {
-      pagePath = 'index';
-    }
+    // Use the page URL as the page ID
+    const pageId = pageUrl;
     
     // Save the imported content
-    await savePageContent(pagePath, content, userId);
+    await savePageContent(pageId, content, userId);
     
     return {
       success: true,
-      message: `Successfully imported content for "${pagePath}"`
+      message: `Successfully imported content for "${pageId}"`
     };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error during import';
