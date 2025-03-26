@@ -1,3 +1,4 @@
+
 import { supabase } from './supabase';
 
 // Enhanced role type
@@ -57,7 +58,8 @@ export const hasPermission = async (permission: Permission): Promise<boolean> =>
     // Role-based permissions
     switch (permission) {
       case 'manage_users':
-        return profile.role === 'admin';
+        // Only admin can manage users, but we already checked for admin above
+        return false;
       
       case 'edit_content': {
         // Fix the type comparison by using a type-safe approach
