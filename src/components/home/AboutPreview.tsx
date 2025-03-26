@@ -45,14 +45,14 @@ const AboutPreview = () => {
               <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-infinet-50 rounded-lg -z-10"></div>
               <div className="bg-gray-50 rounded-lg overflow-hidden shadow-xl border border-infinet-100">
                 <img 
-                  src="/lovable-uploads/ecf95b44-fe0c-4311-90b5-9040f599ce5b.png" 
-                  alt="Fiber optic technology visualization"
+                  src="/lovable-uploads/9197edbf-232c-40b9-844b-12a37c0bbe4a.png" 
+                  alt="Network infrastructure and fiber optic cables"
                   className="w-full h-auto object-cover object-center"
                 />
                 <div className="p-4 bg-infinetYellow-50 border-t border-infinet-100">
-                  <h3 className="text-lg font-medium text-gray-900">Explore Fiber Optic Technology</h3>
+                  <h3 className="text-lg font-medium text-gray-900">Advanced Connectivity Solutions</h3>
                   <p className="text-sm text-gray-600 mt-1">
-                    Interact with our 3D fiber optic model to visualize the technology that powers our high-speed connectivity solutions.
+                    Explore our cutting-edge network infrastructure and fiber optic technologies.
                   </p>
                 </div>
               </div>
