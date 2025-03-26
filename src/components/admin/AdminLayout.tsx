@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate, Link, Outlet, useLocation } from 'react-router-dom';
 import { 
@@ -158,14 +159,14 @@ type AdminSidebarProps = {
 
 const AdminSidebar = ({ onLogout }: AdminSidebarProps) => {
   return (
-    <Sidebar className="fixed inset-y-0 left-0 z-50 w-64 border-r border-sidebar-border bg-[#003366] text-white shadow">
-      <SidebarHeader className="p-4 border-b border-blue-800">
+    <Sidebar className="fixed inset-y-0 left-0 z-50 w-64 border-r border-gray-200 bg-white text-gray-800 shadow">
+      <SidebarHeader className="p-6 border-b border-gray-200">
         <SidebarHeaderTitle>
           <div className="flex items-center justify-center">
             <img 
               src="/lovable-uploads/82c5769b-887a-49f8-a103-392bb5e996d5.png" 
               alt="Conquering Local" 
-              className="h-10 w-auto"
+              className="h-12 w-auto"
             />
           </div>
         </SidebarHeaderTitle>
@@ -173,21 +174,21 @@ const AdminSidebar = ({ onLogout }: AdminSidebarProps) => {
       
       <SidebarNav>
         <SidebarNavHeader>
-          <SidebarNavTitle className="text-xs font-medium text-blue-200">
+          <SidebarNavTitle className="text-sm font-medium text-gray-500">
             Content Management
           </SidebarNavTitle>
         </SidebarNavHeader>
         
         <SidebarNavItems>
-          <SidebarNavItem href="/admin/dashboard" title="Dashboard" icon={<LayoutDashboard className="h-4 w-4" />} />
-          <SidebarNavItem href="/admin/media" title="Media" icon={<Image className="h-4 w-4" />} />
-          <SidebarNavItem href="/admin/users" title="Users" icon={<Users className="h-4 w-4" />} />
-          <SidebarNavItem href="/admin/settings" title="Settings" icon={<Settings className="h-4 w-4" />} />
+          <SidebarNavItem href="/admin/dashboard" title="Dashboard" icon={<LayoutDashboard className="h-5 w-5" />} />
+          <SidebarNavItem href="/admin/media" title="Media" icon={<Image className="h-5 w-5" />} />
+          <SidebarNavItem href="/admin/users" title="Users" icon={<Users className="h-5 w-5" />} />
+          <SidebarNavItem href="/admin/settings" title="Settings" icon={<Settings className="h-5 w-5" />} />
         </SidebarNavItems>
         
-        <div className="mt-6">
+        <div className="mt-8">
           <SidebarNavHeader>
-            <SidebarNavTitle className="text-xs font-medium text-blue-200">
+            <SidebarNavTitle className="text-sm font-medium text-gray-500">
               Website
             </SidebarNavTitle>
           </SidebarNavHeader>
@@ -197,11 +198,11 @@ const AdminSidebar = ({ onLogout }: AdminSidebarProps) => {
               href="/" 
               external
               title="View Site" 
-              icon={<Globe className="h-4 w-4" />} 
+              icon={<Globe className="h-5 w-5" />} 
             />
             <SidebarNavItem 
               title="Logout" 
-              icon={<LogOut className="h-4 w-4" />}
+              icon={<LogOut className="h-5 w-5" />}
               disabled={false}
               active={false}
               onClick={onLogout}
@@ -210,8 +211,8 @@ const AdminSidebar = ({ onLogout }: AdminSidebarProps) => {
         </div>
       </SidebarNav>
       
-      <SidebarFooter className="border-t border-blue-800 p-4">
-        <div className="text-xs text-center text-blue-200">
+      <SidebarFooter className="border-t border-gray-200 p-4">
+        <div className="text-xs text-center text-gray-500">
           Conquering Local CMS v1.0
         </div>
       </SidebarFooter>

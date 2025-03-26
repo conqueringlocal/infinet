@@ -15,7 +15,7 @@ const Sidebar = ({ className, children, ...props }: SidebarProps) => {
   return (
     <div
       className={cn(
-        "fixed inset-y-0 left-0 z-50 w-64 border-r border-sidebar-border bg-sidebar-background text-sidebar-foreground shadow",
+        "fixed inset-y-0 left-0 z-50 w-64 border-r border-gray-200 bg-white text-gray-800 shadow",
         className
       )}
       {...props}
@@ -33,7 +33,7 @@ const SidebarHeader = ({
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) => {
   return (
-    <div className={cn("p-4", className)} {...props}>
+    <div className={cn("p-6", className)} {...props}>
       {children}
     </div>
   )
@@ -50,7 +50,7 @@ const SidebarHeaderTitle = ({
       {...props}
     >
       <div className="grid gap-0.5">
-        <h1 className="text-xl font-semibold">{children}</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">{children}</h1>
       </div>
     </div>
   )
@@ -79,7 +79,7 @@ const SidebarNavHeader = ({
       {...props}
     >
       <div className="flex items-center gap-1">
-        <div className="flex items-center gap-1 text-xs font-medium text-sidebar-foreground/80">
+        <div className="flex items-center gap-1 text-sm font-medium text-gray-500">
           {children}
         </div>
       </div>
@@ -94,7 +94,7 @@ const SidebarNavTitle = ({
   return (
     <h3
       className={cn(
-        "text-xs font-medium tracking-tight text-sidebar-foreground/80",
+        "text-sm font-medium tracking-tight text-gray-500",
         className
       )}
       {...props}
@@ -108,7 +108,7 @@ const SidebarNavItems = ({
   ...props
 }: React.HTMLAttributes<HTMLUListElement>) => {
   return (
-    <ul className={cn("grid gap-2", className)} {...props}>
+    <ul className={cn("grid gap-1", className)} {...props}>
       {children}
     </ul>
   )
@@ -134,37 +134,37 @@ const SidebarNavItem = ({
   external?: boolean
 }) => {
   return (
-    <li className={cn("flex flex-col items-center space-y-1", className)} {...props}>
+    <li className={cn("flex flex-col", className)} {...props}>
       <Button
         asChild
         variant="ghost"
         size="sm"
         className={cn(
-          "w-full justify-start font-normal",
-          active && "bg-sidebar-accent text-sidebar-accent-foreground",
+          "w-full justify-start font-medium text-gray-700 hover:bg-infinet-50 hover:text-infinet-600",
+          active && "bg-infinet-50 text-infinet-600",
           disabled && "pointer-events-none opacity-60"
         )}
       >
         {href ? (
           external ? (
-            <a href={href} target="_blank" rel="noopener noreferrer">
-              {icon && <span className="mr-2">{icon}</span>}
+            <a href={href} target="_blank" rel="noopener noreferrer" className="flex items-center py-2">
+              {icon && <span className="mr-3 text-infinet-500">{icon}</span>}
               {title}
             </a>
           ) : (
-            <a href={href}>
-              {icon && <span className="mr-2">{icon}</span>}
+            <a href={href} className="flex items-center py-2">
+              {icon && <span className="mr-3 text-infinet-500">{icon}</span>}
               {title}
             </a>
           )
         ) : (
-          <div>
-            {icon && <span className="mr-2">{icon}</span>}
+          <div className="flex items-center py-2">
+            {icon && <span className="mr-3 text-infinet-500">{icon}</span>}
             {title}
           </div>
         )}
       </Button>
-      {label && <span className="text-xs">{label}</span>}
+      {label && <span className="text-xs pl-9 text-gray-500">{label}</span>}
     </li>
   )
 }
@@ -175,7 +175,7 @@ const SidebarFooter = ({
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) => {
   return (
-    <div className={cn("p-4", className)} {...props}>
+    <div className={cn("p-4 border-t border-gray-200", className)} {...props}>
       {children}
     </div>
   )
