@@ -3,6 +3,7 @@ import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import EditableContent from '@/components/editor/EditableContent';
 
 const CtaSection = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -49,19 +50,26 @@ const CtaSection = () => {
       <div className="container mx-auto px-4 md:px-6 relative z-10">
         <div className="max-w-4xl mx-auto">
           <div className="text-center space-y-6">
-            <h2 className="reveal text-3xl md:text-4xl font-bold leading-tight">
+            <EditableContent id="cta-heading" tag="h2" className="reveal text-3xl md:text-4xl font-bold leading-tight">
               Work With Infi-NET LLC
-            </h2>
+            </EditableContent>
             
-            <p className="reveal text-lg text-blue-100 max-w-3xl mx-auto">
+            <EditableContent id="cta-description" tag="p" className="reveal text-lg text-blue-100 max-w-3xl mx-auto">
               Whether you need expert fiber optic installations, low-voltage cabling, or customized network solutions, Infi-NET LLC is here to deliver. With a commitment to precision, reliability, and customer satisfaction, we ensure your projects are completed on time and to the highest standards. Let's build the future of connectivity together!
-            </p>
+            </EditableContent>
             
             <div className="reveal pt-4 flex flex-wrap justify-center gap-6">
-              {["Certified Technicians", "Quality Guaranteed", "Timely Delivery", "Exceptional Support"].map((item, index) => (
+              {[
+                {id: "cta-feature-1", text: "Certified Technicians"},
+                {id: "cta-feature-2", text: "Quality Guaranteed"},
+                {id: "cta-feature-3", text: "Timely Delivery"},
+                {id: "cta-feature-4", text: "Exceptional Support"}
+              ].map((item, index) => (
                 <div key={index} className="flex items-center">
                   <CheckCircle2 className="h-5 w-5 text-infinet-400 mr-2" />
-                  <span className="text-blue-100">{item}</span>
+                  <EditableContent id={item.id} tag="span" className="text-blue-100">
+                    {item.text}
+                  </EditableContent>
                 </div>
               ))}
             </div>
@@ -69,7 +77,9 @@ const CtaSection = () => {
             <div className="reveal pt-6">
               <Link to="/contact">
                 <Button size="lg" variant="secondary" className="bg-white text-infinet-800 hover:bg-blue-50">
-                  Get in Touch
+                  <EditableContent id="cta-button" tag="span">
+                    Get in Touch
+                  </EditableContent>
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>

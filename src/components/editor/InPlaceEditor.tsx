@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { X, Save, LogOut, Edit } from 'lucide-react';
+import { X, Save, LogOut, Edit, Image as ImageIcon } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/input';
@@ -14,9 +14,12 @@ interface InPlaceEditorProps {
 const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loginDialogOpen, setLoginDialogOpen] = useState(false);
+  const [imageDialogOpen, setImageDialogOpen] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [editMode, setEditMode] = useState(false);
+  const [currentImageElement, setCurrentImageElement] = useState<HTMLImageElement | null>(null);
+  const [newImageUrl, setNewImageUrl] = useState('');
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
@@ -138,7 +141,7 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
   const initializeEditables = () => {
     console.log('==== INITIALIZING EDITABLES ====');
     
-    // Find all editable elements and make them actually editable
+    // Find all editable elements
     const editableElements = document.querySelectorAll('[data-editable]');
     console.log(`Found ${editableElements.length} editable elements`);
     
@@ -149,20 +152,51 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
     
     editableElements.forEach(el => {
       const id = el.getAttribute('data-editable');
-      console.log(`Setting up editable: ${id}`);
+      const type = el.getAttribute('data-editable-type') || 'text';
+      console.log(`Setting up editable: ${id} (${type})`);
       
-      // Make editable
-      el.setAttribute('contenteditable', 'true');
-      el.classList.add('editable-content');
-      
-      // Add focus/blur styling
-      el.addEventListener('focus', () => el.classList.add('editing'));
-      el.addEventListener('blur', () => el.classList.remove('editing'));
-      
-      console.log(`Element ${id} is now editable`);
+      if (type === 'text') {
+        // Make text editable
+        el.setAttribute('contenteditable', 'true');
+        el.classList.add('editable-content');
+        
+        // Add focus/blur styling
+        el.addEventListener('focus', () => el.classList.add('editing'));
+        el.addEventListener('blur', () => el.classList.remove('editing'));
+        
+        console.log(`Element ${id} is now editable as text`);
+      } else if (type === 'image') {
+        // For images, we need click handler to open image dialog
+        el.classList.add('editable-image');
+        el.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          openImageDialog(el as HTMLImageElement);
+        });
+        
+        console.log(`Element ${id} is now editable as image`);
+      }
     });
     
     console.log('All elements are now editable');
+  };
+
+  const openImageDialog = (imgElement: HTMLImageElement) => {
+    setCurrentImageElement(imgElement);
+    setNewImageUrl(imgElement.src);
+    setImageDialogOpen(true);
+  };
+
+  const updateImage = () => {
+    if (currentImageElement && newImageUrl) {
+      currentImageElement.src = newImageUrl;
+      setImageDialogOpen(false);
+      
+      toast({
+        title: "Image updated",
+        description: "Don't forget to save your changes",
+      });
+    }
   };
 
   const saveChanges = () => {
@@ -171,18 +205,39 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
     const editableElements = document.querySelectorAll('[data-editable]');
     console.log(`Found ${editableElements.length} editable elements to save`);
     
-    const savedContent: Record<string, string> = {};
+    const contentToSave: Record<string, string> = {};
     
+    // First load any existing saved content
+    try {
+      const existingSaved = localStorage.getItem('page_content');
+      if (existingSaved) {
+        Object.assign(contentToSave, JSON.parse(existingSaved));
+      }
+    } catch (e) {
+      console.error('Error loading existing saved content', e);
+    }
+    
+    // Now update with the current page's content
     editableElements.forEach(el => {
       const id = el.getAttribute('data-editable');
+      const type = el.getAttribute('data-editable-type') || 'text';
+      
       if (id) {
-        savedContent[id] = el.innerHTML;
-        console.log(`Saved content for: ${id}`);
+        if (type === 'text') {
+          contentToSave[id] = el.innerHTML;
+          console.log(`Saved text content for: ${id}`);
+        } else if (type === 'image') {
+          contentToSave[id] = (el as HTMLImageElement).src;
+          console.log(`Saved image source for: ${id}`);
+        }
       }
     });
     
     // Save to localStorage
-    localStorage.setItem('page_content', JSON.stringify(savedContent));
+    localStorage.setItem('page_content', JSON.stringify(contentToSave));
+    
+    // Also save to sessionStorage to preserve across page navigation
+    sessionStorage.setItem('page_content', JSON.stringify(contentToSave));
     
     toast({
       title: "Changes saved",
@@ -212,6 +267,7 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
   
   return (
     <>
+      {/* Login Dialog */}
       <Dialog open={loginDialogOpen} onOpenChange={setLoginDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
@@ -250,6 +306,49 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
         </DialogContent>
       </Dialog>
 
+      {/* Image Edit Dialog */}
+      <Dialog open={imageDialogOpen} onOpenChange={setImageDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Change Image</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-4">
+            {currentImageElement && (
+              <div className="border rounded p-2 mb-4">
+                <p className="text-sm text-gray-500 mb-2">Current image:</p>
+                <img 
+                  src={currentImageElement.src} 
+                  alt="Current" 
+                  className="w-full h-40 object-contain mb-2"
+                />
+              </div>
+            )}
+            <div className="space-y-2">
+              <label htmlFor="imageUrl" className="text-sm font-medium">Image URL</label>
+              <Input
+                id="imageUrl"
+                type="url"
+                value={newImageUrl}
+                onChange={(e) => setNewImageUrl(e.target.value)}
+                placeholder="https://example.com/image.jpg"
+              />
+              <p className="text-xs text-gray-500">
+                Enter a valid image URL
+              </p>
+            </div>
+            <div className="flex justify-end space-x-2">
+              <Button variant="outline" onClick={() => setImageDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={updateImage}>
+                Update Image
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Editor Controls */}
       <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 bg-white rounded-lg shadow-lg p-2 flex items-center gap-2">
         {!editMode ? (
           <Button 
@@ -307,6 +406,10 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
         .edit-mode [data-editable].editing {
           outline: 2px solid #0070f3;
           background-color: rgba(0, 112, 243, 0.05);
+        }
+        
+        .edit-mode [data-editable-type="image"] {
+          cursor: pointer;
         }
         
         .edit-mode [data-editable]::before {

@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -88,6 +87,20 @@ const PageWithEditor = () => {
   
   const normalRoute = getNormalRoute();
   console.log('Normal route equivalent:', normalRoute);
+  
+  // Load content when component mounts to ensure it's available across page navigation
+  useEffect(() => {
+    // Restore content from sessionStorage to ensure persistence during navigation
+    try {
+      const sessionContent = sessionStorage.getItem('page_content');
+      if (sessionContent && !localStorage.getItem('page_content')) {
+        localStorage.setItem('page_content', sessionContent);
+        console.log('Restored content from session storage');
+      }
+    } catch (e) {
+      console.error('Error restoring content from session storage', e);
+    }
+  }, [location.pathname]);
   
   // Function to render the appropriate component based on the route
   const renderComponent = () => {
