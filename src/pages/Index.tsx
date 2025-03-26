@@ -10,6 +10,17 @@ import Footer from '@/components/layout/Footer';
 import ServiceFinder from '@/components/home/ServiceFinder';
 import NationwideService from '@/components/home/NationwideService';
 
+// Export components for use in page editor
+export const HomePageComponents = {
+  Hero,
+  AboutPreview,
+  WhyChooseUs,
+  ProjectsPreview,
+  CtaSection,
+  ServiceFinder,
+  NationwideService
+};
+
 const Index = () => {
   useEffect(() => {
     window.scrollTo(0, 0);

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -17,7 +17,11 @@ import {
   Smartphone,
   Monitor,
   Tablet,
-  MessageSquare
+  MessageSquare,
+  Image as ImageIcon,
+  Palette,
+  Settings,
+  Info
 } from 'lucide-react';
 import { 
   Dialog,
@@ -43,6 +47,9 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Card, CardContent } from "@/components/ui/card";
+import { HomePageComponents } from '@/pages/Index';
+import { WhyChooseUs } from '@/components/home/WhyChooseUs';
 
 const Pages = () => {
   const { toast } = useToast();
@@ -55,8 +62,10 @@ const Pages = () => {
   const [previewDevice, setPreviewDevice] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
   const [fullPreviewMode, setFullPreviewMode] = useState(false);
   const [selectedEditableElement, setSelectedEditableElement] = useState<string | null>(null);
+  const [showRealPage, setShowRealPage] = useState(true);
+  const [saveInProgress, setSaveInProgress] = useState(false);
   
-  const pages = [
+  const [pages, setPages] = useState([
     { 
       id: 1, 
       title: 'Home', 
@@ -101,6 +110,17 @@ const Pages = () => {
   </div>
 </div>
       `,
+      assets: [
+        { id: 1, type: 'image', url: '/lovable-uploads/2d58718b-9a89-4dde-b37e-43621ecf8a95.png', alt: 'Hero Image' },
+        { id: 2, type: 'image', url: '/lovable-uploads/82c5769b-887a-49f8-a103-392bb5e996d5.png', alt: 'About Image' },
+      ],
+      components: [
+        { id: 1, type: 'Hero', props: { title: 'Welcome to Infi-NET', subtitle: 'Your trusted provider of fiber and low-voltage solutions.' } },
+        { id: 2, type: 'AboutPreview', props: {} },
+        { id: 3, type: 'ServiceFinder', props: {} },
+        { id: 4, type: 'WhyChooseUs', props: {} },
+        { id: 5, type: 'CtaSection', props: {} }
+      ],
       metaTitle: 'Infi-NET | Fiber & Low-Voltage Solutions',
       metaDescription: 'Infi-NET provides professional fiber optic and low-voltage solutions for businesses. Get reliable network infrastructure with our expert services.',
       ogImage: '/images/home-og.jpg',
@@ -153,31 +173,103 @@ const Pages = () => {
   </div>
 </div>
       `,
+      assets: [
+        { id: 3, type: 'image', url: '/lovable-uploads/f3e6c9f7-b849-4255-84ee-0d5681586a86.png', alt: 'Team Image' },
+      ],
       metaTitle: 'About Us | Infi-NET LLC',
       metaDescription: 'Learn about Infi-NET, our history, mission, and values. Discover why we are the trusted choice for fiber optic and low-voltage solutions.',
       ogImage: '/images/about-og.jpg',
     },
-    // ... keep existing code for other pages
-  ];
+    // Other pages remain the same
+  ]);
 
   const filteredPages = pages.filter(page => 
     page.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     page.slug.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = `
+      .real-page-preview {
+        min-height: 600px;
+        padding: 0;
+        overflow: auto;
+        background-color: #f5f5f5;
+      }
+      
+      .real-page-content {
+        min-height: 600px;
+        padding: 0;
+        margin: 0;
+        width: 100%;
+      }
+      
+      .real-page-content [contenteditable=true]:hover {
+        outline: 2px solid #0070f3;
+      }
+      
+      .real-page-content [contenteditable=true]:focus {
+        outline: 2px solid #0070f3;
+        box-shadow: 0 0 0 4px rgba(0, 112, 243, 0.2);
+      }
+      
+      .visual-editor-toolbox {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 100;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        padding: 8px;
+        display: flex;
+        gap: 4px;
+      }
+      
+      @media (max-width: 768px) {
+        .real-page-preview {
+          min-height: 400px;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+    
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
+
   const handleEditPage = (page: any) => {
-    setEditingPage(page);
+    const pageToEdit = JSON.parse(JSON.stringify(page));
+    setEditingPage(pageToEdit);
     setIsEditDialogOpen(true);
   };
 
   const handleSavePage = () => {
-    // In a real application, this would save to a database
+    setSaveInProgress(true);
     toast({
-      title: "Page updated",
-      description: `Successfully updated ${editingPage.title}`,
+      title: "Saving changes...",
+      description: "Your page changes are being saved",
     });
-    setIsEditDialogOpen(false);
-    setFullPreviewMode(false);
+    
+    setTimeout(() => {
+      setPages(prevPages => 
+        prevPages.map(page => 
+          page.id === editingPage.id ? editingPage : page
+        )
+      );
+      
+      toast({
+        title: "Page updated",
+        description: `Successfully updated ${editingPage.title}`,
+      });
+      
+      setIsEditDialogOpen(false);
+      setFullPreviewMode(false);
+      setSaveInProgress(false);
+    }, 800);
   };
 
   const handleViewPage = (slug: string) => {
@@ -193,13 +285,18 @@ const Pages = () => {
     setFullPreviewMode(!fullPreviewMode);
   };
 
+  const toggleRealPageView = () => {
+    setShowRealPage(!showRealPage);
+  };
+
   const confirmDeletePage = (page: any) => {
     setPageToDelete(page);
     setIsDeleteDialogOpen(true);
   };
 
   const handleDeletePage = () => {
-    // In a real application, this would delete from a database
+    setPages(prevPages => prevPages.filter(page => page.id !== pageToDelete.id));
+    
     toast({
       title: "Page deleted",
       description: `Successfully deleted ${pageToDelete.title}`,
@@ -221,6 +318,13 @@ const Pages = () => {
     }
   };
 
+  const handleAddAsset = () => {
+    toast({
+      title: "Media Library",
+      description: "Media library would open here to select or upload assets.",
+    });
+  };
+
   const getPreviewWidth = () => {
     switch(previewDevice) {
       case 'mobile':
@@ -237,11 +341,33 @@ const Pages = () => {
       return (
         <div className="flex items-center gap-2 text-sm text-blue-600 bg-blue-50 p-2 rounded-md mb-2">
           <MessageSquare className="h-4 w-4" />
-          <span>Click directly on content in the preview to edit it. Changes are saved automatically.</span>
+          <span>Click directly on content in the preview to edit it. All changes are saved automatically when you click "Save Changes".</span>
         </div>
       );
     }
     return null;
+  };
+
+  const renderEnhancedPagePreview = () => {
+    if (!editingPage) return null;
+    
+    return (
+      <div className="w-full h-full bg-white">
+        <div 
+          className="prose max-w-none"
+          contentEditable={editMode === 'visual'}
+          onBlur={handleContentEditableChange}
+          onInput={editMode === 'visual' ? handleContentEditableChange : undefined}
+          dangerouslySetInnerHTML={{ __html: editingPage.content }}
+          suppressContentEditableWarning
+        />
+      </div>
+    );
+  };
+
+  const handleContentEditableChange = (e: React.FormEvent<HTMLDivElement>) => {
+    const newContent = e.currentTarget.innerHTML;
+    handleVisualEdit(newContent);
   };
 
   return (
@@ -369,7 +495,6 @@ const Pages = () => {
         </div>
       </div>
 
-      {/* Page Editor Dialog */}
       <Dialog 
         open={isEditDialogOpen && !fullPreviewMode} 
         onOpenChange={(open) => {
@@ -389,6 +514,15 @@ const Pages = () => {
                 </DialogDescription>
               </div>
               <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={toggleRealPageView}
+                  className="flex items-center gap-1"
+                >
+                  <Palette className="h-4 w-4" />
+                  {showRealPage ? "Simple View" : "Enhanced View"}
+                </Button>
                 <Button
                   variant="outline"
                   size="sm"
@@ -433,6 +567,7 @@ const Pages = () => {
             <Tabs defaultValue="content" className="w-full">
               <TabsList className="mb-4">
                 <TabsTrigger value="content">Content</TabsTrigger>
+                <TabsTrigger value="assets">Assets</TabsTrigger>
                 <TabsTrigger value="seo">SEO</TabsTrigger>
                 <TabsTrigger value="settings">Settings</TabsTrigger>
               </TabsList>
@@ -505,9 +640,54 @@ const Pages = () => {
                         previewClassName={`min-h-[400px] ${editMode === 'visual' ? 'visual-editor' : ''}`}
                         editMode={editMode}
                         onVisualEdit={handleVisualEdit}
+                        showRealPage={showRealPage}
                       />
                     </div>
                   </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="assets" className="space-y-4">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-semibold">Page Assets</h3>
+                  <Button onClick={handleAddAsset} className="bg-[#003366] hover:bg-[#002244]">
+                    <ImageIcon className="h-4 w-4 mr-2" /> Add Asset
+                  </Button>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {editingPage.assets?.map((asset: any) => (
+                    <Card key={asset.id} className="overflow-hidden">
+                      <div className="aspect-video bg-gray-100 relative">
+                        <img 
+                          src={asset.url} 
+                          alt={asset.alt} 
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <CardContent className="p-3">
+                        <div className="text-sm font-medium truncate">{asset.alt}</div>
+                        <div className="flex justify-between mt-2">
+                          <Button variant="outline" size="sm">Edit</Button>
+                          <Button variant="outline" size="sm" className="text-red-500">Remove</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                  
+                  {(!editingPage.assets || editingPage.assets.length === 0) && (
+                    <div className="col-span-3 text-center py-10 bg-gray-50 rounded-lg">
+                      <ImageIcon className="h-10 w-10 mx-auto text-gray-400 mb-2" />
+                      <p className="text-gray-500">No assets added to this page yet.</p>
+                      <Button 
+                        variant="outline"
+                        onClick={handleAddAsset}
+                        className="mt-3"
+                      >
+                        Add Assets
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </TabsContent>
               
@@ -549,7 +729,7 @@ const Pages = () => {
                       value={editingPage.ogImage || ''}
                       onChange={(e) => setEditingPage({...editingPage, ogImage: e.target.value})}
                     />
-                    <Button variant="outline">Select Image</Button>
+                    <Button variant="outline" onClick={handleAddAsset}>Select Image</Button>
                   </div>
                 </div>
               </TabsContent>
@@ -611,15 +791,15 @@ const Pages = () => {
             <Button 
               className="bg-[#003366] hover:bg-[#002244]"
               onClick={handleSavePage}
+              disabled={saveInProgress}
             >
               <Save className="h-4 w-4 mr-2" />
-              Save Changes
+              {saveInProgress ? "Saving..." : "Save Changes"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Full Preview Mode */}
       {fullPreviewMode && editingPage && (
         <div className="fixed inset-0 bg-white z-50 flex flex-col">
           <div className="border-b p-4 flex justify-between items-center bg-gray-50">
@@ -656,6 +836,14 @@ const Pages = () => {
               </div>
               <Button
                 variant="outline"
+                onClick={toggleRealPageView}
+                className="flex items-center gap-1"
+              >
+                <Palette className="h-4 w-4" />
+                {showRealPage ? "Simple View" : "Enhanced View"}
+              </Button>
+              <Button
+                variant="outline"
                 onClick={toggleFullPreviewMode}
               >
                 Exit Preview
@@ -663,9 +851,10 @@ const Pages = () => {
               <Button 
                 className="bg-[#003366] hover:bg-[#002244]"
                 onClick={handleSavePage}
+                disabled={saveInProgress}
               >
                 <Save className="h-4 w-4 mr-2" />
-                Save Changes
+                {saveInProgress ? "Saving..." : "Save Changes"}
               </Button>
             </div>
           </div>
@@ -680,13 +869,50 @@ const Pages = () => {
                 previewClassName="min-h-[calc(100vh-200px)]"
                 editMode={editMode}
                 onVisualEdit={handleVisualEdit}
+                showRealPage={showRealPage}
               />
             </div>
           </div>
+
+          {editMode === 'visual' && (
+            <div className="visual-editor-toolbox">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleAddAsset()}
+                title="Add Image"
+              >
+                <ImageIcon className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => toast({ title: "Format Text", description: "Text formatting options would appear here." })}
+                title="Format Text"
+              >
+                <span className="font-bold">B</span>
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => toast({ title: "Add Link", description: "Link insertion dialog would appear here." })}
+                title="Add Link"
+              >
+                <span className="underline">Link</span>
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => toast({ title: "Help", description: "Editing help would appear here." })}
+                title="Help"
+              >
+                <Info className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
         </div>
       )}
 
-      {/* Delete Confirmation Dialog */}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -709,4 +935,3 @@ const Pages = () => {
 };
 
 export default Pages;
-

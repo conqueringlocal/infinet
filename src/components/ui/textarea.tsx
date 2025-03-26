@@ -10,10 +10,11 @@ export interface TextareaProps
   fullPreview?: boolean;
   editMode?: 'code' | 'visual';
   onVisualEdit?: (newContent: string) => void;
+  showRealPage?: boolean;
 }
 
 const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
-  ({ className, preview, previewClassName, fullPreview, editMode = 'code', onVisualEdit, value, ...props }, ref) => {
+  ({ className, preview, previewClassName, fullPreview, editMode = 'code', onVisualEdit, value, showRealPage, ...props }, ref) => {
     const [internalValue, setInternalValue] = React.useState<string | undefined>(value as string);
     
     // Update internal value when external value changes
@@ -54,11 +55,12 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           <div className={cn(
             "flex-1 border rounded-md overflow-auto",
             fullPreview ? "min-h-[500px] bg-white p-6" : "p-4 bg-white", 
+            showRealPage ? "real-page-preview" : "",
             previewClassName
           )}>
             {typeof internalValue === 'string' && internalValue ? (
               <div 
-                className="prose max-w-none"
+                className={cn("prose max-w-none", showRealPage ? "real-page-content" : "")}
                 style={fullPreview ? { margin: '0 auto', maxWidth: '1200px' } : {}}
                 contentEditable={editMode === 'visual'}
                 onBlur={handleContentEditableChange}
