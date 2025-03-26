@@ -73,6 +73,8 @@ const PageWrapper = ({ Component }: { Component: React.ComponentType<any> }) => 
   
   // Check if we're in edit mode (URL ends with /edit)
   const isEditPath = location.pathname === '/edit' || location.pathname.endsWith('/edit');
+  console.log('PageWrapper - Current path:', location.pathname);
+  console.log('PageWrapper - Is edit path:', isEditPath);
   
   // Determine the base path (the path without /edit) for rendering the correct component
   const basePath = location.pathname === '/edit' 
@@ -81,11 +83,7 @@ const PageWrapper = ({ Component }: { Component: React.ComponentType<any> }) => 
       ? location.pathname.slice(0, -5) 
       : location.pathname;
   
-  useEffect(() => {
-    console.log('PageWrapper - Current path:', location.pathname);
-    console.log('PageWrapper - Edit mode:', isEditPath);
-    console.log('PageWrapper - Base path for rendering:', basePath);
-  }, [location.pathname, isEditPath, basePath]);
+  console.log('PageWrapper - Base path for rendering:', basePath);
   
   return (
     <>
@@ -101,6 +99,8 @@ const AppRoutes = () => {
   
   // Check if we're in edit mode
   const isEditPath = location.pathname === '/edit' || location.pathname.endsWith('/edit');
+  console.log('AppRoutes - Current path:', location.pathname);
+  console.log('AppRoutes - Is edit path:', isEditPath);
   
   // Get the base path for routing
   const basePath = location.pathname === '/edit'

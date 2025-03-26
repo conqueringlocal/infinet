@@ -24,6 +24,8 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
   // Set up the editor on initial load
   useEffect(() => {
     console.log('InPlaceEditor: isEnabled =', isEnabled);
+    console.log('Current path:', location.pathname);
+    console.log('Edit URL detected:', location.pathname.endsWith('/edit'));
     
     // Check if already logged in from localStorage
     const authStatus = localStorage.getItem('edit_authenticated');
@@ -40,14 +42,14 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
         // This timeout ensures DOM is fully loaded before we initialize editables
         setTimeout(() => {
           initializeEditables();
-        }, 300);
+        }, 500); // Increased timeout to ensure page is fully loaded
       }
     } else if (isEnabled) {
       // Not logged in but on edit URL - show login dialog
       console.log('Not logged in but on edit URL - showing login dialog');
       setLoginDialogOpen(true);
     }
-  }, [isEnabled]);
+  }, [isEnabled, location.pathname]);
 
   // Effect for handling edit mode changes
   useEffect(() => {
@@ -60,7 +62,7 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
       // Initialize editables whenever edit mode is activated
       setTimeout(() => {
         initializeEditables();
-      }, 300);
+      }, 500); // Increased timeout
     } else {
       document.body.classList.remove('edit-mode');
     }
@@ -92,7 +94,7 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
       // Initialize editables after login
       setTimeout(() => {
         initializeEditables();
-      }, 300);
+      }, 500); // Increased timeout
     } else {
       toast({
         title: "Login failed",
@@ -136,7 +138,8 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
     }
     
     editableElements.forEach(el => {
-      console.log('Setting up editable:', el.getAttribute('data-editable'));
+      const id = el.getAttribute('data-editable');
+      console.log('Setting up editable:', id);
       el.setAttribute('contenteditable', 'true');
       el.classList.add('editable-content');
       
@@ -186,8 +189,13 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
     }, 1000);
   };
 
+  // Check if we're actually in edit mode - either explicitly enabled or URL ends with /edit
+  const actuallyEnabled = isEnabled || location.pathname.endsWith('/edit');
+  
+  console.log('InPlaceEditor render - Actually enabled:', actuallyEnabled);
+
   // If not enabled (not in edit mode URL), don't show anything
-  if (!isEnabled) {
+  if (!actuallyEnabled) {
     return null;
   }
   

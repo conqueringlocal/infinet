@@ -17,6 +17,15 @@ const EditableContent: React.FC<EditableContentProps> = ({
   const contentRef = useRef<HTMLElement | null>(null);
   const [initialContentSet, setInitialContentSet] = useState(false);
   
+  // Debug logging to help diagnose issues
+  useEffect(() => {
+    console.log(`EditableContent ${id} mounted`);
+    
+    return () => {
+      console.log(`EditableContent ${id} unmounted`);
+    };
+  }, [id]);
+  
   useEffect(() => {
     // Only run once to avoid overwriting user edits
     if (initialContentSet) return;
@@ -44,9 +53,9 @@ const EditableContent: React.FC<EditableContentProps> = ({
 
   return (
     <TagName
+      ref={contentRef as React.RefObject<any>}
       data-editable={id}
       className={className}
-      ref={contentRef}
     >
       {children}
     </TagName>
