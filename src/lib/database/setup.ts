@@ -13,21 +13,25 @@ export const initializeDatabase = async (): Promise<{ success: boolean; message:
     console.log('Initializing database...');
     
     // Initialize tables in the correct order to avoid foreign key issues
+    // Start with user_profiles (no dependencies)
     const userProfilesResult = await initializeUserProfilesTable();
     if (!userProfilesResult.success) {
       return userProfilesResult;
     }
     
+    // Next create page_assignments (depends on user_profiles)
     const pageAssignmentsResult = await initializePageAssignmentsTable();
     if (!pageAssignmentsResult.success) {
       return pageAssignmentsResult;
     }
     
+    // Then create page_content (depends on user_profiles, references page_assignments in policies)
     const pageContentResult = await initializePageContentTable();
     if (!pageContentResult.success) {
       return pageContentResult;
     }
     
+    // Finally create page_analytics (depends on page_content)
     const pageAnalyticsResult = await initializePageAnalyticsTable();
     if (!pageAnalyticsResult.success) {
       return pageAnalyticsResult;

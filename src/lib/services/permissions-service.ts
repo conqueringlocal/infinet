@@ -45,7 +45,7 @@ export const hasEditPermission = async (): Promise<boolean> => {
 };
 
 // Check if user has permission to edit a specific page path
-export const canEditPage = async (pagePath: string): Promise<boolean> => {
+export const canEditPage = async (pageId: string): Promise<boolean> => {
   try {
     // First check general edit permission
     const hasEditPerm = await hasPermission('edit_content');
@@ -63,7 +63,7 @@ export const canEditPage = async (pagePath: string): Promise<boolean> => {
         .from('page_assignments')
         .select('*')
         .eq('user_id', profile.id)
-        .eq('page_path', pagePath);
+        .eq('page_id', pageId);
       
       if (error) {
         console.error('Error checking page assignments:', error);

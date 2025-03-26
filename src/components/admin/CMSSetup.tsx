@@ -18,25 +18,30 @@ const CMSSetup: React.FC = () => {
   const { toast } = useToast();
   const sqlRef = useRef<HTMLPreElement>(null);
 
-  // Enhanced SQL extraction to handle multiple tables
+  // Extract SQL from error message
   const extractSqlFromErrorMessage = (message: string) => {
     if (message.includes('CREATE TABLE')) {
-      // Find all SQL sections for each table
-      const tables: string[] = [];
+      // Extract all SQL statements for table creation
+      const sqlStatements: string[] = [];
       
-      // Extract SQL for each table mention
-      const regex = /(CREATE TABLE IF NOT EXISTS[^;]+;(?:\s*--[^\n]*\n)*(?:\s*(?:ALTER|CREATE)[^;]+;)*)/g;
+      // Find all CREATE TABLE sections
+      const createTableRegex = /(CREATE TABLE IF NOT EXISTS[^;]+;)/g;
       let match;
-      
-      while ((match = regex.exec(message)) !== null) {
-        tables.push(match[1]);
+      while ((match = createTableRegex.exec(message)) !== null) {
+        sqlStatements.push(match[1]);
       }
       
-      if (tables.length > 0) {
-        return tables.join('\n\n');
+      // Find all policy sections
+      const policyRegex = /(-- RLS policies for|ALTER TABLE|CREATE POLICY)[^;]+;/g;
+      while ((match = policyRegex.exec(message)) !== null) {
+        sqlStatements.push(match[0]);
       }
       
-      // Fallback: If regex didn't work, try a simple extraction
+      if (sqlStatements.length > 0) {
+        return sqlStatements.join('\n\n');
+      }
+      
+      // If regex didn't work, use a simpler approach
       const startIdx = message.indexOf('CREATE TABLE');
       if (startIdx !== -1) {
         return message.substring(startIdx);
@@ -103,25 +108,61 @@ const CMSSetup: React.FC = () => {
 
   const sql = setupError ? extractSqlFromErrorMessage(setupError) : null;
 
-  // Helper function to split SQL into manageable parts for execution
-  const splitSqlIntoStatements = (sql: string | null) => {
+  // Helper function to organize SQL for better execution
+  const organizeSQL = (sql: string | null) => {
     if (!sql) return [];
     
-    // Split the SQL into table creation and policy sections
-    const sections = [];
-    let currentSection = '';
+    // Group SQL statements by table and type (table creation vs policies)
+    const tableCreation = [];
+    const policies = [];
     
-    // Split on CREATE TABLE statements
-    sql.split(/(?=CREATE TABLE)/i).forEach(part => {
-      if (part.trim()) {
-        sections.push(part.trim());
+    const lines = sql.split('\n');
+    let currentSection = "";
+    let isPolicy = false;
+    
+    for (const line of lines) {
+      // Start of a new CREATE TABLE statement
+      if (line.trim().startsWith('CREATE TABLE')) {
+        if (currentSection) {
+          if (isPolicy) {
+            policies.push(currentSection);
+          } else {
+            tableCreation.push(currentSection);
+          }
+        }
+        currentSection = line;
+        isPolicy = false;
       }
-    });
+      // Start of a policy section
+      else if (line.trim().startsWith('--') || line.trim().startsWith('ALTER TABLE') || line.trim().startsWith('CREATE POLICY')) {
+        if (currentSection && !isPolicy) {
+          tableCreation.push(currentSection);
+          currentSection = line;
+          isPolicy = true;
+        } else {
+          currentSection += '\n' + line;
+        }
+      }
+      // Continue current section
+      else if (currentSection) {
+        currentSection += '\n' + line;
+      }
+    }
     
-    return sections;
+    // Add the last section
+    if (currentSection) {
+      if (isPolicy) {
+        policies.push(currentSection);
+      } else {
+        tableCreation.push(currentSection);
+      }
+    }
+    
+    // Return organized sections
+    return [...tableCreation, ...policies];
   };
 
-  const sqlStatements = splitSqlIntoStatements(sql);
+  const sqlSections = organizeSQL(sql);
 
   return (
     <Card className="w-full max-w-md mx-auto">
@@ -183,21 +224,24 @@ const CMSSetup: React.FC = () => {
                   <pre ref={sqlRef} className="text-xs whitespace-pre-wrap text-gray-800">{sql}</pre>
                 </div>
                 
-                {sqlStatements.length > 1 && (
-                  <div className="mt-3 text-xs text-gray-600 p-3 bg-blue-50 border border-blue-100 rounded">
-                    <p className="font-medium mb-1">For best results:</p>
-                    <ol className="list-decimal pl-5 space-y-1">
-                      <li>Create each table separately in this order: user_profiles, page_assignments, page_content, page_analytics</li>
-                      <li>For each table, first run just the CREATE TABLE statement</li>
-                      <li>Then run the ALTER TABLE and CREATE POLICY statements</li>
-                      <li>Remove the "IF NOT EXISTS" phrases from the policy creation lines</li>
-                    </ol>
-                  </div>
-                )}
+                <div className="mt-3 text-xs text-gray-600 p-3 bg-blue-50 border border-blue-100 rounded">
+                  <p className="font-medium mb-1">Follow these steps for best results:</p>
+                  <ol className="list-decimal pl-5 space-y-1">
+                    <li>Create tables in this order: user_profiles, page_assignments, page_content, page_analytics</li>
+                    <li>For each table:
+                      <ul className="list-disc pl-5 mt-1 space-y-1">
+                        <li>First run ONLY the CREATE TABLE statement</li>
+                        <li>Then run the ALTER TABLE statement</li>
+                        <li>Finally run the CREATE POLICY statements one by one</li>
+                      </ul>
+                    </li>
+                    <li>If you get syntax errors with policies, remove the "IF NOT EXISTS" phrases</li>
+                    <li>Make sure each table is created before adding policies that reference it</li>
+                  </ol>
+                </div>
                 
                 <p className="text-xs text-gray-500 mt-2">
-                  After running this SQL in your Supabase dashboard, return here and try again. 
-                  Note: Remove the "IF NOT EXISTS" phrases from the policy creation lines if you encounter syntax errors.
+                  After running this SQL in your Supabase dashboard, return here and try again.
                 </p>
               </div>
             )}
