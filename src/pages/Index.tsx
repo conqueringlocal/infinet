@@ -6,7 +6,6 @@ import AboutPreview from '@/components/home/AboutPreview';
 import WhyChooseUs from '@/components/home/WhyChooseUs';
 import ProjectsPreview from '@/components/home/ProjectsPreview';
 import CtaSection from '@/components/home/CtaSection';
-import FiberInfo from '@/components/home/FiberInfo';
 import NationwideService from '@/components/home/NationwideService';
 import ServiceFinder from '@/components/home/ServiceFinder';
 import { useSEO } from '@/hooks/use-seo';
@@ -16,11 +15,10 @@ import { usePageView } from '@/hooks/use-page-view';
 // Create and export the list of components for the admin page editor
 export const HomePageComponents = [
   Hero,
+  AboutPreview,
   ServicesSection,
   ServiceFinder,
-  AboutPreview,
   WhyChooseUs,
-  FiberInfo,
   NationwideService,
   ProjectsPreview,
   CtaSection
@@ -49,11 +47,10 @@ const Index = () => {
   return (
     <div className="flex flex-col min-h-screen">
       <Hero />
+      <AboutPreview />
       <ServicesSection />
       <ServiceFinder />
-      <AboutPreview />
       <WhyChooseUs />
-      <FiberInfo />
       <NationwideService />
       <ProjectsPreview />
       <CtaSection />
