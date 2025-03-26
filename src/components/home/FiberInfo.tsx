@@ -1,8 +1,9 @@
 
-import React from 'react';
+import React, { memo } from 'react';
 import { ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Separator } from '@/components/ui/separator';
+import { Link } from 'react-router-dom';
 
 const FiberInfo = () => {
   return (
@@ -22,9 +23,11 @@ const FiberInfo = () => {
             </div>
           </div>
           
-          <Button size="lg" variant="accent" onClick={() => window.location.href = '/services'}>
-            View Business Solutions
-            <ArrowRight className="ml-2 h-4 w-4" />
+          <Button size="lg" variant="accent" asChild>
+            <Link to="/services">
+              View Business Solutions
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
           </Button>
         </div>
         
@@ -34,6 +37,9 @@ const FiberInfo = () => {
             src="https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80"
             alt="Business Professional using technology" 
             className="w-full h-auto rounded-lg shadow-xl relative z-10 object-cover"
+            loading="lazy"
+            width="600"
+            height="400"
           />
         </div>
       </div>
@@ -41,4 +47,5 @@ const FiberInfo = () => {
   );
 };
 
-export default FiberInfo;
+// Memoize the component to prevent unnecessary re-renders
+export default memo(FiberInfo);

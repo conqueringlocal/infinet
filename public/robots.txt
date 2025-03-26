@@ -1,8 +1,9 @@
 
+# Allow all search engines to access all content
 User-agent: *
 Allow: /
 
-# Allow all search engines to access all content
+# Specific directives for major bots
 User-agent: Googlebot
 Allow: /
 
@@ -30,4 +31,10 @@ Allow: /
 User-agent: Twitterbot
 Allow: /
 
+# Disallow admin areas
+User-agent: *
+Disallow: /admin/
+Disallow: /admin/*
+
+# Sitemap location
 Sitemap: https://infi-net.net/sitemap.xml

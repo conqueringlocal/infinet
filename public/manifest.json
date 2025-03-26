@@ -1,6 +1,6 @@
 
 {
-  "name": "Infi-NET LLC",
+  "name": "Infi-NET LLC - Fiber Optic & Low-Voltage Solutions",
   "short_name": "Infi-NET",
   "description": "Professional fiber optic and low-voltage solutions for businesses across the United States",
   "start_url": "/",
@@ -12,6 +12,13 @@
       "src": "/favicon.png",
       "sizes": "32x32",
       "type": "image/png"
+    },
+    {
+      "src": "/og-image.png",
+      "sizes": "1200x630",
+      "type": "image/png"
     }
-  ]
+  ],
+  "categories": ["business", "technology", "networking", "infrastructure"],
+  "lang": "en-US"
 }

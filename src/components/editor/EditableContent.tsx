@@ -1,5 +1,5 @@
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, memo } from 'react';
 import { getPageContent } from '@/lib/content-service';
 import { useLocation } from 'react-router-dom';
 
@@ -27,13 +27,15 @@ const EditableContent: React.FC<EditableContentProps> = ({
   const [imageSource, setImageSource] = useState(imageSrc);
   const location = useLocation();
   
-  // Debug logging
+  // Debug logging - only in development mode
   useEffect(() => {
-    console.log(`EditableContent "${id}" mounted with tag: ${tag}, type: ${type}`);
-    
-    return () => {
-      console.log(`EditableContent "${id}" unmounted`);
-    };
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`EditableContent "${id}" mounted with tag: ${tag}, type: ${type}`);
+      
+      return () => {
+        console.log(`EditableContent "${id}" unmounted`);
+      };
+    }
   }, [id, tag, type]);
   
   // Normalize the current route path for content loading
@@ -55,18 +57,38 @@ const EditableContent: React.FC<EditableContentProps> = ({
       try {
         // First try to get content from Supabase
         const pagePath = getNormalizedPath();
-        console.log(`Trying to load remote content for "${id}" on page "${pagePath}"`);
         
-        const supabaseContent = await getPageContent(pagePath);
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`Trying to load remote content for "${id}" on page "${pagePath}"`);
+        }
+        
+        // Use Promise with a timeout to avoid blocking rendering
+        const contentPromise = getPageContent(pagePath);
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Content loading timed out')), 3000)
+        );
+        
+        const supabaseContent = await Promise.race([contentPromise, timeoutPromise])
+          .catch(err => {
+            console.warn('Content loading issue:', err);
+            return null;
+          });
         
         if (supabaseContent && supabaseContent[id]) {
-          console.log(`Found Supabase content for "${id}"`);
+          if (process.env.NODE_ENV === 'development') {
+            console.log(`Found Supabase content for "${id}"`);
+          }
+          
           if (type === 'text' && contentRef.current) {
             contentRef.current.innerHTML = supabaseContent[id];
-            console.log(`Applied Supabase text content for "${id}"`);
+            if (process.env.NODE_ENV === 'development') {
+              console.log(`Applied Supabase text content for "${id}"`);
+            }
           } else if (type === 'image') {
             setImageSource(supabaseContent[id]);
-            console.log(`Applied Supabase image source for "${id}"`);
+            if (process.env.NODE_ENV === 'development') {
+              console.log(`Applied Supabase image source for "${id}"`);
+            }
           }
           setInitialContentSet(true);
           return;
@@ -74,7 +96,9 @@ const EditableContent: React.FC<EditableContentProps> = ({
         
         // Fall back to localStorage if no Supabase content
         const savedContent = localStorage.getItem('page_content');
-        console.log(`Checking localStorage for "${id}" as fallback`);
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`Checking localStorage for "${id}" as fallback`);
+        }
         
         if (savedContent) {
           const contentMap = JSON.parse(savedContent);
@@ -82,16 +106,16 @@ const EditableContent: React.FC<EditableContentProps> = ({
           if (contentMap[id]) {
             if (type === 'text' && contentRef.current) {
               contentRef.current.innerHTML = contentMap[id];
-              console.log(`Applied localStorage text content for "${id}"`);
+              if (process.env.NODE_ENV === 'development') {
+                console.log(`Applied localStorage text content for "${id}"`);
+              }
             } else if (type === 'image') {
               setImageSource(contentMap[id]);
-              console.log(`Applied localStorage image source for "${id}"`);
+              if (process.env.NODE_ENV === 'development') {
+                console.log(`Applied localStorage image source for "${id}"`);
+              }
             }
-          } else {
-            console.log(`No saved content for "${id}" in localStorage`);
           }
-        } else {
-          console.log('No saved content found in localStorage');
         }
         
         setInitialContentSet(true);
@@ -101,7 +125,14 @@ const EditableContent: React.FC<EditableContentProps> = ({
       }
     };
     
-    loadContent();
+    // Use requestIdleCallback for non-critical content loading
+    if ('requestIdleCallback' in window) {
+      // @ts-ignore - requestIdleCallback not in standard lib
+      window.requestIdleCallback(() => loadContent());
+    } else {
+      // Fallback to setTimeout for browsers without requestIdleCallback
+      setTimeout(loadContent, 100);
+    }
   }, [id, initialContentSet, type, location.pathname]);
 
   // Create the element with the correct tag
@@ -117,6 +148,7 @@ const EditableContent: React.FC<EditableContentProps> = ({
         data-editable-type="image"
         data-original-src={imageSrc}
         className={`editable-image ${className}`}
+        loading="lazy"
       />
     );
   }
@@ -135,4 +167,5 @@ const EditableContent: React.FC<EditableContentProps> = ({
   );
 };
 
-export default EditableContent;
+// Memoize the component to prevent unnecessary re-renders
+export default memo(EditableContent);
