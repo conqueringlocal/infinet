@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/input';
@@ -14,7 +13,10 @@ import {
   Save,
   Code,
   Layout,
-  Copy
+  Copy,
+  Smartphone,
+  Monitor,
+  Tablet
 } from 'lucide-react';
 import { 
   Dialog,
@@ -38,6 +40,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 
 const Pages = () => {
   const { toast } = useToast();
@@ -47,13 +51,111 @@ const Pages = () => {
   const [editMode, setEditMode] = useState<'code' | 'visual'>('visual');
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [pageToDelete, setPageToDelete] = useState<any>(null);
+  const [previewDevice, setPreviewDevice] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
+  const [fullPreviewMode, setFullPreviewMode] = useState(false);
   
   const pages = [
-    { id: 1, title: 'Home', slug: '/', lastEdited: '2 hours ago', status: 'Published', content: '<h1>Welcome to Infi-NET</h1><p>Your trusted provider of fiber and low-voltage solutions.</p>' },
-    { id: 2, title: 'About Us', slug: '/about', lastEdited: 'Yesterday', status: 'Published', content: '<h1>About Infi-NET</h1><p>Learn about our company history and mission.</p>' },
-    { id: 3, title: 'Services', slug: '/services', lastEdited: '3 days ago', status: 'Published', content: '<h1>Our Services</h1><p>Discover our range of professional services.</p>' },
-    { id: 4, title: 'Projects', slug: '/projects', lastEdited: '1 week ago', status: 'Published', content: '<h1>Projects</h1><p>View our portfolio of completed projects.</p>' },
-    { id: 5, title: 'Contact', slug: '/contact', lastEdited: '2 weeks ago', status: 'Published', content: '<h1>Contact Us</h1><p>Get in touch with our team today.</p>' },
+    { 
+      id: 1, 
+      title: 'Home', 
+      slug: '/', 
+      lastEdited: '2 hours ago', 
+      status: 'Published', 
+      content: `
+<div class="container mx-auto px-4 py-8">
+  <h1 class="text-4xl font-bold text-center mb-8">Welcome to Infi-NET</h1>
+  <p class="text-lg text-center mb-12">Your trusted provider of fiber and low-voltage solutions.</p>
+  
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+    <div class="bg-white p-6 rounded-lg shadow-md">
+      <h2 class="text-xl font-semibold mb-4">Fiber Solutions</h2>
+      <p>We provide comprehensive fiber optic installation and maintenance services for businesses of all sizes.</p>
+    </div>
+    <div class="bg-white p-6 rounded-lg shadow-md">
+      <h2 class="text-xl font-semibold mb-4">Low-Voltage Systems</h2>
+      <p>Our low-voltage solutions include structured cabling, security systems, and audio/visual installations.</p>
+    </div>
+    <div class="bg-white p-6 rounded-lg shadow-md">
+      <h2 class="text-xl font-semibold mb-4">Network Services</h2>
+      <p>We design, implement, and maintain reliable and secure network infrastructure for your business.</p>
+    </div>
+  </div>
+  
+  <div class="bg-blue-50 p-8 rounded-lg mb-12">
+    <h2 class="text-2xl font-bold mb-4 text-center">Why Choose Infi-NET?</h2>
+    <ul class="list-disc pl-8">
+      <li class="mb-2">Over 15 years of industry experience</li>
+      <li class="mb-2">Certified technicians and engineers</li>
+      <li class="mb-2">Comprehensive project management</li>
+      <li class="mb-2">24/7 support and maintenance</li>
+      <li class="mb-2">Competitive pricing and flexible solutions</li>
+    </ul>
+  </div>
+  
+  <div class="text-center">
+    <h2 class="text-2xl font-bold mb-4">Ready to Get Started?</h2>
+    <p class="mb-6">Contact us today for a free consultation and quote.</p>
+    <button class="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors">Contact Us</button>
+  </div>
+</div>
+      `,
+      metaTitle: 'Infi-NET | Fiber & Low-Voltage Solutions',
+      metaDescription: 'Infi-NET provides professional fiber optic and low-voltage solutions for businesses. Get reliable network infrastructure with our expert services.',
+      ogImage: '/images/home-og.jpg',
+    },
+    { 
+      id: 2, 
+      title: 'About Us', 
+      slug: '/about', 
+      lastEdited: 'Yesterday', 
+      status: 'Published', 
+      content: `
+<div class="container mx-auto px-4 py-8">
+  <h1 class="text-4xl font-bold text-center mb-8">About Infi-NET</h1>
+  <p class="text-lg text-center mb-12">Learn about our company history and mission.</p>
+  
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+    <div>
+      <h2 class="text-2xl font-semibold mb-4">Our Story</h2>
+      <p class="mb-4">Founded in 2008, Infi-NET has grown from a small local contractor to a leading provider of fiber optic and low-voltage solutions in the region.</p>
+      <p>With a focus on quality workmanship and customer satisfaction, we've built a reputation for delivering reliable and innovative solutions for businesses of all sizes.</p>
+    </div>
+    <div class="bg-gray-100 p-6 rounded-lg">
+      <h2 class="text-2xl font-semibold mb-4">Our Mission</h2>
+      <p>To provide businesses with reliable, scalable, and future-proof network infrastructure through expert design, quality installation, and responsive support.</p>
+    </div>
+  </div>
+  
+  <div class="mb-12">
+    <h2 class="text-2xl font-semibold text-center mb-6">Our Core Values</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="bg-white p-6 rounded-lg shadow-md">
+        <h3 class="text-xl font-medium mb-3">Quality</h3>
+        <p>We never compromise on the quality of our work, using only the best materials and following industry best practices.</p>
+      </div>
+      <div class="bg-white p-6 rounded-lg shadow-md">
+        <h3 class="text-xl font-medium mb-3">Integrity</h3>
+        <p>We operate with honesty and transparency in all our business dealings, earning the trust of our clients.</p>
+      </div>
+      <div class="bg-white p-6 rounded-lg shadow-md">
+        <h3 class="text-xl font-medium mb-3">Innovation</h3>
+        <p>We stay at the forefront of technology, continually updating our skills and services to provide cutting-edge solutions.</p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="bg-blue-50 p-8 rounded-lg mb-12">
+    <h2 class="text-2xl font-bold mb-4">Our Team</h2>
+    <p class="mb-4">Our team consists of certified technicians, engineers, and project managers with extensive experience in fiber optics, structured cabling, and network infrastructure.</p>
+    <p>We invest in ongoing training and certification to ensure our team is equipped with the latest knowledge and skills in the industry.</p>
+  </div>
+</div>
+      `,
+      metaTitle: 'About Us | Infi-NET LLC',
+      metaDescription: 'Learn about Infi-NET, our history, mission, and values. Discover why we are the trusted choice for fiber optic and low-voltage solutions.',
+      ogImage: '/images/about-og.jpg',
+    },
+    // ... keep existing code for other pages
   ];
 
   const filteredPages = pages.filter(page => 
@@ -73,6 +175,7 @@ const Pages = () => {
       description: `Successfully updated ${editingPage.title}`,
     });
     setIsEditDialogOpen(false);
+    setFullPreviewMode(false);
   };
 
   const handleViewPage = (slug: string) => {
@@ -81,6 +184,10 @@ const Pages = () => {
 
   const toggleEditMode = () => {
     setEditMode(editMode === 'code' ? 'visual' : 'code');
+  };
+
+  const toggleFullPreviewMode = () => {
+    setFullPreviewMode(!fullPreviewMode);
   };
 
   const confirmDeletePage = (page: any) => {
@@ -103,6 +210,17 @@ const Pages = () => {
       title: "HTML copied",
       description: "HTML content copied to clipboard",
     });
+  };
+
+  const getPreviewWidth = () => {
+    switch(previewDevice) {
+      case 'mobile':
+        return 'max-w-[375px]';
+      case 'tablet':
+        return 'max-w-[768px]';
+      default:
+        return 'max-w-full';
+    }
   };
 
   return (
@@ -231,7 +349,15 @@ const Pages = () => {
       </div>
 
       {/* Page Editor Dialog */}
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+      <Dialog 
+        open={isEditDialogOpen && !fullPreviewMode} 
+        onOpenChange={(open) => {
+          if (!open) {
+            setIsEditDialogOpen(false);
+            setFullPreviewMode(false);
+          }
+        }}
+      >
         <DialogContent className="sm:max-w-[90vw] h-[90vh] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <div className="flex items-center justify-between">
@@ -259,6 +385,15 @@ const Pages = () => {
                       Code Editor
                     </>
                   )}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={toggleFullPreviewMode}
+                  className="flex items-center gap-1"
+                >
+                  <Eye className="h-4 w-4" />
+                  Full Preview
                 </Button>
                 <Button
                   variant="outline"
@@ -294,22 +429,59 @@ const Pages = () => {
                 </div>
                 
                 <div className="space-y-2">
-                  <label htmlFor="pageContent" className="text-sm font-medium flex justify-between">
-                    <span>Content</span>
+                  <div className="flex justify-between items-center">
+                    <label htmlFor="pageContent" className="text-sm font-medium">
+                      Content
+                    </label>
+                    {editMode === 'visual' && (
+                      <div className="flex border rounded-md overflow-hidden">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className={`px-3 py-1 rounded-none ${previewDevice === 'desktop' ? 'bg-gray-100' : ''}`}
+                          onClick={() => setPreviewDevice('desktop')}
+                        >
+                          <Monitor className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className={`px-3 py-1 rounded-none ${previewDevice === 'tablet' ? 'bg-gray-100' : ''}`}
+                          onClick={() => setPreviewDevice('tablet')}
+                        >
+                          <Tablet className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className={`px-3 py-1 rounded-none ${previewDevice === 'mobile' ? 'bg-gray-100' : ''}`}
+                          onClick={() => setPreviewDevice('mobile')}
+                        >
+                          <Smartphone className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    )}
                     {editMode === 'code' && (
                       <span className="text-xs text-gray-500">
                         Use HTML tags for formatting. For example, &lt;h1&gt;Title&lt;/h1&gt; for headings.
                       </span>
                     )}
-                  </label>
-                  <Textarea 
-                    id="pageContent"
-                    value={editingPage.content}
-                    onChange={(e) => setEditingPage({...editingPage, content: e.target.value})}
-                    className={editMode === 'visual' ? "" : "min-h-[400px] font-mono"}
-                    preview={editMode === 'visual'}
-                    previewClassName="min-h-[400px]"
-                  />
+                  </div>
+                  <div className={`${editMode === 'visual' && previewDevice !== 'desktop' ? 'flex justify-center bg-gray-50 p-4' : ''}`}>
+                    <div className={editMode === 'visual' ? getPreviewWidth() : ''}>
+                      <Textarea 
+                        id="pageContent"
+                        value={editingPage.content}
+                        onChange={(e) => setEditingPage({...editingPage, content: e.target.value})}
+                        className={editMode === 'visual' ? "" : "min-h-[400px] font-mono"}
+                        preview={editMode === 'visual'}
+                        previewClassName="min-h-[400px]"
+                      />
+                    </div>
+                  </div>
                 </div>
               </TabsContent>
               
@@ -318,7 +490,12 @@ const Pages = () => {
                   <label htmlFor="metaTitle" className="text-sm font-medium">
                     Meta Title
                   </label>
-                  <Input id="metaTitle" placeholder="Meta Title for Search Engines" />
+                  <Input 
+                    id="metaTitle" 
+                    placeholder="Meta Title for Search Engines" 
+                    value={editingPage.metaTitle || ''}
+                    onChange={(e) => setEditingPage({...editingPage, metaTitle: e.target.value})}
+                  />
                 </div>
                 
                 <div className="space-y-2">
@@ -329,6 +506,8 @@ const Pages = () => {
                     id="metaDescription" 
                     placeholder="Description for search engine results"
                     className="min-h-[100px]"
+                    value={editingPage.metaDescription || ''}
+                    onChange={(e) => setEditingPage({...editingPage, metaDescription: e.target.value})}
                   />
                 </div>
                 
@@ -337,7 +516,13 @@ const Pages = () => {
                     Social Share Image
                   </label>
                   <div className="flex items-center gap-2">
-                    <Input id="ogImage" placeholder="URL to image" className="flex-1" />
+                    <Input 
+                      id="ogImage" 
+                      placeholder="URL to image" 
+                      className="flex-1"
+                      value={editingPage.ogImage || ''}
+                      onChange={(e) => setEditingPage({...editingPage, ogImage: e.target.value})}
+                    />
                     <Button variant="outline">Select Image</Button>
                   </div>
                 </div>
@@ -408,6 +593,71 @@ const Pages = () => {
         </DialogContent>
       </Dialog>
 
+      {/* Full Preview Mode */}
+      {fullPreviewMode && editingPage && (
+        <div className="fixed inset-0 bg-white z-50 flex flex-col">
+          <div className="border-b p-4 flex justify-between items-center bg-gray-50">
+            <h2 className="text-xl font-semibold">Previewing: {editingPage.title}</h2>
+            <div className="flex items-center gap-3">
+              <div className="flex border rounded-md overflow-hidden">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className={`px-3 py-1 rounded-none ${previewDevice === 'desktop' ? 'bg-gray-100' : ''}`}
+                  onClick={() => setPreviewDevice('desktop')}
+                >
+                  <Monitor className="h-4 w-4" />
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className={`px-3 py-1 rounded-none ${previewDevice === 'tablet' ? 'bg-gray-100' : ''}`}
+                  onClick={() => setPreviewDevice('tablet')}
+                >
+                  <Tablet className="h-4 w-4" />
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className={`px-3 py-1 rounded-none ${previewDevice === 'mobile' ? 'bg-gray-100' : ''}`}
+                  onClick={() => setPreviewDevice('mobile')}
+                >
+                  <Smartphone className="h-4 w-4" />
+                </Button>
+              </div>
+              <Button
+                variant="outline"
+                onClick={toggleFullPreviewMode}
+              >
+                Exit Preview
+              </Button>
+              <Button 
+                className="bg-[#003366] hover:bg-[#002244]"
+                onClick={handleSavePage}
+              >
+                <Save className="h-4 w-4 mr-2" />
+                Save Changes
+              </Button>
+            </div>
+          </div>
+          <div className="flex-1 overflow-auto bg-gray-100 p-4">
+            <div className={`mx-auto bg-white shadow-lg ${getPreviewWidth()}`}>
+              <Textarea 
+                id="fullPageContent"
+                value={editingPage.content}
+                onChange={(e) => setEditingPage({...editingPage, content: e.target.value})}
+                preview={true}
+                fullPreview={true}
+                previewClassName="min-h-[calc(100vh-200px)]"
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
@@ -431,3 +681,4 @@ const Pages = () => {
 };
 
 export default Pages;
+
