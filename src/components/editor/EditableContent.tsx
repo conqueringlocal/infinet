@@ -1,22 +1,6 @@
-
 import React, { useEffect, useRef, useState, memo } from 'react';
 import { getPageContent } from '@/lib/content-service';
 import { useLocation } from 'react-router-dom';
-
-// Ensure we have a polyfill for requestIdleCallback
-if (!('requestIdleCallback' in window)) {
-  window.requestIdleCallback = function(callback) {
-    const start = Date.now();
-    return setTimeout(function() {
-      callback({
-        didTimeout: false,
-        timeRemaining: function() {
-          return Math.max(0, 50 - (Date.now() - start));
-        }
-      });
-    }, 1);
-  };
-}
 
 interface EditableContentProps {
   id: string;
