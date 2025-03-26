@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card } from '@/components/ui/card';
-import { FileText, Image, Users, Globe, ArrowRight } from 'lucide-react';
+import { FileText, Image, Users, Globe, ArrowRight, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Link } from 'react-router-dom';
 

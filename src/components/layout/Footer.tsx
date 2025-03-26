@@ -1,6 +1,5 @@
-
 import { Link } from 'react-router-dom';
-import { MapPin, Phone, Mail, Facebook, Twitter, Instagram, LinkedIn, ChevronRight, LockKeyhole } from 'lucide-react';
+import { MapPin, Phone, Mail, Facebook, Twitter, Instagram, Linkedin, ChevronRight, LockKeyhole } from 'lucide-react';
 
 const Footer = () => {
   const year = new Date().getFullYear();
@@ -134,7 +133,7 @@ const Footer = () => {
                 <span className="sr-only">Instagram</span>
               </a>
               <a href="#linkedin" className="bg-blue-800 hover:bg-blue-900 p-2 rounded-full transition-colors">
-                <LinkedIn className="h-5 w-5" />
+                <Linkedin className="h-5 w-5" />
                 <span className="sr-only">LinkedIn</span>
               </a>
             </div>

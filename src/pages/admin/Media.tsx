@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/input';
 import { 
@@ -20,7 +19,6 @@ const Media = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   
-  // Sample media items - in a real application, this would come from your database
   const mediaItems = [
     { 
       id: 1, 
@@ -93,6 +91,8 @@ const Media = () => {
     }
   };
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -102,11 +102,12 @@ const Media = () => {
             type="file"
             className="hidden"
             onChange={handleFileUpload}
+            ref={fileInputRef}
           />
           <Button 
             variant="default" 
             className="bg-[#003366] hover:bg-[#002244] cursor-pointer"
-            onClick={() => document.querySelector('input[type="file"]')?.click()}
+            onClick={() => fileInputRef.current?.click()}
           >
             <UploadCloud className="h-4 w-4 mr-2" /> Upload
           </Button>
