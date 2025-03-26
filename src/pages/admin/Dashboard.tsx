@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
-import { FileText, ArrowRight, Settings } from 'lucide-react';
+import { FileText, ArrowRight, Settings, Globe, Users, Image as ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Link } from 'react-router-dom';
 import DashboardSummary from '@/components/admin/DashboardSummary';
@@ -176,7 +176,7 @@ const Dashboard = () => {
                 variant="outline"
                 hoverEffect="lift"
               >
-                <Image className="h-4 w-4 mr-2 text-[#003366]" />
+                <ImageIcon className="h-4 w-4 mr-2 text-[#003366]" />
                 <span>Upload Media</span>
               </InteractiveCard>
             </Link>
