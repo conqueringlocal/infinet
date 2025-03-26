@@ -4,8 +4,8 @@ import App from './App.tsx'
 import './index.css'
 
 // Polyfill for requestIdleCallback for browsers that don't support it
-if (!('requestIdleCallback' in window)) {
-  window.requestIdleCallback = function(callback) {
+if (!window.requestIdleCallback) {
+  window.requestIdleCallback = function(callback, opts) {
     const start = Date.now();
     return setTimeout(function() {
       callback({
@@ -14,7 +14,13 @@ if (!('requestIdleCallback' in window)) {
           return Math.max(0, 50 - (Date.now() - start));
         }
       });
-    }, 1);
+    }, opts?.timeout || 1);
+  };
+}
+
+if (!window.cancelIdleCallback) {
+  window.cancelIdleCallback = function(id) {
+    clearTimeout(id);
   };
 }
 
