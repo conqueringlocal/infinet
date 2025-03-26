@@ -145,7 +145,7 @@ const AdminLayout = () => {
       </div>
       
       <div className="flex-1 flex flex-col md:ml-64">
-        <div className="md:p-8 p-4 pt-16 md:pt-8 flex-1">
+        <div className="md:p-8 p-4 pt-20 md:pt-8 flex-1">
           <Outlet />
         </div>
       </div>
