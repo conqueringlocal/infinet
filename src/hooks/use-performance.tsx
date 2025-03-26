@@ -1,6 +1,21 @@
 
 import { useEffect, useState } from 'react';
 
+// Polyfill for requestIdleCallback
+if (!('requestIdleCallback' in window)) {
+  window.requestIdleCallback = function(callback) {
+    const start = Date.now();
+    return setTimeout(function() {
+      callback({
+        didTimeout: false,
+        timeRemaining: function() {
+          return Math.max(0, 50 - (Date.now() - start));
+        }
+      });
+    }, 1);
+  };
+}
+
 // Define the NetworkInformation interface that's missing in the standard lib
 interface NetworkInformation {
   effectiveType: string;

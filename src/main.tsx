@@ -3,6 +3,21 @@ import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 
+// Polyfill for requestIdleCallback for browsers that don't support it
+if (!('requestIdleCallback' in window)) {
+  window.requestIdleCallback = function(callback) {
+    const start = Date.now();
+    return setTimeout(function() {
+      callback({
+        didTimeout: false,
+        timeRemaining: function() {
+          return Math.max(0, 50 - (Date.now() - start));
+        }
+      });
+    }, 1);
+  };
+}
+
 // Measure initial load performance
 if (process.env.NODE_ENV !== 'production') {
   console.time('App mount');
@@ -19,7 +34,8 @@ root.render(<App />);
 
 // Report performance metrics in development
 if (process.env.NODE_ENV !== 'production') {
-  requestIdleCallback(() => {
+  // Using setTimeout as a safe fallback even with the polyfill above
+  setTimeout(() => {
     console.timeEnd('App mount');
     
     // Report FCP (First Contentful Paint)
@@ -32,5 +48,5 @@ if (process.env.NODE_ENV !== 'production') {
     });
     
     observer.observe({ type: 'paint', buffered: true });
-  });
+  }, 0);
 }
