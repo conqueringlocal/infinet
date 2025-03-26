@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, Save, LogOut, Edit, Image as ImageIcon, Upload, Download } from 'lucide-react';
+import { X, Save, LogOut, Edit, Image as ImageIcon, Upload, Download, FileInput, Import, FileDown } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { savePageContent, getPageContent } from '@/lib/content-service';
+import { savePageContent, getPageContent, validateContentImport, importPageContent, ContentExport } from '@/lib/content-service';
 import { useAuth } from '@/hooks/use-auth';
 import { hasEditPermission } from '@/lib/user-service';
 
@@ -17,6 +17,7 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
   const [loginDialogOpen, setLoginDialogOpen] = useState(false);
   const [imageDialogOpen, setImageDialogOpen] = useState(false);
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [editMode, setEditMode] = useState(false);
@@ -26,7 +27,11 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
   const [exportedContent, setExportedContent] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [canEdit, setCanEdit] = useState(false);
+  const [importError, setImportError] = useState<string | null>(null);
+  const [importSuccess, setImportSuccess] = useState<string | null>(null);
+  const [isImporting, setIsImporting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const importFileInputRef = useRef<HTMLInputElement>(null);
   const exportContentRef = useRef<HTMLTextAreaElement>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -78,10 +83,14 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
           localStorage.setItem('page_content', JSON.stringify(content));
           sessionStorage.setItem('page_content', JSON.stringify(content));
           console.log('Loaded content from Supabase for path:', normalRoute);
+          
+          setTimeout(initializeEditables, 500);
+          return true;
         }
       } catch (error) {
         console.error('Error loading content from Supabase:', error);
       }
+      return false;
     };
 
     loadContent();
@@ -344,6 +353,118 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
     });
   };
 
+  const handleImportClick = () => {
+    setImportDialogOpen(true);
+    setImportError(null);
+    setImportSuccess(null);
+  };
+
+  const handleImportFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setImportError(null);
+    setImportSuccess(null);
+    setIsImporting(true);
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      try {
+        if (event.target?.result) {
+          const fileContent = event.target.result as string;
+          const validationResult = validateContentImport(fileContent);
+          
+          if (!validationResult.valid) {
+            setImportError(validationResult.error || 'Invalid file format');
+            setIsImporting(false);
+            return;
+          }
+
+          const importResult = await importPageContent(
+            validationResult.data as ContentExport, 
+            user?.id
+          );
+
+          if (importResult.success) {
+            setImportSuccess(importResult.message);
+            const currentRoute = getNormalRoute();
+            if (validationResult.data?.pageUrl === currentRoute) {
+              await loadPageContent();
+              setContentChanged(true);
+            }
+          } else {
+            setImportError(importResult.message);
+          }
+        }
+      } catch (error: any) {
+        setImportError(error.message || 'Error processing import file');
+        console.error('Import error:', error);
+      } finally {
+        setIsImporting(false);
+      }
+    };
+
+    reader.onerror = () => {
+      setImportError('Error reading file');
+      setIsImporting(false);
+    };
+
+    reader.readAsText(file);
+  };
+
+  const handlePasteImport = async () => {
+    try {
+      const clipboardText = await navigator.clipboard.readText();
+      const validationResult = validateContentImport(clipboardText);
+      
+      if (!validationResult.valid) {
+        setImportError(validationResult.error || 'Invalid clipboard content');
+        return;
+      }
+
+      setIsImporting(true);
+      const importResult = await importPageContent(
+        validationResult.data as ContentExport, 
+        user?.id
+      );
+
+      if (importResult.success) {
+        setImportSuccess(importResult.message);
+        const currentRoute = getNormalRoute();
+        if (validationResult.data?.pageUrl === currentRoute) {
+          await loadPageContent();
+          setContentChanged(true);
+        }
+      } else {
+        setImportError(importResult.message);
+      }
+    } catch (error: any) {
+      setImportError(error.message || 'Error processing clipboard content');
+      console.error('Import error:', error);
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
+  const loadPageContent = async () => {
+    try {
+      const normalRoute = getNormalRoute();
+      const content = await getPageContent(normalRoute);
+
+      if (content) {
+        localStorage.setItem('page_content', JSON.stringify(content));
+        sessionStorage.setItem('page_content', JSON.stringify(content));
+        console.log('Loaded content from Supabase for path:', normalRoute);
+        
+        setTimeout(initializeEditables, 500);
+        return true;
+      }
+    } catch (error) {
+      console.error('Error loading content from Supabase:', error);
+    }
+    return false;
+  };
+
   const shouldShowEditor = isEditUrl || isEnabled;
 
   if (!shouldShowEditor) {
@@ -517,6 +638,81 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
         </DialogContent>
       </Dialog>
 
+      <Dialog open={importDialogOpen} onOpenChange={setImportDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Import Content</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-4">
+            <p className="text-sm text-gray-600">
+              Import previously exported content. This will replace the current content for the specified page.
+            </p>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium block">
+                Upload JSON File
+              </label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="file"
+                  ref={importFileInputRef}
+                  onChange={handleImportFileUpload}
+                  accept=".json,application/json"
+                  className="hidden"
+                />
+                <Button 
+                  variant="outline" 
+                  onClick={() => importFileInputRef.current?.click()}
+                  className="w-full flex items-center justify-center gap-2"
+                  disabled={isImporting}
+                >
+                  <FileInput className="h-4 w-4" />
+                  {isImporting ? "Processing..." : "Choose File"}
+                </Button>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 py-2">
+              <div className="h-px bg-gray-200 flex-1"></div>
+              <span className="text-xs text-gray-500">OR</span>
+              <div className="h-px bg-gray-200 flex-1"></div>
+            </div>
+
+            <Button 
+              variant="outline" 
+              className="w-full"
+              onClick={handlePasteImport}
+              disabled={isImporting}
+            >
+              Paste from Clipboard
+            </Button>
+
+            {importError && (
+              <div className="p-3 bg-red-50 border border-red-200 rounded-md text-red-700 text-sm">
+                <p className="font-medium">Import Error</p>
+                <p>{importError}</p>
+              </div>
+            )}
+
+            {importSuccess && (
+              <div className="p-3 bg-green-50 border border-green-200 rounded-md text-green-700 text-sm">
+                <p className="font-medium">Success</p>
+                <p>{importSuccess}</p>
+              </div>
+            )}
+
+            <div className="flex justify-end space-x-2 pt-2">
+              <Button 
+                variant="outline" 
+                onClick={() => setImportDialogOpen(false)}
+              >
+                Close
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 bg-white rounded-lg shadow-lg p-2 flex items-center gap-2">
         {!editMode ? (
           <Button 
@@ -549,6 +745,17 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
             >
               <X className="h-4 w-4 mr-2" />
               Cancel
+            </Button>
+            
+            <div className="border-r h-6 mx-1 border-gray-300"></div>
+            
+            <Button 
+              size="sm" 
+              variant="outline"
+              onClick={handleImportClick}
+              title="Import Content"
+            >
+              <FileDown className="h-4 w-4" />
             </Button>
           </>
         )}

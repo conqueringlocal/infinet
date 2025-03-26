@@ -11,6 +11,13 @@ export type PageContent = {
   version?: number;
 };
 
+export type ContentExport = {
+  version: number;
+  timestamp: string;
+  pageUrl: string;
+  content: Record<string, string>;
+};
+
 // Save page content to Supabase
 export const savePageContent = async (
   pagePath: string, 
@@ -78,4 +85,73 @@ export const getAllPagesContent = async (): Promise<PageContent[]> => {
   
   if (error) throw error;
   return data || [];
+};
+
+// Import content from a JSON file
+export const importPageContent = async (
+  importData: ContentExport, 
+  userId?: string
+): Promise<{ success: boolean; message: string }> => {
+  try {
+    // Validate the import data
+    if (!importData || !importData.version || !importData.pageUrl || !importData.content) {
+      return { 
+        success: false, 
+        message: 'Invalid import file format. Missing required fields.' 
+      };
+    }
+    
+    // Save the imported content
+    await savePageContent(
+      importData.pageUrl,
+      importData.content,
+      userId
+    );
+    
+    return { 
+      success: true, 
+      message: `Content successfully imported for page: ${importData.pageUrl}` 
+    };
+  } catch (error: any) {
+    console.error('Error importing content:', error);
+    return { 
+      success: false, 
+      message: error.message || 'An error occurred during import' 
+    };
+  }
+};
+
+// Validate content export format
+export const validateContentImport = (jsonData: any): { 
+  valid: boolean; 
+  data?: ContentExport; 
+  error?: string 
+} => {
+  try {
+    // If string was passed, try to parse it
+    const data = typeof jsonData === 'string' ? JSON.parse(jsonData) : jsonData;
+    
+    // Check required fields
+    if (!data.version || !data.timestamp || !data.pageUrl || !data.content) {
+      return { 
+        valid: false, 
+        error: 'Invalid import format: missing required fields' 
+      };
+    }
+    
+    // Check if content is an object
+    if (typeof data.content !== 'object' || data.content === null) {
+      return {
+        valid: false,
+        error: 'Invalid content format: content must be an object'
+      };
+    }
+    
+    return { valid: true, data: data as ContentExport };
+  } catch (error: any) {
+    return { 
+      valid: false, 
+      error: error.message || 'Invalid JSON format' 
+    };
+  }
 };
