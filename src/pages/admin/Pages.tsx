@@ -10,7 +10,11 @@ import {
   Edit,
   Trash2,
   Plus,
-  Eye
+  Eye,
+  Save,
+  Code,
+  Layout,
+  Copy
 } from 'lucide-react';
 import { 
   Dialog,
@@ -23,12 +27,26 @@ import {
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const Pages = () => {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [editingPage, setEditingPage] = useState<any>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editMode, setEditMode] = useState<'code' | 'visual'>('visual');
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [pageToDelete, setPageToDelete] = useState<any>(null);
   
   const pages = [
     { id: 1, title: 'Home', slug: '/', lastEdited: '2 hours ago', status: 'Published', content: '<h1>Welcome to Infi-NET</h1><p>Your trusted provider of fiber and low-voltage solutions.</p>' },
@@ -59,6 +77,32 @@ const Pages = () => {
 
   const handleViewPage = (slug: string) => {
     window.open(slug, '_blank');
+  };
+
+  const toggleEditMode = () => {
+    setEditMode(editMode === 'code' ? 'visual' : 'code');
+  };
+
+  const confirmDeletePage = (page: any) => {
+    setPageToDelete(page);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleDeletePage = () => {
+    // In a real application, this would delete from a database
+    toast({
+      title: "Page deleted",
+      description: `Successfully deleted ${pageToDelete.title}`,
+    });
+    setIsDeleteDialogOpen(false);
+  };
+
+  const handleCopyHtml = (html: string) => {
+    navigator.clipboard.writeText(html);
+    toast({
+      title: "HTML copied",
+      description: "HTML content copied to clipboard",
+    });
   };
 
   return (
@@ -157,6 +201,7 @@ const Pages = () => {
                         variant="ghost" 
                         size="icon"
                         onClick={() => handleViewPage(page.slug)}
+                        title="View page"
                       >
                         <Eye className="h-4 w-4" />
                       </Button>
@@ -164,10 +209,16 @@ const Pages = () => {
                         variant="ghost" 
                         size="icon"
                         onClick={() => handleEditPage(page)}
+                        title="Edit page"
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="icon">
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        onClick={() => confirmDeletePage(page)}
+                        title="Delete page"
+                      >
                         <Trash2 className="h-4 w-4 text-red-500" />
                       </Button>
                     </div>
@@ -181,12 +232,45 @@ const Pages = () => {
 
       {/* Page Editor Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="sm:max-w-[900px] max-h-[90vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-[90vw] h-[90vh] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Edit Page: {editingPage?.title}</DialogTitle>
-            <DialogDescription>
-              Make changes to the page content. Click save when you're done.
-            </DialogDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <DialogTitle>Edit Page: {editingPage?.title}</DialogTitle>
+                <DialogDescription>
+                  Make changes to the page content. Click save when you're done.
+                </DialogDescription>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={toggleEditMode}
+                  className="flex items-center gap-1"
+                >
+                  {editMode === 'code' ? (
+                    <>
+                      <Layout className="h-4 w-4" />
+                      Visual Editor
+                    </>
+                  ) : (
+                    <>
+                      <Code className="h-4 w-4" />
+                      Code Editor
+                    </>
+                  )}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => editingPage && handleCopyHtml(editingPage.content)}
+                  className="flex items-center gap-1"
+                >
+                  <Copy className="h-4 w-4" />
+                  Copy HTML
+                </Button>
+              </div>
+            </div>
           </DialogHeader>
           
           {editingPage && (
@@ -210,20 +294,22 @@ const Pages = () => {
                 </div>
                 
                 <div className="space-y-2">
-                  <label htmlFor="pageContent" className="text-sm font-medium">
-                    Content
+                  <label htmlFor="pageContent" className="text-sm font-medium flex justify-between">
+                    <span>Content</span>
+                    {editMode === 'code' && (
+                      <span className="text-xs text-gray-500">
+                        Use HTML tags for formatting. For example, &lt;h1&gt;Title&lt;/h1&gt; for headings.
+                      </span>
+                    )}
                   </label>
-                  <div className="border rounded-md p-4 min-h-[300px] bg-white">
-                    <Textarea 
-                      id="pageContent"
-                      value={editingPage.content}
-                      onChange={(e) => setEditingPage({...editingPage, content: e.target.value})}
-                      className="min-h-[250px] w-full border-0 focus-visible:ring-0 focus-visible:ring-offset-0 resize-none"
-                    />
-                  </div>
-                  <p className="text-xs text-gray-500">
-                    Use HTML tags for formatting. For example, &lt;h1&gt;Title&lt;/h1&gt; for headings.
-                  </p>
+                  <Textarea 
+                    id="pageContent"
+                    value={editingPage.content}
+                    onChange={(e) => setEditingPage({...editingPage, content: e.target.value})}
+                    className={editMode === 'visual' ? "" : "min-h-[400px] font-mono"}
+                    preview={editMode === 'visual'}
+                    previewClassName="min-h-[400px]"
+                  />
                 </div>
               </TabsContent>
               
@@ -315,11 +401,31 @@ const Pages = () => {
               className="bg-[#003366] hover:bg-[#002244]"
               onClick={handleSavePage}
             >
+              <Save className="h-4 w-4 mr-2" />
               Save Changes
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the page
+              "{pageToDelete?.title}" and remove it from our servers.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeletePage} className="bg-red-500 hover:bg-red-600">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
