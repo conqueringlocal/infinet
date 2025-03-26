@@ -1,7 +1,9 @@
+
 import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/Button';
 import { ArrowRight, CheckCircle } from 'lucide-react';
+import EditableContent from '@/components/editor/EditableContent';
 
 const AboutPreview = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -53,14 +55,18 @@ const AboutPreview = () => {
 
           <div className="space-y-6 order-1 lg:order-2">
             <div className="reveal">
-              <span className="text-sm font-semibold text-infinet-600 uppercase tracking-wider">About Infi-NET LLC</span>
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mt-2">Connecting Florida with Precision and Expertise</h2>
+              <EditableContent id="about-section-title" tag="span" className="text-sm font-semibold text-infinet-600 uppercase tracking-wider">
+                About Infi-NET LLC
+              </EditableContent>
+              <EditableContent id="about-section-heading" tag="h2" className="text-3xl md:text-4xl font-bold text-gray-900 mt-2">
+                Connecting Florida with Precision and Expertise
+              </EditableContent>
             </div>
 
             <div className="reveal">
-              <p className="text-gray-600 text-lg">
+              <EditableContent id="about-section-description" tag="p" className="text-gray-600 text-lg">
                 Founded on principles of quality and reliability, Infi-NET LLC brings over 35 years of combined experience to every project. Based in Lakeland, Florida, we specialize in fiber optic installations, low-voltage data cabling, and point-to-point applications for businesses across industries.
-              </p>
+              </EditableContent>
             </div>
 
             <div className="reveal space-y-3">
@@ -71,7 +77,9 @@ const AboutPreview = () => {
               ].map((item, index) => (
                 <div key={index} className="flex items-start">
                   <CheckCircle className="h-5 w-5 text-infinet-600 mt-1 mr-2 flex-shrink-0" />
-                  <p className="text-gray-700">{item}</p>
+                  <EditableContent id={`about-bullet-${index+1}`} tag="p" className="text-gray-700">
+                    {item}
+                  </EditableContent>
                 </div>
               ))}
             </div>
