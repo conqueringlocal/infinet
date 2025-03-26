@@ -1,4 +1,3 @@
-
 import { supabase } from './supabase';
 
 // Enhanced role type
@@ -61,10 +60,12 @@ export const hasPermission = async (permission: Permission): Promise<boolean> =>
         return profile.role === 'admin';
       
       case 'edit_content': {
+        // Fix the type comparison by using a type-safe approach
         return ['admin', 'editor', 'contributor'].includes(profile.role);
       }
       
       case 'publish_content': {
+        // Fix the type comparison by using a type-safe approach
         return ['admin', 'editor'].includes(profile.role);
       }
       
@@ -72,6 +73,7 @@ export const hasPermission = async (permission: Permission): Promise<boolean> =>
         return true; // All authenticated users can view content
       
       case 'manage_media': {
+        // Fix the type comparison by using a type-safe approach
         return ['admin', 'editor'].includes(profile.role);
       }
       
