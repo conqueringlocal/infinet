@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/Button';
 import { ArrowRight } from 'lucide-react';
@@ -95,6 +94,26 @@ const FiberCmsInfo = () => {
             </div>
           </div>
         </div>
+      </div>
+
+      <div className="absolute top-14 right-20 rounded-xl overflow-hidden shadow-lg transform rotate-3 z-10 hidden lg:block">
+        <EditableContent
+          id="fiber-cms-image-1"
+          type="image"
+          imageSrc="/assets/cms-preview-1.jpg"
+          imageAlt="CMS Preview 1"
+          className="w-72 h-auto object-cover"
+        />
+      </div>
+
+      <div className="absolute bottom-14 left-20 rounded-xl overflow-hidden shadow-lg transform -rotate-3 z-10 hidden lg:block">
+        <EditableContent
+          id="fiber-cms-image-2"
+          type="image"
+          imageSrc="/assets/cms-preview-2.jpg"
+          imageAlt="CMS Preview 2"
+          className="w-72 h-auto object-cover"
+        />
       </div>
     </section>
   );

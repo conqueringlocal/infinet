@@ -1,6 +1,6 @@
 
-import React, { useState, useEffect } from 'react';
-import { X, Save, LogOut, Edit, Image as ImageIcon } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { X, Save, LogOut, Edit, Image as ImageIcon, Upload } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/input';
@@ -20,6 +20,7 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
   const [editMode, setEditMode] = useState(false);
   const [currentImageElement, setCurrentImageElement] = useState<HTMLImageElement | null>(null);
   const [newImageUrl, setNewImageUrl] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
@@ -187,6 +188,19 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
     setImageDialogOpen(true);
   };
 
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      if (event.target?.result) {
+        setNewImageUrl(event.target.result as string);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
   const updateImage = () => {
     if (currentImageElement && newImageUrl) {
       currentImageElement.src = newImageUrl;
@@ -236,7 +250,7 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
     // Save to localStorage
     localStorage.setItem('page_content', JSON.stringify(contentToSave));
     
-    // Also save to sessionStorage to preserve across page navigation
+    // Also save to sessionStorage for redundancy
     sessionStorage.setItem('page_content', JSON.stringify(contentToSave));
     
     toast({
@@ -323,19 +337,59 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
                 />
               </div>
             )}
-            <div className="space-y-2">
-              <label htmlFor="imageUrl" className="text-sm font-medium">Image URL</label>
-              <Input
-                id="imageUrl"
-                type="url"
-                value={newImageUrl}
-                onChange={(e) => setNewImageUrl(e.target.value)}
-                placeholder="https://example.com/image.jpg"
-              />
-              <p className="text-xs text-gray-500">
-                Enter a valid image URL
-              </p>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium block mb-2">Upload Image</label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileUpload}
+                    accept="image/*"
+                    className="hidden"
+                  />
+                  <Button 
+                    variant="outline" 
+                    onClick={() => fileInputRef.current?.click()}
+                    className="w-full flex items-center justify-center gap-2"
+                  >
+                    <Upload className="h-4 w-4" />
+                    Choose File
+                  </Button>
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <label htmlFor="imageUrl" className="text-sm font-medium">Or Enter Image URL</label>
+                <Input
+                  id="imageUrl"
+                  type="url"
+                  value={newImageUrl}
+                  onChange={(e) => setNewImageUrl(e.target.value)}
+                  placeholder="https://example.com/image.jpg"
+                />
+              </div>
+              
+              {newImageUrl && newImageUrl !== currentImageElement?.src && (
+                <div className="border rounded p-2">
+                  <p className="text-sm text-gray-500 mb-2">Preview:</p>
+                  <img 
+                    src={newImageUrl} 
+                    alt="Preview" 
+                    className="w-full h-40 object-contain"
+                    onError={() => {
+                      toast({
+                        title: "Error loading image",
+                        description: "The URL might be invalid or the image is not accessible",
+                        variant: "destructive"
+                      });
+                    }}
+                  />
+                </div>
+              )}
             </div>
+            
             <div className="flex justify-end space-x-2">
               <Button variant="outline" onClick={() => setImageDialogOpen(false)}>
                 Cancel
