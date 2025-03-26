@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, ChevronDown } from 'lucide-react';
@@ -13,7 +12,6 @@ import {
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 
-// Main navigation links
 const navLinks = [{
   path: '/',
   label: 'Home'
@@ -32,7 +30,6 @@ const navLinks = [{
   label: 'Contact'
 }];
 
-// Service submenu items
 const serviceLinks = [
   { path: '/service/fiber', label: 'Fiber Optic Installation' },
   { path: '/service/structured', label: 'Structured Cabling' },
@@ -73,7 +70,6 @@ const Navbar = () => {
         ? 'bg-white py-3 shadow-md' 
         : 'bg-white/95 backdrop-blur-md py-5'
     )}>
-      {/* Gradient Loading Animation */}
       <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-infinet-500 to-infinetYellow-400"></div>
       
       <div className="container mx-auto px-4 md:px-6">
@@ -82,7 +78,6 @@ const Navbar = () => {
             <img src="/lovable-uploads/2d58718b-9a89-4dde-b37e-43621ecf8a95.png" alt="Infi-NET LLC" className="h-12" />
           </Link>
 
-          {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-1">
             {navLinks.map(link => 
               link.hasSubmenu ? (
@@ -90,8 +85,8 @@ const Navbar = () => {
                   <NavigationMenuList>
                     <NavigationMenuItem>
                       <NavigationMenuTrigger className={cn(
-                        'px-3 py-2 text-sm font-medium transition-colors',
-                        location.pathname.includes('/service/') ? 'text-infinet-600 bg-infinet-50' : 'text-gray-800 hover:text-infinet-600 hover:bg-infinet-50'
+                        'px-3 py-2 text-sm font-medium transition-colors hover:text-infinet-600 hover:bg-transparent',
+                        location.pathname.includes('/service/') ? 'text-infinet-600' : 'text-gray-800'
                       )}>
                         {link.label}
                       </NavigationMenuTrigger>
@@ -151,7 +146,6 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Mobile Menu */}
       <div className={cn('md:hidden absolute top-full left-0 right-0 bg-white border-b border-gray-200 shadow-lg transition-all duration-300 transform', isMenuOpen ? 'translate-y-0 opacity-100' : '-translate-y-10 opacity-0 pointer-events-none')}>
         <div className="container mx-auto px-4 py-3">
           <nav className="flex flex-col space-y-1">
