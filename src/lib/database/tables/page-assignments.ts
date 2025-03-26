@@ -1,5 +1,6 @@
 
 import { supabase } from '../../supabase';
+import { executeSql } from '../utils';
 
 /**
  * Creates the page_assignments table if it doesn't exist
@@ -19,7 +20,7 @@ export const initializePageAssignmentsTable = async (): Promise<{ success: boole
         console.log('Table page_assignments does not exist, creating it...');
         
         // Create the table with direct SQL query
-        const { error: createTableError } = await supabase.sql(`
+        const sqlResult = await executeSql(`
           CREATE TABLE IF NOT EXISTS public.page_assignments (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
             page_id TEXT NOT NULL,
@@ -59,9 +60,9 @@ export const initializePageAssignmentsTable = async (): Promise<{ success: boole
             );
         `);
         
-        if (createTableError) {
-          console.error('Error creating page_assignments table:', createTableError);
-          return { success: false, message: `Error creating page_assignments table: ${createTableError.message}` };
+        if (!sqlResult.success) {
+          console.error('Error creating page_assignments table:', sqlResult.message);
+          return { success: false, message: `Error creating page_assignments table: ${sqlResult.message}` };
         }
       } else {
         console.error('Error checking page_assignments table:', checkError);

@@ -1,5 +1,6 @@
 
 import { supabase } from '../../supabase';
+import { executeSql } from '../utils';
 
 /**
  * Creates the user_profiles table if it doesn't exist
@@ -19,7 +20,7 @@ export const initializeUserProfilesTable = async (): Promise<{ success: boolean;
         console.log('Table user_profiles does not exist, creating it...');
         
         // Create the table with direct SQL query
-        const { error: createTableError } = await supabase.sql(`
+        const sqlResult = await executeSql(`
           CREATE TABLE IF NOT EXISTS public.user_profiles (
             id UUID PRIMARY KEY,
             email TEXT NOT NULL,
@@ -57,9 +58,9 @@ export const initializeUserProfilesTable = async (): Promise<{ success: boolean;
             );
         `);
         
-        if (createTableError) {
-          console.error('Error creating user_profiles table:', createTableError);
-          return { success: false, message: `Error creating user_profiles table: ${createTableError.message}` };
+        if (!sqlResult.success) {
+          console.error('Error creating user_profiles table:', sqlResult.message);
+          return { success: false, message: `Error creating user_profiles table: ${sqlResult.message}` };
         }
       } else {
         console.error('Error checking user_profiles table:', checkError);

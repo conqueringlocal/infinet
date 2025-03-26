@@ -1,5 +1,6 @@
 
 import { supabase } from '../../supabase';
+import { executeSql } from '../utils';
 
 /**
  * Creates the page_analytics table if it doesn't exist
@@ -19,7 +20,7 @@ export const initializePageAnalyticsTable = async (): Promise<{ success: boolean
         console.log('Table page_analytics does not exist, creating it...');
         
         // Create the table with direct SQL query
-        const { error: createTableError } = await supabase.sql(`
+        const sqlResult = await executeSql(`
           CREATE TABLE IF NOT EXISTS public.page_analytics (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
             page_id TEXT NOT NULL,
@@ -63,9 +64,9 @@ export const initializePageAnalyticsTable = async (): Promise<{ success: boolean
             USING (auth.uid() IS NOT NULL);
         `);
         
-        if (createTableError) {
-          console.error('Error creating page_analytics table:', createTableError);
-          return { success: false, message: `Error creating page_analytics table: ${createTableError.message}` };
+        if (!sqlResult.success) {
+          console.error('Error creating page_analytics table:', sqlResult.message);
+          return { success: false, message: `Error creating page_analytics table: ${sqlResult.message}` };
         }
       } else {
         console.error('Error checking page_analytics table:', checkError);

@@ -1,5 +1,6 @@
 
 import { supabase } from '../../supabase';
+import { executeSql } from '../utils';
 
 /**
  * Creates the page_content table if it doesn't exist
@@ -19,7 +20,7 @@ export const initializePageContentTable = async (): Promise<{ success: boolean; 
         console.log('Table page_content does not exist, creating it...');
         
         // Create the table with direct SQL query
-        const { error: createTableError } = await supabase.sql(`
+        const sqlResult = await executeSql(`
           CREATE TABLE IF NOT EXISTS public.page_content (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
             page_id TEXT NOT NULL,
@@ -86,9 +87,9 @@ export const initializePageContentTable = async (): Promise<{ success: boolean; 
             );
         `);
         
-        if (createTableError) {
-          console.error('Error creating page_content table:', createTableError);
-          return { success: false, message: `Error creating page_content table: ${createTableError.message}` };
+        if (!sqlResult.success) {
+          console.error('Error creating page_content table:', sqlResult.message);
+          return { success: false, message: `Error creating page_content table: ${sqlResult.message}` };
         }
       } else {
         console.error('Error checking page_content table:', checkError);
