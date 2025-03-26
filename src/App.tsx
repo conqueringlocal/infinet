@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -66,23 +67,26 @@ const ScrollToTop = () => {
   return null;
 };
 
-// Wrapper component to handle edit mode for pages
+// Enhanced PageWrapper component to handle edit mode
 const PageWrapper = ({ Component }: { Component: React.ComponentType<any> }) => {
   const location = useLocation();
-  const isEditMode = location.pathname.endsWith('/edit');
   const navigate = useNavigate();
   
-  // Remove the /edit suffix for routing purposes
-  const actualPath = location.pathname.replace('/edit', '');
+  // Check if we're in edit mode by looking for /edit at the end of the path
+  const isEditMode = location.pathname.endsWith('/edit');
+  
+  // Get the base path without /edit for component rendering
+  const basePath = isEditMode 
+    ? location.pathname.slice(0, -5) // Remove /edit
+    : location.pathname;
   
   useEffect(() => {
-    // If we're in edit mode but the URL doesn't end with /edit
-    // (happens after first render), navigate to the edit URL
-    if (isEditMode && !location.pathname.endsWith('/edit')) {
-      navigate(`${location.pathname}/edit`, { replace: true });
-    }
-  }, [isEditMode, location.pathname, navigate]);
-
+    // Log the current path and edit mode status
+    console.log('Current path:', location.pathname);
+    console.log('Edit mode:', isEditMode);
+    console.log('Base path for rendering:', basePath);
+  }, [location.pathname, isEditMode, basePath]);
+  
   return (
     <>
       <Component />
@@ -93,11 +97,15 @@ const PageWrapper = ({ Component }: { Component: React.ComponentType<any> }) => 
 
 const AppRoutes = () => {
   const location = useLocation();
-  const basePathname = location.pathname.replace('/edit', '');
   
+  // Remove '/edit' from the path for route matching
+  const basePath = location.pathname.endsWith('/edit')
+    ? location.pathname.slice(0, -5)
+    : location.pathname;
+    
   return (
     <PageTransition>
-      <Routes location={basePathname}>
+      <Routes location={basePath}>
         <Route path="/" element={<PageWrapper Component={Index} />} />
         <Route path="/about" element={<PageWrapper Component={About} />} />
         <Route path="/services" element={<PageWrapper Component={Services} />} />

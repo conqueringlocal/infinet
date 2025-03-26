@@ -25,6 +25,7 @@ const EditableContent: React.FC<EditableContentProps> = ({
         const contentMap = JSON.parse(savedContent);
         if (contentMap[id] && contentRef.current) {
           contentRef.current.innerHTML = contentMap[id];
+          console.log(`Loaded saved content for "${id}"`);
         }
       } catch (e) {
         console.error('Error parsing saved content', e);

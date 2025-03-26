@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 interface InPlaceEditorProps {
   isEnabled: boolean;
@@ -17,18 +18,25 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
   const [password, setPassword] = useState('');
   const [editMode, setEditMode] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
+    console.log('InPlaceEditor: isEnabled =', isEnabled);
+    
     // Check if already logged in
     const authStatus = localStorage.getItem('edit_authenticated');
     if (authStatus === 'true') {
       setIsLoggedIn(true);
+      console.log('User is already logged in');
     } else if (isEnabled) {
       setLoginDialogOpen(true);
+      console.log('Showing login dialog');
     }
 
     // Add edit mode class to body when in edit mode
     if (isEnabled && isLoggedIn && editMode) {
+      console.log('Enabling edit mode');
       document.body.classList.add('edit-mode');
       initializeEditables();
     } else {
@@ -43,21 +51,26 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     
+    console.log('Attempting login with:', email);
+    
     // Simple mock login - would connect to auth system in production
     if (email === 'admin@conqueringlocal.com' && password === 'admin123') {
       localStorage.setItem('edit_authenticated', 'true');
       setIsLoggedIn(true);
       setLoginDialogOpen(false);
+      setEditMode(true); // Automatically enable edit mode after login
       toast({
         title: "Login successful",
         description: "You can now edit the page content",
       });
+      console.log('Login successful, edit mode enabled');
     } else {
       toast({
         title: "Login failed",
         description: "Invalid email or password",
         variant: "destructive",
       });
+      console.log('Login failed');
     }
   };
 
@@ -65,15 +78,34 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
     localStorage.removeItem('edit_authenticated');
     setIsLoggedIn(false);
     setEditMode(false);
-    window.location.href = window.location.pathname.replace('/edit', '');
+    toast({
+      title: "Logged out",
+      description: "You've been logged out successfully",
+    });
+    
+    // Navigate to the non-edit version of the page
+    const currentPath = location.pathname;
+    const basePath = currentPath.endsWith('/edit') 
+      ? currentPath.slice(0, -5) 
+      : currentPath;
+      
+    navigate(basePath);
+    console.log('User logged out, navigating to:', basePath);
   };
 
   const initializeEditables = () => {
     // Find all editable elements and make them actually editable
+    console.log('Initializing editable elements');
     const editableElements = document.querySelectorAll('[data-editable]');
+    console.log('Found', editableElements.length, 'editable elements');
+    
     editableElements.forEach(el => {
       el.setAttribute('contenteditable', 'true');
       el.classList.add('editable-content');
+      
+      // Get the editable ID
+      const id = el.getAttribute('data-editable');
+      console.log('Initialized editable element:', id);
       
       // Add focus/blur styling
       el.addEventListener('focus', () => el.classList.add('editing'));
@@ -83,7 +115,7 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
 
   const saveChanges = () => {
     // In a real implementation, this would send data to a backend
-    // For this demo, we'll show a toast and persist some changes to localStorage
+    console.log('Saving changes...');
     
     const editableElements = document.querySelectorAll('[data-editable]');
     const savedContent: Record<string, string> = {};
@@ -92,6 +124,7 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
       const id = el.getAttribute('data-editable');
       if (id) {
         savedContent[id] = el.innerHTML;
+        console.log('Saved content for:', id);
       }
     });
     
@@ -105,15 +138,22 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
 
     // Turn off edit mode after saving
     setEditMode(false);
+    console.log('Changes saved, edit mode disabled');
     
-    // Redirect to the non-edit version to see changes
+    // Navigate to the non-edit version to see changes
+    const currentPath = location.pathname;
+    const basePath = currentPath.endsWith('/edit') 
+      ? currentPath.slice(0, -5) 
+      : currentPath;
+      
     setTimeout(() => {
-      window.location.href = window.location.pathname.replace('/edit', '');
+      navigate(basePath);
+      console.log('Navigating to view saved changes:', basePath);
     }, 1000);
   };
 
-  // If not in edit mode or not logged in, don't show anything
-  if (!isEnabled || !isLoggedIn) {
+  // If not enabled (not in edit mode URL), don't show anything
+  if (!isEnabled) {
     return null;
   }
 
@@ -228,6 +268,7 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
           border-radius: 3px;
           opacity: 0;
           transition: opacity 0.2s;
+          z-index: 100;
         }
         
         .edit-mode [data-editable]:hover::before {
