@@ -1,4 +1,11 @@
+
 import { supabase, UserProfile } from './supabase';
+
+// Enhanced role type
+export type UserRole = 'admin' | 'editor' | 'contributor' | 'viewer';
+
+// Permission types for different actions
+export type Permission = 'manage_users' | 'edit_content' | 'publish_content' | 'view_content' | 'manage_media';
 
 // Get the current user's profile
 export const getCurrentUserProfile = async (): Promise<UserProfile | null> => {
@@ -25,13 +32,81 @@ export const getCurrentUserProfile = async (): Promise<UserProfile | null> => {
   }
 };
 
-// Check if current user has editor or admin role
-export const hasEditPermission = async (): Promise<boolean> => {
+// Check if current user has specific permission
+export const hasPermission = async (permission: Permission): Promise<boolean> => {
   try {
     const profile = await getCurrentUserProfile();
-    return !!profile && (profile.role === 'admin' || profile.role === 'editor');
+    if (!profile) return false;
+    
+    // Admin has all permissions
+    if (profile.role === 'admin') return true;
+    
+    // Role-based permissions
+    switch (permission) {
+      case 'manage_users':
+        return profile.role === 'admin';
+      
+      case 'edit_content':
+        return ['admin', 'editor', 'contributor'].includes(profile.role as UserRole);
+      
+      case 'publish_content':
+        return ['admin', 'editor'].includes(profile.role as UserRole);
+      
+      case 'view_content':
+        return ['admin', 'editor', 'contributor', 'viewer'].includes(profile.role as UserRole);
+      
+      case 'manage_media':
+        return ['admin', 'editor'].includes(profile.role as UserRole);
+      
+      default:
+        return false;
+    }
   } catch (error) {
-    console.error('Error checking edit permissions:', error);
+    console.error('Error checking permissions:', error);
+    return false;
+  }
+};
+
+// Legacy function for backward compatibility
+export const hasEditPermission = async (): Promise<boolean> => {
+  return hasPermission('edit_content');
+};
+
+// Check if user has permission to edit a specific page path
+export const canEditPage = async (pagePath: string): Promise<boolean> => {
+  try {
+    // First check general edit permission
+    const hasEditPerm = await hasPermission('edit_content');
+    if (!hasEditPerm) return false;
+    
+    const profile = await getCurrentUserProfile();
+    if (!profile) return false;
+    
+    // Admin can edit all pages
+    if (profile.role === 'admin') return true;
+    
+    // For contributors, check if they have access to this specific page
+    if (profile.role === 'contributor') {
+      // Get contributor page assignments from Supabase
+      const { data, error } = await supabase
+        .from('page_assignments')
+        .select('*')
+        .eq('user_id', profile.id)
+        .eq('page_path', pagePath);
+      
+      if (error) {
+        console.error('Error checking page assignments:', error);
+        return false;
+      }
+      
+      // If contributor has explicit assignment to this page, allow edit
+      return data && data.length > 0;
+    }
+    
+    // Editors can edit all content
+    return profile.role === 'editor';
+  } catch (error) {
+    console.error('Error in canEditPage:', error);
     return false;
   }
 };
@@ -114,7 +189,7 @@ export const getAllUserProfiles = async (): Promise<UserProfile[]> => {
 // Update user role (admin function)
 export const updateUserRole = async (
   userId: string, 
-  role: 'admin' | 'editor' | 'viewer'
+  role: UserRole
 ): Promise<boolean> => {
   try {
     const { error } = await supabase
@@ -130,5 +205,62 @@ export const updateUserRole = async (
   }
 };
 
+// Assign a user to a specific page (admin function)
+export const assignUserToPage = async (
+  userId: string,
+  pagePath: string
+): Promise<boolean> => {
+  try {
+    const { error } = await supabase
+      .from('page_assignments')
+      .insert({
+        user_id: userId,
+        page_path: pagePath,
+        created_at: new Date().toISOString()
+      });
+    
+    if (error) throw error;
+    return true;
+  } catch (error) {
+    console.error('Error in assignUserToPage:', error);
+    return false;
+  }
+};
+
+// Remove user assignment from a page (admin function)
+export const removeUserFromPage = async (
+  userId: string,
+  pagePath: string
+): Promise<boolean> => {
+  try {
+    const { error } = await supabase
+      .from('page_assignments')
+      .delete()
+      .match({ user_id: userId, page_path: pagePath });
+    
+    if (error) throw error;
+    return true;
+  } catch (error) {
+    console.error('Error in removeUserFromPage:', error);
+    return false;
+  }
+};
+
+// Get pages assigned to a specific user
+export const getUserPageAssignments = async (userId: string): Promise<string[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('page_assignments')
+      .select('page_path')
+      .eq('user_id', userId);
+    
+    if (error) throw error;
+    return data.map(item => item.page_path);
+  } catch (error) {
+    console.error('Error in getUserPageAssignments:', error);
+    return [];
+  }
+};
+
 // Re-export UserProfile type so it can be used elsewhere
-export type { UserProfile };
+export type { UserProfile, UserRole, Permission };

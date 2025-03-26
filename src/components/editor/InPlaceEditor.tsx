@@ -7,7 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { savePageContent, getPageContent, validateContentImport, importPageContent, ContentExport } from '@/lib/content-service';
 import { useAuth } from '@/hooks/use-auth';
-import { hasEditPermission } from '@/lib/user-service';
+import { hasEditPermission, canEditPage, hasPermission } from '@/lib/user-service';
 
 interface InPlaceEditorProps {
   isEnabled: boolean;
@@ -39,6 +39,7 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
   const { user, signIn, signOut } = useAuth();
 
   const isEditUrl = location.pathname === '/edit' || location.pathname.endsWith('/edit');
+  const normalRoute = getNormalRoute();
 
   useEffect(() => {
     console.log('==== EDITOR MOUNT EFFECT ====');
@@ -49,17 +50,24 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
     const checkPermission = async () => {
       if (user) {
         const hasPermission = await hasEditPermission();
-        setCanEdit(hasPermission);
-        console.log('User has edit permission:', hasPermission);
+        const canEditCurrentPage = await canEditPage(normalRoute);
         
-        if (shouldEnableEditMode && hasPermission) {
+        const effectiveCanEdit = hasPermission && canEditCurrentPage;
+        setCanEdit(effectiveCanEdit);
+        
+        console.log('User has edit permission:', hasPermission);
+        console.log('User can edit this page:', canEditCurrentPage);
+        
+        if (shouldEnableEditMode && effectiveCanEdit) {
           console.log('Auto-activating edit mode');
           setEditMode(true);
           setTimeout(initializeEditables, 500);
-        } else if (shouldEnableEditMode && !hasPermission) {
+        } else if (shouldEnableEditMode && !effectiveCanEdit) {
           toast({
             title: "Permission denied",
-            description: "You don't have editing privileges",
+            description: canEditCurrentPage 
+              ? "You don't have editing privileges" 
+              : "You don't have permission to edit this specific page",
             variant: "destructive",
           });
           navigateToNonEditVersion();
@@ -76,7 +84,6 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
   useEffect(() => {
     const loadContent = async () => {
       try {
-        const normalRoute = getNormalRoute();
         const content = await getPageContent(normalRoute);
 
         if (content) {
@@ -126,22 +133,31 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
 
     try {
       await signIn(email, password);
-      const hasPermission = await hasEditPermission();
       
-      if (hasPermission) {
+      const hasPermission = await hasEditPermission();
+      const canEditCurrentPage = await canEditPage(normalRoute);
+      
+      if (hasPermission && canEditCurrentPage) {
         setLoginDialogOpen(false);
         setEditMode(true);
         setTimeout(initializeEditables, 500);
       } else {
         toast({
           title: "Permission denied",
-          description: "You don't have editing privileges",
+          description: canEditCurrentPage 
+            ? "You don't have editing privileges" 
+            : "You don't have permission to edit this specific page",
           variant: "destructive",
         });
         navigateToNonEditVersion();
       }
     } catch (error) {
       console.error('Login error:', error);
+      toast({
+        title: "Login failed",
+        description: "Please check your credentials and try again",
+        variant: "destructive",
+      });
     }
   };
 
@@ -281,11 +297,16 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
 
     try {
       const pagePath = getNormalRoute();
+      
+      const canPublish = await hasPermission('publish_content');
+      
       await savePageContent(pagePath, contentToSave, user?.id);
 
       toast({
-        title: "Changes saved",
-        description: "Your content has been updated and stored in the database",
+        title: canPublish ? "Changes saved and published" : "Changes saved as draft",
+        description: canPublish 
+          ? "Your content has been updated and published to the site" 
+          : "Your changes have been saved as a draft and are awaiting approval",
       });
 
       prepareExportContent(contentToSave);
@@ -448,7 +469,6 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
 
   const loadPageContent = async () => {
     try {
-      const normalRoute = getNormalRoute();
       const content = await getPageContent(normalRoute);
 
       if (content) {
@@ -466,6 +486,18 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
   };
 
   const shouldShowEditor = isEditUrl || isEnabled;
+  const hasMediaPermission = useRef<boolean>(false);
+
+  useEffect(() => {
+    const checkMediaPermission = async () => {
+      if (user) {
+        const canManageMedia = await hasPermission('manage_media');
+        hasMediaPermission.current = canManageMedia;
+      }
+    };
+    
+    checkMediaPermission();
+  }, [user]);
 
   if (!shouldShowEditor) {
     return null;
@@ -749,14 +781,16 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
             
             <div className="border-r h-6 mx-1 border-gray-300"></div>
             
-            <Button 
-              size="sm" 
-              variant="outline"
-              onClick={handleImportClick}
-              title="Import Content"
-            >
-              <FileDown className="h-4 w-4" />
-            </Button>
+            {hasMediaPermission.current && (
+              <Button 
+                size="sm" 
+                variant="outline"
+                onClick={handleImportClick}
+                title="Import Content"
+              >
+                <FileDown className="h-4 w-4" />
+              </Button>
+            )}
           </>
         )}
         <Button 
