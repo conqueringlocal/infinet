@@ -18,14 +18,14 @@ const CMSSetup: React.FC = () => {
   const { toast } = useToast();
   const sqlRef = useRef<HTMLPreElement>(null);
 
+  // Improved SQL extraction to ensure we get complete SQL statements
   const extractSqlFromErrorMessage = (message: string) => {
-    // Try to find SQL section in the error message
     if (message.includes('CREATE TABLE')) {
+      // Find the SQL section starting with CREATE TABLE
       const sqlStartIdx = message.indexOf('CREATE TABLE');
-      let sql = message.substring(sqlStartIdx);
       
-      // Make sure we're returning the complete SQL block
-      return sql;
+      // Return the full SQL block
+      return message.substring(sqlStartIdx);
     }
     return null;
   };
@@ -43,11 +43,11 @@ const CMSSetup: React.FC = () => {
 
   const openSupabaseSqlEditor = () => {
     // Extract the Supabase project ID from the error message or env
-    const supabaseUrl = 'https://gqcfneuiruffgpwhkecy.supabase.co';
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://gqcfneuiruffgpwhkecy.supabase.co';
     const projectId = supabaseUrl.replace('https://', '').split('.')[0];
     
     // Open the SQL editor URL
-    window.open(`https://app.supabase.com/project/${projectId}/sql`, '_blank');
+    window.open(`https://app.supabase.com/project/${projectId}/sql/new`, '_blank');
   };
 
   const runSetup = async () => {
@@ -144,11 +144,12 @@ const CMSSetup: React.FC = () => {
                     </Button>
                   </div>
                 </div>
-                <div className="bg-gray-50 rounded-md border border-gray-200 p-3 overflow-auto max-h-64">
+                <div className="bg-gray-50 rounded-md border border-gray-200 p-3 overflow-auto max-h-[400px]">
                   <pre ref={sqlRef} className="text-xs whitespace-pre-wrap text-gray-800">{sql}</pre>
                 </div>
                 <p className="text-xs text-gray-500 mt-2">
-                  After running this SQL in your Supabase dashboard, return here and try again.
+                  After running this SQL in your Supabase dashboard, return here and try again. 
+                  Note: Remove the "IF NOT EXISTS" phrases from the policy creation lines if you encounter syntax errors.
                 </p>
               </div>
             )}

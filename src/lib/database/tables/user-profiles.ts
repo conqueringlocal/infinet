@@ -23,17 +23,17 @@ CREATE TABLE IF NOT EXISTS public.user_profiles (
 ALTER TABLE public.user_profiles ENABLE ROW LEVEL SECURITY;
 
 -- Create view policy
-CREATE POLICY IF NOT EXISTS "Users can view all profiles" 
+CREATE POLICY "Users can view all profiles" 
 ON public.user_profiles FOR SELECT 
 USING (true);
 
 -- Create update policy
-CREATE POLICY IF NOT EXISTS "Users can update own profile" 
+CREATE POLICY "Users can update own profile" 
 ON public.user_profiles FOR UPDATE 
 USING (auth.uid() = id);
 
 -- Create admin policy
-CREATE POLICY IF NOT EXISTS "Admins can update any profile" 
+CREATE POLICY "Admins can update any profile" 
 ON public.user_profiles FOR UPDATE 
 USING (
   EXISTS (
@@ -110,14 +110,17 @@ export const initializeUserProfilesTable = async (): Promise<{ success: boolean;
           const rlsSQL = `
             ALTER TABLE public.user_profiles ENABLE ROW LEVEL SECURITY;
             
+            -- Create view policy
             CREATE POLICY "Users can view all profiles" 
             ON public.user_profiles FOR SELECT 
             USING (true);
             
+            -- Create update policy
             CREATE POLICY "Users can update own profile" 
             ON public.user_profiles FOR UPDATE 
             USING (auth.uid() = id);
             
+            -- Create admin policy
             CREATE POLICY "Admins can update any profile" 
             ON public.user_profiles FOR UPDATE 
             USING (
