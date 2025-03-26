@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/Button";
@@ -36,8 +35,12 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { getAllUserProfiles, updateUserRole } from "@/lib/user-service";
-import type { UserProfile } from "@/lib/supabase";
+import { 
+  getAllUserProfiles, 
+  updateUserRole, 
+  UserProfile, 
+  UserRole
+} from "@/lib/user-service";
 import { useAuth } from "@/hooks/use-auth";
 import { ChevronDown, Search, UserPlus, MoreHorizontal, UserCheck, UserX } from 'lucide-react';
 
@@ -71,7 +74,7 @@ const Users = () => {
     }
   };
 
-  const handleRoleChange = async (userId: string, newRole: 'admin' | 'editor' | 'viewer') => {
+  const handleRoleChange = async (userId: string, newRole: UserRole) => {
     try {
       const success = await updateUserRole(userId, newRole);
       
@@ -118,6 +121,7 @@ const Users = () => {
     switch (role) {
       case 'admin': return 'default';
       case 'editor': return 'secondary';
+      case 'contributor': return 'outline';
       case 'viewer': return 'outline';
       default: return 'outline';
     }
@@ -185,6 +189,18 @@ const Users = () => {
                     />
                     <label htmlFor="role-viewer" className="text-sm">
                       Viewer - Can only view content
+                    </label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="radio"
+                      id="role-contributor"
+                      name="role"
+                      value="contributor"
+                      className="h-4 w-4"
+                    />
+                    <label htmlFor="role-contributor" className="text-sm">
+                      Contributor - Can edit assigned content only
                     </label>
                   </div>
                   <div className="flex items-center space-x-2">
@@ -287,7 +303,7 @@ const Users = () => {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      {new Date(userProfile.created_at).toLocaleDateString()}
+                      {userProfile.created_at ? new Date(userProfile.created_at).toLocaleDateString() : 'N/A'}
                     </TableCell>
                     <TableCell className="text-right">
                       <DropdownMenu>
@@ -308,6 +324,12 @@ const Users = () => {
                             disabled={userProfile.role === 'editor' || userProfile.id === user?.id}
                           >
                             Make Editor
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => handleRoleChange(userProfile.id, 'contributor')}
+                            disabled={userProfile.role === 'contributor' || userProfile.id === user?.id}
+                          >
+                            Make Contributor
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={() => handleRoleChange(userProfile.id, 'viewer')}

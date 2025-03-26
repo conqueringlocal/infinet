@@ -1,3 +1,4 @@
+
 import { supabase } from './supabase';
 
 // Enhanced role type
@@ -11,6 +12,7 @@ export interface UserProfile {
   id: string;
   email: string;
   display_name?: string;
+  full_name?: string; // For compatibility with existing code
   role: UserRole;
   created_at?: string;
   updated_at?: string;
@@ -58,17 +60,23 @@ export const hasPermission = async (permission: Permission): Promise<boolean> =>
       case 'manage_users':
         return profile.role === 'admin';
       
-      case 'edit_content':
-        return ['admin', 'editor', 'contributor'].includes(profile.role);
+      case 'edit_content': {
+        const allowedRoles: UserRole[] = ['admin', 'editor', 'contributor'];
+        return allowedRoles.includes(profile.role);
+      }
       
-      case 'publish_content':
-        return ['admin', 'editor'].includes(profile.role);
+      case 'publish_content': {
+        const allowedRoles: UserRole[] = ['admin', 'editor'];
+        return allowedRoles.includes(profile.role);
+      }
       
       case 'view_content':
         return true; // All authenticated users can view content
       
-      case 'manage_media':
-        return ['admin', 'editor'].includes(profile.role);
+      case 'manage_media': {
+        const allowedRoles: UserRole[] = ['admin', 'editor'];
+        return allowedRoles.includes(profile.role);
+      }
       
       default:
         return false;
@@ -273,6 +281,3 @@ export const getUserPageAssignments = async (userId: string): Promise<string[]> 
     return [];
   }
 };
-
-// Re-export UserProfile type so it can be used elsewhere
-export type { UserProfile, UserRole, Permission };
