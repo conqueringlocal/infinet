@@ -45,8 +45,8 @@ const AboutPreview = () => {
               <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-infinet-50 rounded-lg -z-10"></div>
               <div className="bg-gray-50 rounded-lg overflow-hidden shadow-xl border border-infinet-100">
                 <img 
-                  src="/lovable-uploads/9197edbf-232c-40b9-844b-12a37c0bbe4a.png" 
-                  alt="Network infrastructure and fiber optic cables"
+                  src="/lovable-uploads/b71b7aa9-dfb5-4deb-9ec1-273c4b756fd5.png" 
+                  alt="Infi-NET fiber optic infrastructure and connectivity solutions"
                   className="w-full h-auto object-cover object-center"
                 />
                 <div className="p-4 bg-infinetYellow-50 border-t border-infinet-100">
@@ -110,3 +110,4 @@ const AboutPreview = () => {
 };
 
 export default AboutPreview;
+
