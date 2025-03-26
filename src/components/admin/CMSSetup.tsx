@@ -1,12 +1,12 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { setupCMS } from '@/lib/database';
 import { Button } from '@/components/ui/Button';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2, CheckCircle, XCircle } from 'lucide-react';
+import { Loader2, CheckCircle, XCircle, Copy, ExternalLink } from 'lucide-react';
 
 const CMSSetup: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -16,6 +16,35 @@ const CMSSetup: React.FC = () => {
   const [email, setEmail] = useState('admin@example.com');
   const [password, setPassword] = useState('admin123');
   const { toast } = useToast();
+  const sqlRef = useRef<HTMLPreElement>(null);
+
+  const extractSqlFromErrorMessage = (message: string) => {
+    if (message.includes('CREATE TABLE IF NOT EXISTS')) {
+      const sqlStart = message.indexOf('CREATE TABLE');
+      return message.substring(sqlStart);
+    }
+    return null;
+  };
+
+  const copyToClipboard = () => {
+    if (sqlRef.current) {
+      const sql = sqlRef.current.textContent || '';
+      navigator.clipboard.writeText(sql);
+      toast({
+        title: "SQL Copied",
+        description: "SQL has been copied to clipboard",
+      });
+    }
+  };
+
+  const openSupabaseSqlEditor = () => {
+    // Extract the Supabase project ID from the error message or env
+    const supabaseUrl = 'https://gqcfneuiruffgpwhkecy.supabase.co';
+    const projectId = supabaseUrl.replace('https://', '').split('.')[0];
+    
+    // Open the SQL editor URL
+    window.open(`https://app.supabase.com/project/${projectId}/sql`, '_blank');
+  };
 
   const runSetup = async () => {
     try {
@@ -36,7 +65,7 @@ const CMSSetup: React.FC = () => {
         setSetupError(result.message);
         toast({
           title: "Setup Failed",
-          description: result.message,
+          description: "Please check the error details below",
           variant: "destructive",
         });
       }
@@ -52,6 +81,8 @@ const CMSSetup: React.FC = () => {
       setIsLoading(false);
     }
   };
+
+  const sql = setupError ? extractSqlFromErrorMessage(setupError) : null;
 
   return (
     <Card className="w-full max-w-md mx-auto">
@@ -71,12 +102,52 @@ const CMSSetup: React.FC = () => {
             </div>
           </div>
         ) : setupError ? (
-          <div className="p-4 bg-red-50 border border-red-200 rounded-md flex items-start">
-            <XCircle className="h-5 w-5 text-red-500 mr-2 flex-shrink-0 mt-0.5" />
-            <div>
-              <p className="text-red-800 font-medium">Setup Failed</p>
-              <p className="text-red-700 text-sm mt-1">{setupError}</p>
+          <div className="space-y-4">
+            <div className="p-4 bg-red-50 border border-red-200 rounded-md flex items-start">
+              <XCircle className="h-5 w-5 text-red-500 mr-2 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-red-800 font-medium">Setup Failed</p>
+                <p className="text-red-700 text-sm mt-1">
+                  {setupError && !setupError.includes('CREATE TABLE') 
+                    ? setupError 
+                    : "Could not automatically create the required tables. Please create them manually in Supabase."}
+                </p>
+              </div>
             </div>
+            
+            {sql && (
+              <div className="mt-4">
+                <div className="flex justify-between items-center mb-2">
+                  <h3 className="text-sm font-medium">Required SQL</h3>
+                  <div className="flex space-x-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="h-8 px-2 text-xs"
+                      onClick={copyToClipboard}
+                    >
+                      <Copy className="h-3.5 w-3.5 mr-1" />
+                      Copy SQL
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="h-8 px-2 text-xs"
+                      onClick={openSupabaseSqlEditor}
+                    >
+                      <ExternalLink className="h-3.5 w-3.5 mr-1" />
+                      Open SQL Editor
+                    </Button>
+                  </div>
+                </div>
+                <div className="bg-gray-50 rounded-md border border-gray-200 p-3 overflow-auto max-h-40">
+                  <pre ref={sqlRef} className="text-xs whitespace-pre-wrap text-gray-800">{sql}</pre>
+                </div>
+                <p className="text-xs text-gray-500 mt-2">
+                  After running this SQL in your Supabase dashboard, return here and try again.
+                </p>
+              </div>
+            )}
           </div>
         ) : (
           <>

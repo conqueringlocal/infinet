@@ -84,111 +84,95 @@ export const initializeUserProfilesTable = async (): Promise<{ success: boolean;
       
       // Try multiple approaches to create the table
       
-      // Approach 1: Create table with complete SQL definition
+      // Approach 1: Direct SQL execution through fetch API (most reliable)
       try {
-        const result = await createTableWithSql('user_profiles', USER_PROFILES_SQL);
-        if (result.success) {
-          return result;
-        }
-      } catch (error) {
-        console.warn('Failed to create table with complete SQL definition:', error);
-      }
-      
-      // Approach 2: Create table with simplified SQL (just the table, no policies)
-      try {
-        const result = await createTableWithSql('user_profiles', SIMPLE_USER_PROFILES_SQL);
-        if (result.success) {
-          console.log('Created table without policies, attempting to add policies...');
-          
-          // Now try to add policies
-          const policiesSQL = USER_PROFILES_SQL.split('CREATE TABLE')[1].split(';').slice(1).join(';');
-          await executeSql(policiesSQL);
-          
-          return { success: true, message: 'User profiles table created successfully with basic structure' };
-        }
-      } catch (error) {
-        console.warn('Failed to create table with simplified SQL:', error);
-      }
-      
-      // Approach 3: Create with schema object
-      try {
-        const schema = {
-          id: 'uuid primary key',
-          email: 'text not null',
-          display_name: 'text',
-          full_name: 'text',
-          role: 'text not null default \'viewer\'',
-          created_at: 'timestamp with time zone default now()',
-          updated_at: 'timestamp with time zone default now()',
-          avatar_url: 'text',
-          bio: 'text',
-          settings: 'jsonb'
-        };
-        
-        const result = await createTable('user_profiles', schema);
-        if (result.success) {
-          console.log('Created table with schema object, attempting to add RLS...');
-          
-          // Try to add RLS policies
-          try {
-            await executeSql(`
-              ALTER TABLE public.user_profiles ENABLE ROW LEVEL SECURITY;
-              
-              CREATE POLICY "Users can view all profiles" 
-              ON public.user_profiles FOR SELECT 
-              USING (true);
-              
-              CREATE POLICY "Users can update own profile" 
-              ON public.user_profiles FOR UPDATE 
-              USING (auth.uid() = id);
-              
-              CREATE POLICY "Admins can update any profile" 
-              ON public.user_profiles FOR UPDATE 
-              USING (
-                EXISTS (
-                  SELECT 1 FROM public.user_profiles 
-                  WHERE id = auth.uid() AND role = 'admin'
-                )
-              );
-            `);
-          } catch (error) {
-            console.warn('Failed to add RLS policies, but table was created:', error);
-          }
-          
-          return { success: true, message: 'User profiles table created successfully' };
-        }
-      } catch (error) {
-        console.warn('Failed to create table with schema object:', error);
-      }
-      
-      // Approach 4: Try using the REST API directly
-      try {
-        // Get the URL and API key from environment variables or configuration
-        const url = import.meta.env.VITE_SUPABASE_URL || 'https://gqcfneuiruffgpwhkecy.supabase.co';
+        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://gqcfneuiruffgpwhkecy.supabase.co';
         const apiKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdxY2ZuZXVpcnVmZmdwd2hrZWN5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI5NjUyNzAsImV4cCI6MjA1ODU0MTI3MH0.Wm8coMFjXv8TA2bQfiXoDYjzml92iTPSDuZOlPJhD_0';
         
-        const response = await fetch(`${url}/rest/v1/rpc/execute_sql`, {
+        // Create the table first
+        const tableResponse = await fetch(`${supabaseUrl}/rest/v1/`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'apikey': apiKey,
-            'Authorization': `Bearer ${apiKey}`
+            'Authorization': `Bearer ${apiKey}`,
+            'Prefer': 'return=minimal'
           },
-          body: JSON.stringify({ sql_query: SIMPLE_USER_PROFILES_SQL })
+          body: JSON.stringify({ 
+            query: SIMPLE_USER_PROFILES_SQL 
+          })
         });
         
-        if (response.ok) {
-          return { success: true, message: 'User profiles table created successfully via REST API' };
+        if (tableResponse.ok) {
+          console.log('Successfully created user_profiles table via direct fetch');
+          
+          // Now try to add RLS policies
+          const rlsSQL = `
+            ALTER TABLE public.user_profiles ENABLE ROW LEVEL SECURITY;
+            
+            CREATE POLICY "Users can view all profiles" 
+            ON public.user_profiles FOR SELECT 
+            USING (true);
+            
+            CREATE POLICY "Users can update own profile" 
+            ON public.user_profiles FOR UPDATE 
+            USING (auth.uid() = id);
+            
+            CREATE POLICY "Admins can update any profile" 
+            ON public.user_profiles FOR UPDATE 
+            USING (
+              EXISTS (
+                SELECT 1 FROM public.user_profiles 
+                WHERE id = auth.uid() AND role = 'admin'
+              )
+            );
+          `;
+          
+          const policyResponse = await fetch(`${supabaseUrl}/rest/v1/`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'apikey': apiKey,
+              'Authorization': `Bearer ${apiKey}`,
+              'Prefer': 'return=minimal'
+            },
+            body: JSON.stringify({ 
+              query: rlsSQL 
+            })
+          });
+          
+          if (policyResponse.ok) {
+            return { success: true, message: 'User profiles table and policies created successfully' };
+          } else {
+            return { success: true, message: 'User profiles table created, but policies may need manual setup' };
+          }
         }
       } catch (error) {
-        console.warn('Failed to create table via REST API:', error);
+        console.warn('Failed to create table via direct fetch:', error);
       }
       
-      // If all automatic approaches fail, provide SQL for manual creation
-      return { 
-        success: false, 
-        message: 'Could not automatically create the user_profiles table. Please create it manually in the Supabase dashboard using this SQL:\n\n' + USER_PROFILES_SQL
-      };
+      // Approach 2: Try using the Supabase SQL editor URL
+      try {
+        const message = 'Could not automatically create the user_profiles table. Please create it manually in the Supabase dashboard using this SQL:\n\n' + USER_PROFILES_SQL;
+        
+        // Extract the Supabase project ID from the URL
+        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://gqcfneuiruffgpwhkecy.supabase.co';
+        const projectId = supabaseUrl.replace('https://', '').split('.')[0];
+        
+        // Construct a direct link to the SQL editor
+        const sqlEditorUrl = `https://app.supabase.com/project/${projectId}/sql`;
+        
+        return { 
+          success: false, 
+          message: `${message}\n\nYou can run this SQL directly in your Supabase SQL editor: ${sqlEditorUrl}`
+        };
+      } catch (error) {
+        // If creating the link fails, fall back to just the SQL
+        return { 
+          success: false, 
+          message: 'Could not automatically create the user_profiles table. Please create it manually in the Supabase dashboard using this SQL:\n\n' + USER_PROFILES_SQL
+        };
+      }
     } else {
       console.error('Error checking user_profiles table:', checkError);
       return { success: false, message: `Error checking user_profiles table: ${checkError.message}` };
