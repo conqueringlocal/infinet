@@ -1,9 +1,9 @@
 
 import React from 'react';
+import FiberCmsInfo from './FiberCmsInfo';
 
-// This component has been deprecated in favor of a business-focused FiberInfo component
 const Fiber3DModel = () => {
-  return null;
+  return <FiberCmsInfo />;
 };
 
 export default Fiber3DModel;

@@ -23,6 +23,15 @@ import PointToPointPage from "./pages/service/PointToPoint";
 import NetworkPage from "./pages/service/Network";
 import MaintenancePage from "./pages/service/Maintenance";
 
+// Import admin pages
+import AdminLogin from "./pages/admin/Login";
+import AdminLayout from "./components/admin/AdminLayout";
+import AdminDashboard from "./pages/admin/Dashboard";
+import AdminPages from "./pages/admin/Pages";
+import AdminMedia from "./pages/admin/Media";
+import AdminUsers from "./pages/admin/Users";
+import AdminSettings from "./pages/admin/Settings";
+
 const queryClient = new QueryClient();
 
 const ScrollToTop = () => {
@@ -47,6 +56,8 @@ const ScrollToTop = () => {
       if (service) {
         pageTitle = `${service.charAt(0).toUpperCase() + service.slice(1)} Services | Infi-NET LLC`;
       }
+    } else if (pathname.includes("/admin")) {
+      pageTitle = "Admin Dashboard | Conquering Local CMS";
     }
     
     document.title = pageTitle;
@@ -72,6 +83,18 @@ const AppRoutes = () => {
         <Route path="/service/ptp" element={<PointToPointPage />} />
         <Route path="/service/network" element={<NetworkPage />} />
         <Route path="/service/maintenance" element={<MaintenancePage />} />
+        
+        {/* Admin routes */}
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route path="dashboard" element={<AdminDashboard />} />
+          <Route path="pages" element={<AdminPages />} />
+          <Route path="media" element={<AdminMedia />} />
+          <Route path="users" element={<AdminUsers />} />
+          <Route path="settings" element={<AdminSettings />} />
+          {/* Redirect /admin to /admin/dashboard */}
+          <Route path="" element={<AdminDashboard />} />
+        </Route>
         
         <Route path="*" element={<NotFound />} />
       </Routes>
