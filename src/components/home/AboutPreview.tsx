@@ -43,12 +43,18 @@ const AboutPreview = () => {
             <div className="relative">
               <div className="absolute -top-4 -left-4 w-32 h-32 bg-infinet-100 rounded-lg -z-10"></div>
               <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-infinet-50 rounded-lg -z-10"></div>
-              <div className="bg-gray-200 rounded-lg overflow-hidden shadow-2xl">
+              <div className="bg-gray-50 rounded-lg overflow-hidden shadow-xl border border-infinet-100">
                 <img 
-                  src="https://images.unsplash.com/photo-1605810230434-7631ac76ec81?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" 
-                  alt="Team of technicians working on fiber optic installation"
-                  className="w-full h-80 object-cover object-center transform hover:scale-105 transition-transform duration-700"
+                  src="/lovable-uploads/ecf95b44-fe0c-4311-90b5-9040f599ce5b.png" 
+                  alt="Fiber optic technology visualization"
+                  className="w-full h-auto object-cover object-center"
                 />
+                <div className="p-4 bg-infinetYellow-50 border-t border-infinet-100">
+                  <h3 className="text-lg font-medium text-gray-900">Explore Fiber Optic Technology</h3>
+                  <p className="text-sm text-gray-600 mt-1">
+                    Interact with our 3D fiber optic model to visualize the technology that powers our high-speed connectivity solutions.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -59,13 +65,13 @@ const AboutPreview = () => {
                 About Infi-NET LLC
               </EditableContent>
               <EditableContent id="about-section-heading" tag="h2" className="text-3xl md:text-4xl font-bold text-gray-900 mt-2">
-                Connecting Florida with Precision and Expertise
+                Leading Provider of Fiber & Low Voltage Solutions
               </EditableContent>
             </div>
 
             <div className="reveal">
               <EditableContent id="about-section-description" tag="p" className="text-gray-600 text-lg">
-                Founded on principles of quality and reliability, Infi-NET LLC brings over 35 years of combined experience to every project. Based in Lakeland, Florida, we specialize in fiber optic installations, low-voltage data cabling, and point-to-point applications for businesses across industries.
+                We bring over 35 years of combined experience to every project. Based in Lakeland, Florida, we specialize in fiber optic installations, low-voltage data cabling, and point-to-point applications for businesses across industries.
               </EditableContent>
             </div>
 
@@ -76,7 +82,9 @@ const AboutPreview = () => {
                 "Commitment to quality, safety, and industry best practices"
               ].map((item, index) => (
                 <div key={index} className="flex items-start">
-                  <CheckCircle className="h-5 w-5 text-infinet-600 mt-1 mr-2 flex-shrink-0" />
+                  <div className="h-6 w-6 rounded-full bg-infinetYellow-100 flex items-center justify-center mt-1 mr-2 flex-shrink-0">
+                    <span className="text-infinet-600 font-bold">✓</span>
+                  </div>
                   <EditableContent id={`about-bullet-${index+1}`} tag="p" className="text-gray-700">
                     {item}
                   </EditableContent>
