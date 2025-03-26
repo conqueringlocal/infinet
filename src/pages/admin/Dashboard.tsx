@@ -4,7 +4,7 @@ import { Card } from '@/components/ui/card';
 import { FileText, Image, Users, Globe, ArrowRight, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Link } from 'react-router-dom';
-import { DashboardSummary } from '@/components/admin/DashboardSummary';
+import DashboardSummary from '@/components/admin/DashboardSummary';
 import { supabase } from '@/lib/supabase';
 import { InteractiveCard } from '@/components/ui/InteractiveCard';
 
