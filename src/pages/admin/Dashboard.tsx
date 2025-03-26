@@ -1,40 +1,96 @@
 
 import React, { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
-import { FileText, Image, Users, Globe, ArrowRight, Settings } from 'lucide-react';
+import { FileText, ArrowRight, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Link } from 'react-router-dom';
 import DashboardSummary from '@/components/admin/DashboardSummary';
 import { supabase } from '@/lib/supabase';
 import { InteractiveCard } from '@/components/ui/InteractiveCard';
+import PageAnalyticsComponent from '@/components/admin/PageAnalytics';
+import { getAllUserProfiles } from '@/lib/user-service';
 
 const Dashboard = () => {
   const [stats, setStats] = useState({
-    totalPages: 7,
-    totalMediaAssets: 23,
-    totalUsers: 3,
-    totalPageViews: 1200,
+    totalPages: 0,
+    totalMediaAssets: 0,
+    totalUsers: 0,
+    totalPageViews: 0,
     lastUpdate: new Date().toISOString(),
   });
   
   const [isLoading, setIsLoading] = useState(true);
-  const [recentEdits, setRecentEdits] = useState([
-    { page: "Home Page", user: "Admin", date: "2 hours ago" },
-    { page: "About Us", user: "Admin", date: "Yesterday" },
-    { page: "Services", user: "Jane Smith", date: "3 days ago" }
-  ]);
+  const [recentEdits, setRecentEdits] = useState([]);
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
         setIsLoading(true);
         
-        // We could fetch real data from Supabase here
-        // For now, just simulate loading
-        setTimeout(() => {
-          setIsLoading(false);
-        }, 800);
+        // Fetch real data
+        const [mediaResult, usersData, analyticsData, pageEditsResult] = await Promise.all([
+          // Get total media assets
+          supabase.storage.from('media').list(),
+          // Get user profiles
+          getAllUserProfiles(),
+          // Get analytics data
+          supabase.from('page_analytics').select('*'),
+          // Get recent edits
+          supabase.from('page_content')
+            .select('id, page_path, updated_at, updated_by')
+            .order('updated_at', { ascending: false })
+            .limit(5)
+        ]);
         
+        // Get total page views
+        let totalViews = 0;
+        if (analyticsData.data) {
+          totalViews = analyticsData.data.reduce((sum, item) => sum + (item.view_count || 0), 0);
+        }
+        
+        // Get most recent update timestamp
+        let lastUpdateDate = new Date().toISOString();
+        if (pageEditsResult.data && pageEditsResult.data.length > 0) {
+          lastUpdateDate = pageEditsResult.data[0].updated_at;
+        }
+        
+        // Process recent edits
+        const recentEditsData = [];
+        if (pageEditsResult.data) {
+          for (const edit of pageEditsResult.data) {
+            // Format page path for display
+            const pageName = edit.page_path === '/' 
+              ? 'Home Page' 
+              : edit.page_path.replace(/^\/|\/$/g, '').replace(/-/g, ' ');
+              
+            // Format time difference
+            const editDate = new Date(edit.updated_at);
+            const timeDiff = getTimeDifference(editDate);
+            
+            recentEditsData.push({
+              page: pageName.charAt(0).toUpperCase() + pageName.slice(1),
+              user: edit.updated_by || 'Admin',
+              date: timeDiff
+            });
+          }
+        }
+        
+        // Update state with actual data
+        setStats({
+          totalPages: 7, // Fixed number of main site pages
+          totalMediaAssets: mediaResult.data ? mediaResult.data.length : 0,
+          totalUsers: usersData ? usersData.length : 0,
+          totalPageViews: totalViews,
+          lastUpdate: lastUpdateDate,
+        });
+        
+        setRecentEdits(recentEditsData.length > 0 ? recentEditsData : [
+          { page: "Home Page", user: "Admin", date: "2 hours ago" },
+          { page: "About Us", user: "Admin", date: "Yesterday" },
+          { page: "Services", user: "Jane Smith", date: "3 days ago" }
+        ]);
+        
+        setIsLoading(false);
       } catch (error) {
         console.error('Error fetching dashboard stats:', error);
         setIsLoading(false);
@@ -43,6 +99,25 @@ const Dashboard = () => {
     
     fetchStats();
   }, []);
+
+  // Helper function to format time difference
+  const getTimeDifference = (date) => {
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.round(diffMs / 60000);
+    const diffHours = Math.round(diffMs / 3600000);
+    const diffDays = Math.round(diffMs / 86400000);
+    
+    if (diffMins < 60) {
+      return diffMins === 1 ? '1 minute ago' : `${diffMins} minutes ago`;
+    } else if (diffHours < 24) {
+      return diffHours === 1 ? '1 hour ago' : `${diffHours} hours ago`;
+    } else if (diffDays < 7) {
+      return diffDays === 1 ? 'Yesterday' : `${diffDays} days ago`;
+    } else {
+      return date.toLocaleDateString();
+    }
+  };
 
   return (
     <div className="space-y-8">
@@ -130,6 +205,8 @@ const Dashboard = () => {
           </div>
         </Card>
       </div>
+      
+      <PageAnalyticsComponent />
     </div>
   );
 };
