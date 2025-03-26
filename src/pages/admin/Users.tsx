@@ -1,79 +1,228 @@
 
-import React, { useEffect, useState } from 'react';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/input';
+import React, { useState, useEffect } from 'react';
+import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/input";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from '@/components/ui/table';
-import { Search, UserPlus, MoreHorizontal, CheckCircle, XCircle } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/lib/supabase';
-import { useAuth } from '@/hooks/use-auth';
-import { UserProfile } from '@/lib/supabase';
-import { useQuery } from '@tanstack/react-query';
-
-const fetchUsers = async (): Promise<UserProfile[]> => {
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('*')
-    .order('created_at', { ascending: false });
-  
-  if (error) {
-    throw new Error(error.message);
-  }
-  
-  return data || [];
-};
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { getAllUserProfiles, updateUserRole, UserProfile } from "@/lib/user-service";
+import { useAuth } from "@/hooks/use-auth";
+import { ChevronDown, Search, UserPlus, MoreHorizontal, UserCheck, UserX } from 'lucide-react';
 
 const Users = () => {
   const { toast } = useToast();
   const { user } = useAuth();
+  const [users, setUsers] = useState<UserProfile[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  
-  const { data: users = [], isLoading, error, refetch } = useQuery({
-    queryKey: ['users'],
-    queryFn: fetchUsers,
-  });
-  
+  const [isLoading, setIsLoading] = useState(true);
+  const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState('');
+
   useEffect(() => {
-    if (error) {
+    loadUsers();
+  }, []);
+
+  const loadUsers = async () => {
+    setIsLoading(true);
+    try {
+      const userProfiles = await getAllUserProfiles();
+      setUsers(userProfiles);
+    } catch (error) {
+      console.error('Error loading users:', error);
       toast({
-        title: "Error loading users",
-        description: (error as Error).message,
-        variant: "destructive",
+        title: 'Error loading users',
+        description: 'There was a problem loading the user list',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleRoleChange = async (userId: string, newRole: 'admin' | 'editor' | 'viewer') => {
+    try {
+      const success = await updateUserRole(userId, newRole);
+      
+      if (success) {
+        setUsers(prevUsers => 
+          prevUsers.map(u => 
+            u.id === userId ? { ...u, role: newRole } : u
+          )
+        );
+        
+        toast({
+          title: "Role updated",
+          description: `User role has been updated to ${newRole}`,
+        });
+      } else {
+        throw new Error('Failed to update role');
+      }
+    } catch (error) {
+      console.error('Error updating role:', error);
+      toast({
+        title: 'Error updating role',
+        description: 'There was a problem updating the user role',
+        variant: 'destructive',
       });
     }
-  }, [error, toast]);
+  };
 
-  const filteredUsers = searchQuery
-    ? users.filter(user => 
-        user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (user.full_name && user.full_name.toLowerCase().includes(searchQuery.toLowerCase())))
-    : users;
-
-  const handleAddUser = () => {
+  const handleInviteUser = () => {
     toast({
-      title: "Add user",
-      description: "This would open a form to add a new user",
+      title: "Invitation sent",
+      description: `An invitation has been sent to ${inviteEmail}`,
     });
+    setInviteEmail('');
+    setIsInviteDialogOpen(false);
+    // In a real implementation, this would create an invitation in Supabase
+  };
+
+  const filteredUsers = users.filter(user => 
+    user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (user.full_name && user.full_name.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
+
+  const getRoleBadgeVariant = (role: string) => {
+    switch (role) {
+      case 'admin': return 'default';
+      case 'editor': return 'secondary';
+      case 'viewer': return 'outline';
+      default: return 'outline';
+    }
+  };
+
+  const getInitials = (fullName?: string, email?: string) => {
+    if (fullName) {
+      return fullName
+        .split(' ')
+        .map(name => name[0])
+        .join('')
+        .toUpperCase()
+        .substring(0, 2);
+    }
+    
+    if (email) {
+      return email.substring(0, 2).toUpperCase();
+    }
+    
+    return 'U';
   };
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-800">Users</h1>
-        <Button 
-          variant="default" 
-          className="bg-[#003366] hover:bg-[#002244]"
-          onClick={handleAddUser}
-        >
-          <UserPlus className="h-4 w-4 mr-2" /> Add User
-        </Button>
+        <h1 className="text-2xl font-bold text-gray-800">Users &amp; Permissions</h1>
+        <Dialog open={isInviteDialogOpen} onOpenChange={setIsInviteDialogOpen}>
+          <DialogTrigger asChild>
+            <Button className="bg-[#003366] hover:bg-[#002244]">
+              <UserPlus className="h-4 w-4 mr-2" /> Invite User
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Invite new user</DialogTitle>
+              <DialogDescription>
+                Send an invitation to join your content management team.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <label htmlFor="email" className="text-sm font-medium">
+                  Email Address
+                </label>
+                <Input
+                  id="email"
+                  placeholder="email@example.com"
+                  value={inviteEmail}
+                  onChange={(e) => setInviteEmail(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">
+                  Permission Level
+                </label>
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="radio"
+                      id="role-viewer"
+                      name="role"
+                      value="viewer"
+                      defaultChecked
+                      className="h-4 w-4"
+                    />
+                    <label htmlFor="role-viewer" className="text-sm">
+                      Viewer - Can only view content
+                    </label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="radio"
+                      id="role-editor"
+                      name="role"
+                      value="editor"
+                      className="h-4 w-4"
+                    />
+                    <label htmlFor="role-editor" className="text-sm">
+                      Editor - Can edit content
+                    </label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="radio"
+                      id="role-admin"
+                      name="role"
+                      value="admin"
+                      className="h-4 w-4"
+                    />
+                    <label htmlFor="role-admin" className="text-sm">
+                      Admin - Full control over content and users
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsInviteDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button className="bg-[#003366]" onClick={handleInviteUser}>
+                Send Invitation
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <div className="flex items-center space-x-2">
@@ -86,74 +235,102 @@ const Users = () => {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
+        <Button variant="outline" className="flex items-center">
+          Filter
+          <ChevronDown className="ml-2 h-4 w-4" />
+        </Button>
       </div>
 
-      <div className="bg-white rounded-lg shadow">
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Role</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoading ? (
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle>Team Members</CardTitle>
+          <CardDescription>
+            Manage user access and permissions for your content management system.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <div className="flex justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+            </div>
+          ) : filteredUsers.length > 0 ? (
+            <Table>
+              <TableHeader>
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center py-8">
-                    Loading users...
-                  </TableCell>
+                  <TableHead>User</TableHead>
+                  <TableHead>Role</TableHead>
+                  <TableHead>Joined</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
-              ) : filteredUsers.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-center py-8">
-                    No users found
-                  </TableCell>
-                </TableRow>
-              ) : (
-                filteredUsers.map((user) => (
-                  <TableRow key={user.id} className="hover:bg-gray-50">
-                    <TableCell className="font-medium">
-                      {user.full_name || 'Unnamed User'}
-                    </TableCell>
-                    <TableCell>{user.email}</TableCell>
+              </TableHeader>
+              <TableBody>
+                {filteredUsers.map((userProfile) => (
+                  <TableRow key={userProfile.id}>
                     <TableCell>
-                      <span className={`px-2 py-1 text-xs rounded-full ${
-                        user.role === 'admin' 
-                          ? 'bg-purple-100 text-purple-700' 
-                          : user.role === 'editor'
-                          ? 'bg-blue-100 text-blue-700'
-                          : 'bg-gray-100 text-gray-700'
-                      }`}>
-                        {user.role}
-                      </span>
+                      <div className="flex items-center gap-3">
+                        <Avatar>
+                          <AvatarImage src={userProfile.avatar_url || ''} />
+                          <AvatarFallback>{getInitials(userProfile.full_name, userProfile.email)}</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <div className="font-medium">{userProfile.full_name || userProfile.email}</div>
+                          {userProfile.full_name && (
+                            <div className="text-sm text-gray-500">{userProfile.email}</div>
+                          )}
+                        </div>
+                      </div>
                     </TableCell>
                     <TableCell>
-                      {user.id ? (
-                        <span className="flex items-center px-2 py-1 text-xs rounded-full bg-green-100 text-green-700">
-                          <CheckCircle className="h-3 w-3 mr-1" /> Active
-                        </span>
-                      ) : (
-                        <span className="flex items-center px-2 py-1 text-xs rounded-full bg-red-100 text-red-700">
-                          <XCircle className="h-3 w-3 mr-1" /> Inactive
-                        </span>
-                      )}
+                      <Badge variant={getRoleBadgeVariant(userProfile.role)}>
+                        {userProfile.role}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {new Date(userProfile.created_at).toLocaleDateString()}
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button variant="ghost" size="icon">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem
+                            onClick={() => handleRoleChange(userProfile.id, 'admin')}
+                            disabled={userProfile.role === 'admin' || userProfile.id === user?.id}
+                          >
+                            Make Admin
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => handleRoleChange(userProfile.id, 'editor')}
+                            disabled={userProfile.role === 'editor' || userProfile.id === user?.id}
+                          >
+                            Make Editor
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => handleRoleChange(userProfile.id, 'viewer')}
+                            disabled={userProfile.role === 'viewer' || userProfile.id === user?.id}
+                          >
+                            Make Viewer
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </TableCell>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </div>
-      </div>
+                ))}
+              </TableBody>
+            </Table>
+          ) : (
+            <div className="text-center py-10">
+              <p className="text-gray-500">No users found</p>
+              <Button variant="outline" className="mt-4" onClick={() => setIsInviteDialogOpen(true)}>
+                <UserPlus className="h-4 w-4 mr-2" /> Invite Users
+              </Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 };

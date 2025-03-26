@@ -7,6 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { savePageContent, getPageContent } from '@/lib/content-service';
 import { useAuth } from '@/hooks/use-auth';
+import { hasEditPermission } from '@/lib/user-service';
 
 interface InPlaceEditorProps {
   isEnabled: boolean;
@@ -24,6 +25,7 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
   const [contentChanged, setContentChanged] = useState(false);
   const [exportedContent, setExportedContent] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const [canEdit, setCanEdit] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const exportContentRef = useRef<HTMLTextAreaElement>(null);
   const { toast } = useToast();
@@ -39,15 +41,31 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
     const shouldEnableEditMode = isEditUrl || isEnabled;
     console.log('Should enable edit mode?', shouldEnableEditMode);
 
-    if (shouldEnableEditMode && user) {
-      console.log('Auto-activating edit mode');
-      setEditMode(true);
-
-      setTimeout(initializeEditables, 500);
-    } else if (shouldEnableEditMode && !user) {
-      console.log('Opening login dialog for edit mode');
-      setLoginDialogOpen(true);
-    }
+    const checkPermission = async () => {
+      if (user) {
+        const hasPermission = await hasEditPermission();
+        setCanEdit(hasPermission);
+        console.log('User has edit permission:', hasPermission);
+        
+        if (shouldEnableEditMode && hasPermission) {
+          console.log('Auto-activating edit mode');
+          setEditMode(true);
+          setTimeout(initializeEditables, 500);
+        } else if (shouldEnableEditMode && !hasPermission) {
+          toast({
+            title: "Permission denied",
+            description: "You don't have editing privileges",
+            variant: "destructive",
+          });
+          navigateToNonEditVersion();
+        }
+      } else if (shouldEnableEditMode) {
+        console.log('Opening login dialog for edit mode');
+        setLoginDialogOpen(true);
+      }
+    };
+    
+    checkPermission();
   }, [isEditUrl, isEnabled, user]);
 
   useEffect(() => {
@@ -99,10 +117,20 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
 
     try {
       await signIn(email, password);
-      setLoginDialogOpen(false);
-      setEditMode(true);
-
-      setTimeout(initializeEditables, 500);
+      const hasPermission = await hasEditPermission();
+      
+      if (hasPermission) {
+        setLoginDialogOpen(false);
+        setEditMode(true);
+        setTimeout(initializeEditables, 500);
+      } else {
+        toast({
+          title: "Permission denied",
+          description: "You don't have editing privileges",
+          variant: "destructive",
+        });
+        navigateToNonEditVersion();
+      }
     } catch (error) {
       console.error('Login error:', error);
     }
@@ -495,7 +523,7 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
             size="sm" 
             onClick={() => setEditMode(true)}
             className="bg-blue-600 hover:bg-blue-700"
-            disabled={!user}
+            disabled={!user || !canEdit}
           >
             <Edit className="h-4 w-4 mr-2" />
             Edit Page
