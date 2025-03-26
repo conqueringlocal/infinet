@@ -29,7 +29,6 @@ import MaintenancePage from "./pages/service/Maintenance";
 import AdminLogin from "./pages/admin/Login";
 import AdminLayout from "./components/admin/AdminLayout";
 import AdminDashboard from "./pages/admin/Dashboard";
-import AdminPages from "./pages/admin/Pages";
 import AdminMedia from "./pages/admin/Media";
 import AdminUsers from "./pages/admin/Users";
 import AdminSettings from "./pages/admin/Settings";
@@ -70,19 +69,16 @@ const ScrollToTop = () => {
   return null;
 };
 
-// This component determines if we're in edit mode
 const PageWithEditor = () => {
   const location = useLocation();
   const isEditMode = location.pathname === '/edit' || location.pathname.endsWith('/edit');
   
-  // Use the page view hook
   usePageView();
   
   console.log('====== APP ROUTING ======');
   console.log('Current URL path:', location.pathname);
   console.log('Is edit mode enabled?', isEditMode);
   
-  // Get the corresponding normal route for this edit route
   const getNormalRoute = () => {
     if (location.pathname === '/edit') return '/';
     if (location.pathname.endsWith('/edit')) {
@@ -94,9 +90,7 @@ const PageWithEditor = () => {
   const normalRoute = getNormalRoute();
   console.log('Normal route equivalent:', normalRoute);
   
-  // Load content when component mounts to ensure it's available across page navigation
   useEffect(() => {
-    // Restore content from sessionStorage to ensure persistence during navigation
     try {
       const sessionContent = sessionStorage.getItem('page_content');
       if (sessionContent && !localStorage.getItem('page_content')) {
@@ -108,9 +102,7 @@ const PageWithEditor = () => {
     }
   }, [location.pathname]);
   
-  // Function to render the appropriate component based on the route
   const renderComponent = () => {
-    // Strip "/edit" suffix if present to determine which page to render
     switch (normalRoute) {
       case '/': return <Index />;
       case '/about': return <About />;
@@ -139,7 +131,6 @@ const AppRoutes = () => {
   return (
     <PageTransition>
       <Routes>
-        {/* Regular routes */}
         <Route path="/" element={<PageWithEditor />} />
         <Route path="/about" element={<PageWithEditor />} />
         <Route path="/services" element={<PageWithEditor />} />
@@ -152,17 +143,14 @@ const AppRoutes = () => {
         <Route path="/service/network" element={<PageWithEditor />} />
         <Route path="/service/maintenance" element={<PageWithEditor />} />
         
-        {/* Edit mode routes */}
         <Route path="/edit" element={<PageWithEditor />} />
         <Route path="/:page/edit" element={<PageWithEditor />} />
         <Route path="/service/:service/edit" element={<PageWithEditor />} />
         
-        {/* Admin routes */}
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin/setup" element={<SetupPage />} />
         <Route path="/admin" element={<AdminLayout />}>
           <Route path="dashboard" element={<AdminDashboard />} />
-          <Route path="pages" element={<AdminPages />} />
           <Route path="media" element={<AdminMedia />} />
           <Route path="users" element={<AdminUsers />} />
           <Route path="settings" element={<AdminSettings />} />

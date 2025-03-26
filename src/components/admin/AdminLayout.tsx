@@ -13,7 +13,6 @@ import {
 } from '@/components/ui/sidebar';
 import { 
   LayoutDashboard, 
-  FileText, 
   Image, 
   Settings, 
   LogOut, 
@@ -181,7 +180,6 @@ const AdminSidebar = ({ onLogout }: AdminSidebarProps) => {
         
         <SidebarNavItems>
           <SidebarNavItem href="/admin/dashboard" title="Dashboard" icon={<LayoutDashboard className="h-4 w-4" />} />
-          <SidebarNavItem href="/admin/pages" title="Pages" icon={<FileText className="h-4 w-4" />} />
           <SidebarNavItem href="/admin/media" title="Media" icon={<Image className="h-4 w-4" />} />
           <SidebarNavItem href="/admin/users" title="Users" icon={<Users className="h-4 w-4" />} />
           <SidebarNavItem href="/admin/settings" title="Settings" icon={<Settings className="h-4 w-4" />} />
