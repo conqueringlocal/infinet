@@ -292,7 +292,7 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
     sessionStorage.setItem('page_content', JSON.stringify(contentToSave));
 
     try {
-      const pagePath = getNormalRoute();
+      const pagePath = getNormalRouteFromPath(location.pathname);
       
       const canPublish = await hasPermission('publish_content');
       
