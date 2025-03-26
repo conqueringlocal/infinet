@@ -1,3 +1,4 @@
+
 import { Link } from 'react-router-dom';
 import { MapPin, Phone, Mail, Facebook, Twitter, Instagram, Linkedin, ChevronRight, LockKeyhole } from 'lucide-react';
 
@@ -157,3 +158,4 @@ const Footer = () => {
 };
 
 export default Footer;
+
