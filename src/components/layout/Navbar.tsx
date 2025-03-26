@@ -67,9 +67,14 @@ const Navbar = () => {
   }, [location]);
 
   return (
-    <header className={cn('fixed top-0 left-0 right-0 z-50 transition-all duration-300', scrolled ? 'bg-white/90 backdrop-blur-md py-3 shadow-md' : 'bg-transparent py-5')}>
+    <header className={cn(
+      'fixed top-0 left-0 right-0 z-50 transition-all duration-300', 
+      scrolled 
+        ? 'bg-white py-3 shadow-md' 
+        : 'bg-white/95 backdrop-blur-md py-5'
+    )}>
       {/* Gradient Loading Animation */}
-      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-infinetYellow-400 to-infinet-500"></div>
+      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-infinet-500 to-infinetYellow-400"></div>
       
       <div className="container mx-auto px-4 md:px-6">
         <div className="flex items-center justify-between">
@@ -86,17 +91,17 @@ const Navbar = () => {
                     <NavigationMenuItem>
                       <NavigationMenuTrigger className={cn(
                         'px-3 py-2 text-sm font-medium transition-colors',
-                        location.pathname.includes('/service/') ? 'text-infinet-600 bg-infinet-50' : 'text-gray-700 hover:text-infinet-600 hover:bg-infinet-50'
+                        location.pathname.includes('/service/') ? 'text-infinet-600 bg-infinet-50' : 'text-gray-800 hover:text-infinet-600 hover:bg-infinet-50'
                       )}>
                         {link.label}
                       </NavigationMenuTrigger>
                       <NavigationMenuContent>
-                        <ul className="grid gap-3 p-4 w-[220px]">
+                        <ul className="grid gap-3 p-4 w-[220px] bg-white shadow-lg rounded-md">
                           <li>
                             <NavigationMenuLink asChild>
                               <Link 
                                 to={link.path}
-                                className="block p-2 hover:bg-infinet-50 rounded-md text-sm font-medium text-gray-700 hover:text-infinet-600"
+                                className="block p-2 hover:bg-infinet-50 rounded-md text-sm font-medium text-gray-800 hover:text-infinet-600"
                               >
                                 All Services
                               </Link>
@@ -109,7 +114,7 @@ const Navbar = () => {
                                   to={serviceLink.path}
                                   className={cn(
                                     "block p-2 hover:bg-infinet-50 rounded-md text-sm font-medium transition-colors",
-                                    location.pathname === serviceLink.path ? 'text-infinet-600 bg-infinet-50' : 'text-gray-700 hover:text-infinet-600'
+                                    location.pathname === serviceLink.path ? 'text-infinet-600 bg-infinet-50' : 'text-gray-800 hover:text-infinet-600'
                                   )}
                                 >
                                   {serviceLink.label}
@@ -127,17 +132,19 @@ const Navbar = () => {
                   key={link.path} 
                   to={link.path} 
                   className={cn('px-3 py-2 rounded-md text-sm font-medium transition-colors', 
-                    location.pathname === link.path ? 'text-infinet-600 bg-infinet-50' : 'text-gray-700 hover:text-infinet-600 hover:bg-infinet-50')}
+                    location.pathname === link.path ? 'text-infinet-600 bg-infinet-50' : 'text-gray-800 hover:text-infinet-600 hover:bg-infinet-50')}
                 >
                   {link.label}
                 </Link>
               )
             )}
-            <Button variant="accent" size="sm" className="ml-2" onClick={() => window.location.href = '/contact'}>Get in Touch</Button>
+            <Button variant="accent" size="sm" className="ml-3 bg-infinet-500 hover:bg-infinet-600 text-white" onClick={() => window.location.href = '/contact'}>Get in Touch</Button>
+            <Button variant="outline" size="sm" className="ml-2 border-infinet-500 text-infinet-500 hover:bg-infinet-50" onClick={() => window.location.href = '/admin/login'}>Login</Button>
           </nav>
 
           <div className="md:hidden flex items-center">
-            <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-gray-700 hover:text-infinet-600" aria-label="Toggle menu">
+            <Button variant="outline" size="sm" className="mr-2 border-infinet-500 text-infinet-500 hover:bg-infinet-50" onClick={() => window.location.href = '/admin/login'}>Login</Button>
+            <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-gray-800 hover:text-infinet-600" aria-label="Toggle menu">
               {isMenuOpen ? <X size={24} className="transition-transform duration-300 transform rotate-90" /> : <Menu size={24} className="transition-transform duration-300" />}
             </button>
           </div>
@@ -155,7 +162,7 @@ const Navbar = () => {
                     onClick={() => setShowServiceMenu(!showServiceMenu)}
                     className={cn(
                       'flex items-center justify-between px-3 py-3 rounded-md text-base font-medium transition-colors', 
-                      location.pathname.includes('/service/') ? 'text-infinet-600 bg-infinet-50' : 'text-gray-700 hover:text-infinet-600 hover:bg-infinet-50'
+                      location.pathname.includes('/service/') ? 'text-infinet-600 bg-infinet-50' : 'text-gray-800 hover:text-infinet-600 hover:bg-infinet-50'
                     )}
                   >
                     <span>{link.label}</span>
@@ -172,7 +179,7 @@ const Navbar = () => {
                   )}>
                     <Link 
                       to={link.path} 
-                      className="block px-3 py-2 rounded-md text-sm text-gray-700 hover:text-infinet-600 hover:bg-infinet-50"
+                      className="block px-3 py-2 rounded-md text-sm text-gray-800 hover:text-infinet-600 hover:bg-infinet-50"
                     >
                       All Services
                     </Link>
@@ -182,7 +189,7 @@ const Navbar = () => {
                         to={serviceLink.path} 
                         className={cn(
                           "block px-3 py-2 rounded-md text-sm transition-colors",
-                          location.pathname === serviceLink.path ? 'text-infinet-600 bg-infinet-50' : 'text-gray-700 hover:text-infinet-600 hover:bg-infinet-50'
+                          location.pathname === serviceLink.path ? 'text-infinet-600 bg-infinet-50' : 'text-gray-800 hover:text-infinet-600 hover:bg-infinet-50'
                         )}
                       >
                         {serviceLink.label}
@@ -196,7 +203,7 @@ const Navbar = () => {
                   to={link.path} 
                   className={cn(
                     'px-3 py-3 rounded-md text-base font-medium transition-colors', 
-                    location.pathname === link.path ? 'text-infinet-600 bg-infinet-50' : 'text-gray-700 hover:text-infinet-600 hover:bg-infinet-50'
+                    location.pathname === link.path ? 'text-infinet-600 bg-infinet-50' : 'text-gray-800 hover:text-infinet-600 hover:bg-infinet-50'
                   )}
                 >
                   {link.label}
