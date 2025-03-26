@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -16,6 +17,8 @@ import ScrollProgressBar from "./components/ui/ScrollProgressBar";
 import Chatbot from "./components/ui/Chatbot";
 import InPlaceEditor from "./components/editor/InPlaceEditor";
 import { usePageView } from "./hooks/use-page-view";
+import Navbar from "./components/layout/Navbar";
+import Footer from "./components/layout/Footer";
 
 // Import individual service pages
 import FiberServicePage from "./pages/service/Fiber";
@@ -128,38 +131,56 @@ const PageWithEditor = () => {
 };
 
 const AppRoutes = () => {
+  const location = useLocation();
+  const isAdminRoute = location.pathname.startsWith('/admin');
+  
+  // Only render Navbar and Footer for non-admin routes
+  if (isAdminRoute) {
+    return (
+      <PageTransition>
+        <Routes>
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin/setup" element={<SetupPage />} />
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route path="dashboard" element={<AdminDashboard />} />
+            <Route path="media" element={<AdminMedia />} />
+            <Route path="users" element={<AdminUsers />} />
+            <Route path="settings" element={<AdminSettings />} />
+            <Route path="" element={<AdminDashboard />} />
+          </Route>
+        </Routes>
+      </PageTransition>
+    );
+  }
+  
   return (
-    <PageTransition>
-      <Routes>
-        <Route path="/" element={<PageWithEditor />} />
-        <Route path="/about" element={<PageWithEditor />} />
-        <Route path="/services" element={<PageWithEditor />} />
-        <Route path="/projects" element={<PageWithEditor />} />
-        <Route path="/contact" element={<PageWithEditor />} />
-        <Route path="/service/fiber" element={<PageWithEditor />} />
-        <Route path="/service/structured" element={<PageWithEditor />} />
-        <Route path="/service/wireless" element={<PageWithEditor />} />
-        <Route path="/service/ptp" element={<PageWithEditor />} />
-        <Route path="/service/network" element={<PageWithEditor />} />
-        <Route path="/service/maintenance" element={<PageWithEditor />} />
-        
-        <Route path="/edit" element={<PageWithEditor />} />
-        <Route path="/:page/edit" element={<PageWithEditor />} />
-        <Route path="/service/:service/edit" element={<PageWithEditor />} />
-        
-        <Route path="/admin/login" element={<AdminLogin />} />
-        <Route path="/admin/setup" element={<SetupPage />} />
-        <Route path="/admin" element={<AdminLayout />}>
-          <Route path="dashboard" element={<AdminDashboard />} />
-          <Route path="media" element={<AdminMedia />} />
-          <Route path="users" element={<AdminUsers />} />
-          <Route path="settings" element={<AdminSettings />} />
-          <Route path="" element={<AdminDashboard />} />
-        </Route>
-        
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </PageTransition>
+    <>
+      <Navbar />
+      <div className="pt-20">
+        <PageTransition>
+          <Routes>
+            <Route path="/" element={<PageWithEditor />} />
+            <Route path="/about" element={<PageWithEditor />} />
+            <Route path="/services" element={<PageWithEditor />} />
+            <Route path="/projects" element={<PageWithEditor />} />
+            <Route path="/contact" element={<PageWithEditor />} />
+            <Route path="/service/fiber" element={<PageWithEditor />} />
+            <Route path="/service/structured" element={<PageWithEditor />} />
+            <Route path="/service/wireless" element={<PageWithEditor />} />
+            <Route path="/service/ptp" element={<PageWithEditor />} />
+            <Route path="/service/network" element={<PageWithEditor />} />
+            <Route path="/service/maintenance" element={<PageWithEditor />} />
+            
+            <Route path="/edit" element={<PageWithEditor />} />
+            <Route path="/:page/edit" element={<PageWithEditor />} />
+            <Route path="/service/:service/edit" element={<PageWithEditor />} />
+            
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </PageTransition>
+      </div>
+      <Footer />
+    </>
   );
 };
 
