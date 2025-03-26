@@ -16,7 +16,8 @@ import {
   Copy,
   Smartphone,
   Monitor,
-  Tablet
+  Tablet,
+  MessageSquare
 } from 'lucide-react';
 import { 
   Dialog,
@@ -53,6 +54,7 @@ const Pages = () => {
   const [pageToDelete, setPageToDelete] = useState<any>(null);
   const [previewDevice, setPreviewDevice] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
   const [fullPreviewMode, setFullPreviewMode] = useState(false);
+  const [selectedEditableElement, setSelectedEditableElement] = useState<string | null>(null);
   
   const pages = [
     { 
@@ -184,6 +186,7 @@ const Pages = () => {
 
   const toggleEditMode = () => {
     setEditMode(editMode === 'code' ? 'visual' : 'code');
+    setSelectedEditableElement(null);
   };
 
   const toggleFullPreviewMode = () => {
@@ -212,6 +215,12 @@ const Pages = () => {
     });
   };
 
+  const handleVisualEdit = (newContent: string) => {
+    if (editingPage) {
+      setEditingPage({...editingPage, content: newContent});
+    }
+  };
+
   const getPreviewWidth = () => {
     switch(previewDevice) {
       case 'mobile':
@@ -221,6 +230,18 @@ const Pages = () => {
       default:
         return 'max-w-full';
     }
+  };
+
+  const getEditModeTip = () => {
+    if (editMode === 'visual') {
+      return (
+        <div className="flex items-center gap-2 text-sm text-blue-600 bg-blue-50 p-2 rounded-md mb-2">
+          <MessageSquare className="h-4 w-4" />
+          <span>Click directly on content in the preview to edit it. Changes are saved automatically.</span>
+        </div>
+      );
+    }
+    return null;
   };
 
   return (
@@ -470,6 +491,9 @@ const Pages = () => {
                       </span>
                     )}
                   </div>
+                  
+                  {getEditModeTip()}
+                  
                   <div className={`${editMode === 'visual' && previewDevice !== 'desktop' ? 'flex justify-center bg-gray-50 p-4' : ''}`}>
                     <div className={editMode === 'visual' ? getPreviewWidth() : ''}>
                       <Textarea 
@@ -477,8 +501,10 @@ const Pages = () => {
                         value={editingPage.content}
                         onChange={(e) => setEditingPage({...editingPage, content: e.target.value})}
                         className={editMode === 'visual' ? "" : "min-h-[400px] font-mono"}
-                        preview={editMode === 'visual'}
-                        previewClassName="min-h-[400px]"
+                        preview={true}
+                        previewClassName={`min-h-[400px] ${editMode === 'visual' ? 'visual-editor' : ''}`}
+                        editMode={editMode}
+                        onVisualEdit={handleVisualEdit}
                       />
                     </div>
                   </div>
@@ -652,6 +678,8 @@ const Pages = () => {
                 preview={true}
                 fullPreview={true}
                 previewClassName="min-h-[calc(100vh-200px)]"
+                editMode={editMode}
+                onVisualEdit={handleVisualEdit}
               />
             </div>
           </div>

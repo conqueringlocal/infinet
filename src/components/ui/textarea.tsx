@@ -8,14 +8,31 @@ export interface TextareaProps
   preview?: boolean;
   previewClassName?: string;
   fullPreview?: boolean;
+  editMode?: 'code' | 'visual';
+  onVisualEdit?: (newContent: string) => void;
 }
 
 const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
-  ({ className, preview, previewClassName, fullPreview, value, ...props }, ref) => {
+  ({ className, preview, previewClassName, fullPreview, editMode = 'code', onVisualEdit, value, ...props }, ref) => {
+    const [internalValue, setInternalValue] = React.useState<string | undefined>(value as string);
+    
+    // Update internal value when external value changes
+    React.useEffect(() => {
+      setInternalValue(value as string);
+    }, [value]);
+    
+    // Handle contentEditable changes
+    const handleContentEditableChange = (e: React.FormEvent<HTMLDivElement>) => {
+      const newContent = e.currentTarget.innerHTML;
+      if (onVisualEdit) {
+        onVisualEdit(newContent);
+      }
+    };
+    
     if (preview) {
       return (
         <div className={fullPreview ? "w-full" : "flex flex-col md:flex-row gap-4 w-full"}>
-          {!fullPreview && (
+          {!fullPreview && editMode === 'code' && (
             <div className="flex-1">
               <textarea
                 className={cn(
@@ -23,7 +40,13 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
                   className
                 )}
                 ref={ref}
-                value={value}
+                value={internalValue}
+                onChange={(e) => {
+                  setInternalValue(e.target.value);
+                  if (props.onChange) {
+                    props.onChange(e);
+                  }
+                }}
                 {...props}
               />
             </div>
@@ -33,18 +56,21 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
             fullPreview ? "min-h-[500px] bg-white p-6" : "p-4 bg-white", 
             previewClassName
           )}>
-            {typeof value === 'string' && value ? (
+            {typeof internalValue === 'string' && internalValue ? (
               <div 
                 className="prose max-w-none"
                 style={fullPreview ? { margin: '0 auto', maxWidth: '1200px' } : {}}
-              >
-                {parse(value)}
-              </div>
+                contentEditable={editMode === 'visual'}
+                onBlur={handleContentEditableChange}
+                onInput={editMode === 'visual' ? handleContentEditableChange : undefined}
+                dangerouslySetInnerHTML={{ __html: internalValue }}
+                suppressContentEditableWarning
+              />
             ) : (
               <div className="text-gray-400 italic">Preview will appear here</div>
             )}
           </div>
-          {fullPreview && (
+          {fullPreview && editMode === 'code' && (
             <div className="mt-4">
               <textarea
                 className={cn(
@@ -52,7 +78,13 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
                   className
                 )}
                 ref={ref}
-                value={value}
+                value={internalValue}
+                onChange={(e) => {
+                  setInternalValue(e.target.value);
+                  if (props.onChange) {
+                    props.onChange(e);
+                  }
+                }}
                 {...props}
               />
             </div>
@@ -68,6 +100,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           className
         )}
         ref={ref}
+        value={value}
         {...props}
       />
     )
