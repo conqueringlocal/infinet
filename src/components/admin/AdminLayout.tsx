@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, Link, Outlet, useLocation } from 'react-router-dom';
 import { 
   Sidebar, 
@@ -25,34 +25,100 @@ import {
 import { Button } from '@/components/ui/Button';
 import { useToast } from '@/hooks/use-toast';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { useAuth } from '@/hooks/use-auth';
+import { supabase } from '@/lib/supabase';
 
 const AdminLayout = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const location = useLocation();
+  const { user } = useAuth();
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Check if user is authenticated - skip check for setup page
+  // Check if user is authenticated and admin
   useEffect(() => {
     const isSetupPage = location.pathname === '/admin/setup';
-    const isAuthenticated = localStorage.getItem('admin_authenticated') === 'true';
     
-    if (!isAuthenticated && !isSetupPage) {
-      navigate('/admin/login');
+    // If on setup page, no need to check auth
+    if (isSetupPage) {
+      setIsLoading(false);
+      return;
     }
-  }, [navigate, location.pathname]);
+    
+    const checkAuth = async () => {
+      setIsLoading(true);
+      
+      // First check localStorage for quicker UI response
+      const isAdminAuthenticated = localStorage.getItem('admin_authenticated') === 'true';
+      
+      if (!user && !isAdminAuthenticated) {
+        // No user and no localStorage authentication
+        navigate('/admin/login');
+        setIsLoading(false);
+        return;
+      }
+      
+      if (user) {
+        // Verify admin role from database
+        try {
+          const { data: profile, error } = await supabase
+            .from('user_profiles')
+            .select('role')
+            .eq('id', user.id)
+            .single();
+          
+          if (error || profile?.role !== 'admin') {
+            localStorage.removeItem('admin_authenticated');
+            navigate('/admin/login');
+            setIsAdmin(false);
+          } else {
+            localStorage.setItem('admin_authenticated', 'true');
+            setIsAdmin(true);
+          }
+        } catch (error) {
+          console.error('Error checking admin status:', error);
+          navigate('/admin/login');
+          setIsAdmin(false);
+        }
+      }
+      
+      setIsLoading(false);
+    };
+    
+    checkAuth();
+  }, [navigate, location.pathname, user]);
 
-  const handleLogout = () => {
-    localStorage.removeItem('admin_authenticated');
-    toast({
-      title: "Logged out",
-      description: "You have been successfully logged out",
-    });
-    navigate('/admin/login');
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      localStorage.removeItem('admin_authenticated');
+      setIsAdmin(false);
+      
+      toast({
+        title: "Logged out",
+        description: "You have been successfully logged out",
+      });
+      
+      navigate('/admin/login');
+    } catch (error) {
+      console.error('Error during logout:', error);
+      toast({
+        title: "Logout failed",
+        description: "An error occurred during logout",
+        variant: "destructive",
+      });
+    }
   };
 
   // If on setup page, render only the setup component without the admin layout
   if (location.pathname === '/admin/setup') {
     return <Outlet />;
+  }
+
+  // Show loading or redirect if not admin
+  if (isLoading) {
+    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
   }
 
   return (

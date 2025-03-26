@@ -18,9 +18,44 @@ const Login = () => {
   // Redirect if already logged in
   useEffect(() => {
     if (user) {
-      navigate('/admin/dashboard');
+      // Check admin status before redirecting
+      checkAdminStatus();
     }
-  }, [user, navigate]);
+  }, [user]);
+
+  const checkAdminStatus = async () => {
+    if (!user) return;
+    
+    try {
+      // Use the correct table name - user_profiles instead of profiles
+      const { data: profile, error } = await supabase
+        .from('user_profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+      
+      if (error) {
+        console.error('Error checking admin status:', error);
+        return;
+      }
+      
+      if (profile?.role === 'admin') {
+        // Store authentication state in localStorage
+        localStorage.setItem('admin_authenticated', 'true');
+        navigate('/admin/dashboard');
+      } else {
+        // Not an admin, sign out
+        await supabase.auth.signOut();
+        toast({
+          title: "Access denied",
+          description: "You don't have admin privileges",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Error during admin check:', error);
+    }
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,30 +63,7 @@ const Login = () => {
     
     try {
       await signIn(email, password);
-      
-      // Fetch user profile to check if admin
-      const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user?.id)
-        .single();
-      
-      if (error) {
-        throw new Error('Could not verify admin permissions');
-      }
-      
-      if (profile?.role !== 'admin') {
-        await supabase.auth.signOut();
-        toast({
-          title: "Access denied",
-          description: "You don't have admin privileges",
-          variant: "destructive",
-        });
-        return;
-      }
-      
-      // Navigate to dashboard
-      navigate('/admin/dashboard');
+      // The useEffect will handle redirecting if user is admin
     } catch (error: any) {
       toast({
         title: "Login failed",
