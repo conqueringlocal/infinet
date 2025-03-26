@@ -68,55 +68,77 @@ const ScrollToTop = () => {
   return null;
 };
 
-// This wrapper decides whether to show the editor based on URL
-const PageWrapper = ({ Component }: { Component: React.ComponentType<any> }) => {
+// This component determines if we're in edit mode
+const PageWithEditor = () => {
   const location = useLocation();
-  console.log('PageWrapper - Current path:', location.pathname);
-  
-  // Check if we're in edit mode (URL ends with /edit)
   const isEditMode = location.pathname === '/edit' || location.pathname.endsWith('/edit');
-  console.log('PageWrapper - Edit mode enabled:', isEditMode);
+  
+  console.log('====== APP ROUTING ======');
+  console.log('Current URL path:', location.pathname);
+  console.log('Is edit mode enabled?', isEditMode);
+  
+  // Get the corresponding normal route for this edit route
+  const getNormalRoute = () => {
+    if (location.pathname === '/edit') return '/';
+    if (location.pathname.endsWith('/edit')) {
+      return location.pathname.slice(0, -5);
+    }
+    return location.pathname;
+  };
+  
+  const normalRoute = getNormalRoute();
+  console.log('Normal route equivalent:', normalRoute);
+  
+  // Function to render the appropriate component based on the route
+  const renderComponent = () => {
+    // Strip "/edit" suffix if present to determine which page to render
+    switch (normalRoute) {
+      case '/': return <Index />;
+      case '/about': return <About />;
+      case '/services': return <Services />;
+      case '/projects': return <Projects />;
+      case '/contact': return <Contact />;
+      case '/service/fiber': return <FiberServicePage />;
+      case '/service/structured': return <StructuredCablingPage />;
+      case '/service/wireless': return <WirelessPage />;
+      case '/service/ptp': return <PointToPointPage />;
+      case '/service/network': return <NetworkPage />;
+      case '/service/maintenance': return <MaintenancePage />;
+      default: return <NotFound />;
+    }
+  };
   
   return (
     <>
-      <Component />
-      {/* Always render the InPlaceEditor, but it will only show its UI if enabled */}
+      {renderComponent()}
       <InPlaceEditor isEnabled={isEditMode} />
     </>
   );
 };
 
 const AppRoutes = () => {
-  const location = useLocation();
-  
-  // Get the base path for rendering the correct component
-  // This removes the /edit suffix if present
-  const getBasePath = (path: string) => {
-    if (path === '/edit') return '/';
-    if (path.endsWith('/edit')) return path.slice(0, -5);
-    return path;
-  };
-  
-  const basePath = getBasePath(location.pathname);
-  console.log('AppRoutes - Current path:', location.pathname);
-  console.log('AppRoutes - Using path for routing:', basePath);
-    
   return (
     <PageTransition>
-      <Routes location={basePath}>
-        <Route path="/" element={<PageWrapper Component={Index} />} />
-        <Route path="/about" element={<PageWrapper Component={About} />} />
-        <Route path="/services" element={<PageWrapper Component={Services} />} />
-        <Route path="/projects" element={<PageWrapper Component={Projects} />} />
-        <Route path="/contact" element={<PageWrapper Component={Contact} />} />
+      <Routes>
+        {/* Regular routes */}
+        <Route path="/" element={<PageWithEditor />} />
+        <Route path="/about" element={<PageWithEditor />} />
+        <Route path="/services" element={<PageWithEditor />} />
+        <Route path="/projects" element={<PageWithEditor />} />
+        <Route path="/contact" element={<PageWithEditor />} />
+        <Route path="/service/fiber" element={<PageWithEditor />} />
+        <Route path="/service/structured" element={<PageWithEditor />} />
+        <Route path="/service/wireless" element={<PageWithEditor />} />
+        <Route path="/service/ptp" element={<PageWithEditor />} />
+        <Route path="/service/network" element={<PageWithEditor />} />
+        <Route path="/service/maintenance" element={<PageWithEditor />} />
         
-        <Route path="/service/fiber" element={<PageWrapper Component={FiberServicePage} />} />
-        <Route path="/service/structured" element={<PageWrapper Component={StructuredCablingPage} />} />
-        <Route path="/service/wireless" element={<PageWrapper Component={WirelessPage} />} />
-        <Route path="/service/ptp" element={<PageWrapper Component={PointToPointPage} />} />
-        <Route path="/service/network" element={<PageWrapper Component={NetworkPage} />} />
-        <Route path="/service/maintenance" element={<PageWrapper Component={MaintenancePage} />} />
+        {/* Edit mode routes */}
+        <Route path="/edit" element={<PageWithEditor />} />
+        <Route path="/:page/edit" element={<PageWithEditor />} />
+        <Route path="/service/:service/edit" element={<PageWithEditor />} />
         
+        {/* Admin routes */}
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin" element={<AdminLayout />}>
           <Route path="dashboard" element={<AdminDashboard />} />

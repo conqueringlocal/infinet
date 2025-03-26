@@ -22,51 +22,54 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
   const location = useLocation();
 
   // Check if we're on an edit URL (ends with /edit)
-  const isEditUrl = location.pathname.endsWith('/edit');
+  const isEditUrl = location.pathname === '/edit' || location.pathname.endsWith('/edit');
+  
+  console.log('==== EDITOR INIT ====');
+  console.log('Current path:', location.pathname);
+  console.log('isEditUrl detected:', isEditUrl);
+  console.log('isEnabled prop value:', isEnabled);
   
   // Set up the editor on initial load
   useEffect(() => {
-    console.log('----- EDITOR INITIALIZATION -----');
-    console.log('Current path:', location.pathname);
-    console.log('isEditUrl:', isEditUrl);
-    console.log('isEnabled prop:', isEnabled);
+    console.log('==== EDITOR MOUNT EFFECT ====');
     
     // Detect edit mode from URL or prop
     const shouldEnableEditMode = isEditUrl || isEnabled;
-    console.log('Should enable edit mode:', shouldEnableEditMode);
+    console.log('Should enable edit mode?', shouldEnableEditMode);
     
     // Check if user is authenticated for editing
     const authStatus = localStorage.getItem('edit_authenticated');
-    setIsLoggedIn(authStatus === 'true');
-    console.log('Is logged in:', authStatus === 'true');
+    const isAuthenticated = authStatus === 'true';
+    setIsLoggedIn(isAuthenticated);
+    console.log('Is authenticated?', isAuthenticated);
     
-    // If we're in edit mode URL and user is logged in, enable edit mode
-    if (shouldEnableEditMode && authStatus === 'true') {
-      console.log('Activating edit mode automatically');
+    // If edit mode should be enabled and user is logged in
+    if (shouldEnableEditMode && isAuthenticated) {
+      console.log('Auto-activating edit mode');
       setEditMode(true);
       
-      // Give the DOM time to fully render before initializing editables
-      setTimeout(initializeEditables, 1000);
-    } 
-    // If we're in edit mode URL but not logged in, show login dialog
-    else if (shouldEnableEditMode) {
-      console.log('Showing login dialog');
+      // Initialize editables with a delay to ensure DOM is ready
+      setTimeout(initializeEditables, 500);
+    }
+    // If edit mode should be enabled but user is not logged in
+    else if (shouldEnableEditMode && !isAuthenticated) {
+      console.log('Opening login dialog for edit mode');
       setLoginDialogOpen(true);
     }
-  }, [location.pathname, isEditUrl, isEnabled]);
+  }, [isEditUrl, isEnabled]);
 
   // Effect for handling edit mode changes
   useEffect(() => {
-    console.log('----- EDIT MODE CHANGED -----');
-    console.log('Edit mode:', editMode);
-    console.log('Is logged in:', isLoggedIn);
+    console.log('==== EDIT MODE CHANGED ====');
+    console.log('Edit mode active?', editMode);
+    console.log('User is logged in?', isLoggedIn);
     
     if (editMode && isLoggedIn) {
       console.log('Adding edit-mode class to body');
       document.body.classList.add('edit-mode');
       
       // Initialize editables whenever edit mode is activated
-      setTimeout(initializeEditables, 1000);
+      setTimeout(initializeEditables, 500);
     } else {
       console.log('Removing edit-mode class from body');
       document.body.classList.remove('edit-mode');
@@ -80,7 +83,7 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     
-    console.log('Attempting login with:', email);
+    console.log('Login attempt with:', email);
     
     // Simple mock login - would connect to auth system in production
     if (email === 'admin@conqueringlocal.com' && password === 'admin123') {
@@ -94,8 +97,8 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
         description: "You can now edit the page content",
       });
       
-      // Initialize editables after login with a longer delay
-      setTimeout(initializeEditables, 1000);
+      // Initialize editables after login
+      setTimeout(initializeEditables, 500);
     } else {
       toast({
         title: "Login failed",
@@ -133,14 +136,14 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
   };
 
   const initializeEditables = () => {
-    console.log('----- INITIALIZING EDITABLES -----');
+    console.log('==== INITIALIZING EDITABLES ====');
     
     // Find all editable elements and make them actually editable
     const editableElements = document.querySelectorAll('[data-editable]');
     console.log(`Found ${editableElements.length} editable elements`);
     
     if (editableElements.length === 0) {
-      console.warn('No editable elements found on the page. Check if EditableContent components are being rendered.');
+      console.warn('No editable elements found. Are EditableContent components rendered?');
       return;
     }
     
@@ -178,7 +181,7 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
       }
     });
     
-    // Save to localStorage as a simple persistence mechanism
+    // Save to localStorage
     localStorage.setItem('page_content', JSON.stringify(savedContent));
     
     toast({
@@ -189,23 +192,23 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
     // Turn off edit mode after saving
     setEditMode(false);
     
-    // Navigate to the non-edit version to see changes
+    // Navigate to the non-edit version
     navigateToNonEditVersion();
   };
 
-  // Determine if editor should be shown (either prop or URL indicates edit mode)
+  // Determine if editor should be shown (based on URL or prop)
   const shouldShowEditor = isEditUrl || isEnabled;
   
-  console.log('----- RENDER DECISION -----');
-  console.log('Should show editor:', shouldShowEditor);
+  console.log('==== RENDER DECISION ====');
+  console.log('Should show editor?', shouldShowEditor);
 
-  // If we shouldn't show the editor, return null
+  // Don't render anything if we shouldn't show the editor
   if (!shouldShowEditor) {
-    console.log('Not showing editor component');
+    console.log('Not rendering editor component');
     return null;
   }
   
-  console.log('Rendering editor component');
+  console.log('Rendering editor component and UI');
   
   return (
     <>
@@ -287,7 +290,7 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
         </Button>
       </div>
 
-      {/* Add styles for editable content */}
+      {/* Styles for editable content */}
       <style>
         {`
         .edit-mode [data-editable] {
