@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { X, Save, LogOut, Edit, Image as ImageIcon, Upload } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -91,10 +90,15 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
 
         if (content) {
           console.log('Content loaded from Supabase:', Object.keys(content).length, 'elements');
+          
+          // Store in both localStorage and sessionStorage for fallback
           localStorage.setItem('page_content', JSON.stringify(content));
           sessionStorage.setItem('page_content', JSON.stringify(content));
           
-          setTimeout(initializeEditables, 500);
+          // Re-initialize editables to apply the content
+          if (editMode) {
+            setTimeout(initializeEditables, 500);
+          }
           return true;
         } else {
           console.log('No content found in Supabase for path:', normalRoute);
@@ -105,8 +109,9 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
       return false;
     };
 
+    // Load content whenever the route changes
     loadContent();
-  }, [location.pathname]);
+  }, [location.pathname, editMode]);
 
   useEffect(() => {
     if (editMode) {
@@ -267,15 +272,6 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
 
     const contentToSave: Record<string, string> = {};
 
-    try {
-      const existingSaved = localStorage.getItem('page_content');
-      if (existingSaved) {
-        Object.assign(contentToSave, JSON.parse(existingSaved));
-      }
-    } catch (e) {
-      console.error('Error loading existing saved content', e);
-    }
-
     editableElements.forEach(el => {
       const id = el.getAttribute('data-editable');
       const type = el.getAttribute('data-editable-type') || 'text';
@@ -283,16 +279,13 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
       if (id) {
         if (type === 'text') {
           contentToSave[id] = el.innerHTML;
-          console.log(`Saved text content for: ${id}`);
+          console.log(`Saving text content for: ${id}`);
         } else if (type === 'image') {
           contentToSave[id] = (el as HTMLImageElement).src;
-          console.log(`Saved image source for: ${id}`);
+          console.log(`Saving image source for: ${id}`);
         }
       }
     });
-
-    localStorage.setItem('page_content', JSON.stringify(contentToSave));
-    sessionStorage.setItem('page_content', JSON.stringify(contentToSave));
 
     try {
       const pagePath = getNormalRouteFromPath(location.pathname);
@@ -300,15 +293,25 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
       
       const canPublish = await hasPermission('publish_content');
       
-      await savePageContent(pagePath, contentToSave, user?.id);
-      console.log('Content saved successfully to Supabase');
+      // Save to Supabase
+      const saveResult = await savePageContent(pagePath, contentToSave, user?.id);
+      
+      if (saveResult) {
+        console.log('Content saved successfully to Supabase');
+        
+        // Update localStorage after successful save to Supabase
+        localStorage.setItem('page_content', JSON.stringify(contentToSave));
+        sessionStorage.setItem('page_content', JSON.stringify(contentToSave));
 
-      toast({
-        title: canPublish ? "Changes saved and published" : "Changes saved as draft",
-        description: canPublish 
-          ? "Your content has been updated and published to the site" 
-          : "Your changes have been saved as a draft and are awaiting approval",
-      });
+        toast({
+          title: canPublish ? "Changes saved and published" : "Changes saved as draft",
+          description: canPublish 
+            ? "Your content has been updated and published to the site" 
+            : "Your changes have been saved as a draft and are awaiting approval",
+        });
+      } else {
+        throw new Error("Failed to save content to Supabase");
+      }
 
       // Hide the saving feedback after a brief delay
       setTimeout(() => {

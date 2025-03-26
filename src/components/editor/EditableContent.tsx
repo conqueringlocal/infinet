@@ -1,5 +1,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
+import { getPageContent } from '@/lib/content-service';
+import { useLocation } from 'react-router-dom';
 
 interface EditableContentProps {
   id: string;
@@ -23,6 +25,7 @@ const EditableContent: React.FC<EditableContentProps> = ({
   const contentRef = useRef<HTMLElement | null>(null);
   const [initialContentSet, setInitialContentSet] = useState(false);
   const [imageSource, setImageSource] = useState(imageSrc);
+  const location = useLocation();
   
   // Debug logging
   useEffect(() => {
@@ -33,40 +36,73 @@ const EditableContent: React.FC<EditableContentProps> = ({
     };
   }, [id, tag, type]);
   
-  // Load saved content from localStorage on mount
+  // Normalize the current route path for content loading
+  const getNormalizedPath = () => {
+    const path = location.pathname;
+    if (path === '/edit') return '/';
+    if (path.endsWith('/edit')) {
+      return path.slice(0, -5);
+    }
+    return path;
+  };
+  
+  // Load saved content on mount
   useEffect(() => {
     // Only run once to avoid overwriting user edits
     if (initialContentSet) return;
     
-    try {
-      // Get stored content from localStorage first
-      const savedContent = localStorage.getItem('page_content');
-      console.log(`Checking for saved content for "${id}"`);
-      
-      if (savedContent) {
-        const contentMap = JSON.parse(savedContent);
+    const loadContent = async () => {
+      try {
+        // First try to get content from Supabase
+        const pagePath = getNormalizedPath();
+        console.log(`Trying to load remote content for "${id}" on page "${pagePath}"`);
         
-        if (contentMap[id]) {
+        const supabaseContent = await getPageContent(pagePath);
+        
+        if (supabaseContent && supabaseContent[id]) {
+          console.log(`Found Supabase content for "${id}"`);
           if (type === 'text' && contentRef.current) {
-            contentRef.current.innerHTML = contentMap[id];
-            console.log(`Loaded saved text content for "${id}"`);
-          } else if (type === 'image' && contentMap[id]) {
-            setImageSource(contentMap[id]);
-            console.log(`Loaded saved image source for "${id}"`);
+            contentRef.current.innerHTML = supabaseContent[id];
+            console.log(`Applied Supabase text content for "${id}"`);
+          } else if (type === 'image') {
+            setImageSource(supabaseContent[id]);
+            console.log(`Applied Supabase image source for "${id}"`);
+          }
+          setInitialContentSet(true);
+          return;
+        }
+        
+        // Fall back to localStorage if no Supabase content
+        const savedContent = localStorage.getItem('page_content');
+        console.log(`Checking localStorage for "${id}" as fallback`);
+        
+        if (savedContent) {
+          const contentMap = JSON.parse(savedContent);
+          
+          if (contentMap[id]) {
+            if (type === 'text' && contentRef.current) {
+              contentRef.current.innerHTML = contentMap[id];
+              console.log(`Applied localStorage text content for "${id}"`);
+            } else if (type === 'image') {
+              setImageSource(contentMap[id]);
+              console.log(`Applied localStorage image source for "${id}"`);
+            }
+          } else {
+            console.log(`No saved content for "${id}" in localStorage`);
           }
         } else {
-          console.log(`No saved content for "${id}" in localStorage`);
+          console.log('No saved content found in localStorage');
         }
-      } else {
-        console.log('No saved content found in localStorage');
+        
+        setInitialContentSet(true);
+      } catch (e) {
+        console.error('Error loading content:', e);
+        setInitialContentSet(true);
       }
-      
-      setInitialContentSet(true);
-    } catch (e) {
-      console.error('Error parsing saved content', e);
-      setInitialContentSet(true);
-    }
-  }, [id, initialContentSet, type]);
+    };
+    
+    loadContent();
+  }, [id, initialContentSet, type, location.pathname]);
 
   // Create the element with the correct tag
   const TagName = tag as React.ElementType;
