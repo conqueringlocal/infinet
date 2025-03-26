@@ -5,16 +5,6 @@ import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 
-// Featured states where Infi-NET has completed projects
-const featuredStates = [
-  { name: 'Florida', abbr: 'FL' },
-  { name: 'Texas', abbr: 'TX' },
-  { name: 'Virginia', abbr: 'VA' },
-  { name: 'Massachusetts', abbr: 'MA', displayMobile: 'Mass.' },
-  { name: 'Colorado', abbr: 'CO' },
-  { name: 'California', abbr: 'CA' }
-];
-
 const NationwideService = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
@@ -85,7 +75,7 @@ const NationwideService = () => {
               <Button 
                 variant="default" 
                 size="lg" 
-                className="w-full md:w-auto flex items-center justify-center"
+                className="w-full md:w-auto flex items-center justify-center mx-auto"
               >
                 Discuss Your Project
                 <ArrowRight className="ml-2 h-5 w-5" />

@@ -107,7 +107,7 @@ const ProjectsPreview = () => {
           <Button 
             variant="default" 
             size="lg" 
-            className="w-full md:w-auto px-8 flex items-center justify-center" 
+            className="w-full md:w-auto px-8 flex items-center justify-center mx-auto" 
             asChild
           >
             <Link to="/projects" className="flex items-center justify-center">
