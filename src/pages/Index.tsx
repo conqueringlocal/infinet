@@ -1,7 +1,6 @@
 
 import React, { useEffect } from 'react';
 import Hero from '@/components/home/Hero';
-import ServicesSection from '@/components/home/ServicesSection';
 import AboutPreview from '@/components/home/AboutPreview';
 import WhyChooseUs from '@/components/home/WhyChooseUs';
 import ProjectsPreview from '@/components/home/ProjectsPreview';
@@ -16,7 +15,6 @@ import { usePageView } from '@/hooks/use-page-view';
 export const HomePageComponents = [
   Hero,
   AboutPreview,
-  ServicesSection,
   ServiceFinder,
   WhyChooseUs,
   NationwideService,
@@ -48,7 +46,6 @@ const Index = () => {
     <div className="flex flex-col min-h-screen">
       <Hero />
       <AboutPreview />
-      <ServicesSection />
       <ServiceFinder />
       <WhyChooseUs />
       <NationwideService />
