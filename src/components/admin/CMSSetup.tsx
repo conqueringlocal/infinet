@@ -18,30 +18,29 @@ const CMSSetup: React.FC = () => {
   const { toast } = useToast();
   const sqlRef = useRef<HTMLPreElement>(null);
 
-  // Enhanced SQL extraction to handle multiple table creations
+  // Enhanced SQL extraction to handle multiple tables
   const extractSqlFromErrorMessage = (message: string) => {
     if (message.includes('CREATE TABLE')) {
-      // Find all SQL sections starting with CREATE TABLE
-      const sqlSections = [];
-      let remainingText = message;
+      // Find all SQL sections for each table
+      const tables: string[] = [];
       
-      while (remainingText.includes('CREATE TABLE')) {
-        const sqlStartIdx = remainingText.indexOf('CREATE TABLE');
-        const nextTableIdx = remainingText.indexOf('CREATE TABLE', sqlStartIdx + 12);
-        
-        if (nextTableIdx !== -1) {
-          // Extract this table's SQL
-          sqlSections.push(remainingText.substring(sqlStartIdx, nextTableIdx));
-          remainingText = remainingText.substring(nextTableIdx);
-        } else {
-          // This is the last or only table
-          sqlSections.push(remainingText.substring(sqlStartIdx));
-          break;
-        }
+      // Extract SQL for each table mention
+      const regex = /(CREATE TABLE IF NOT EXISTS[^;]+;(?:\s*--[^\n]*\n)*(?:\s*(?:ALTER|CREATE)[^;]+;)*)/g;
+      let match;
+      
+      while ((match = regex.exec(message)) !== null) {
+        tables.push(match[1]);
       }
       
-      // Join all SQL sections
-      return sqlSections.join('\n\n');
+      if (tables.length > 0) {
+        return tables.join('\n\n');
+      }
+      
+      // Fallback: If regex didn't work, try a simple extraction
+      const startIdx = message.indexOf('CREATE TABLE');
+      if (startIdx !== -1) {
+        return message.substring(startIdx);
+      }
     }
     return null;
   };
@@ -58,11 +57,11 @@ const CMSSetup: React.FC = () => {
   };
 
   const openSupabaseSqlEditor = () => {
-    // Extract the Supabase project ID from the error message or env
+    // Extract the Supabase project ID from the env
     const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://gqcfneuiruffgpwhkecy.supabase.co';
     const projectId = supabaseUrl.replace('https://', '').split('.')[0];
     
-    // Open the SQL editor URL
+    // Open the SQL editor URL in a new tab
     window.open(`https://app.supabase.com/project/${projectId}/sql/new`, '_blank');
   };
 
@@ -103,6 +102,26 @@ const CMSSetup: React.FC = () => {
   };
 
   const sql = setupError ? extractSqlFromErrorMessage(setupError) : null;
+
+  // Helper function to split SQL into manageable parts for execution
+  const splitSqlIntoStatements = (sql: string | null) => {
+    if (!sql) return [];
+    
+    // Split the SQL into table creation and policy sections
+    const sections = [];
+    let currentSection = '';
+    
+    // Split on CREATE TABLE statements
+    sql.split(/(?=CREATE TABLE)/i).forEach(part => {
+      if (part.trim()) {
+        sections.push(part.trim());
+      }
+    });
+    
+    return sections;
+  };
+
+  const sqlStatements = splitSqlIntoStatements(sql);
 
   return (
     <Card className="w-full max-w-md mx-auto">
@@ -160,13 +179,25 @@ const CMSSetup: React.FC = () => {
                     </Button>
                   </div>
                 </div>
-                <div className="bg-gray-50 rounded-md border border-gray-200 p-3 overflow-auto max-h-[400px]">
+                <div className="bg-gray-50 rounded-md border border-gray-200 p-3 overflow-auto max-h-[500px]">
                   <pre ref={sqlRef} className="text-xs whitespace-pre-wrap text-gray-800">{sql}</pre>
                 </div>
+                
+                {sqlStatements.length > 1 && (
+                  <div className="mt-3 text-xs text-gray-600 p-3 bg-blue-50 border border-blue-100 rounded">
+                    <p className="font-medium mb-1">For best results:</p>
+                    <ol className="list-decimal pl-5 space-y-1">
+                      <li>Create each table separately in this order: user_profiles, page_assignments, page_content, page_analytics</li>
+                      <li>For each table, first run just the CREATE TABLE statement</li>
+                      <li>Then run the ALTER TABLE and CREATE POLICY statements</li>
+                      <li>Remove the "IF NOT EXISTS" phrases from the policy creation lines</li>
+                    </ol>
+                  </div>
+                )}
+                
                 <p className="text-xs text-gray-500 mt-2">
                   After running this SQL in your Supabase dashboard, return here and try again. 
                   Note: Remove the "IF NOT EXISTS" phrases from the policy creation lines if you encounter syntax errors.
-                  Run each table creation separately if you encounter any issues.
                 </p>
               </div>
             )}

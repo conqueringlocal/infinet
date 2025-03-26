@@ -12,20 +12,20 @@ export const initializeDatabase = async (): Promise<{ success: boolean; message:
   try {
     console.log('Initializing database...');
     
-    // Initialize tables
+    // Initialize tables in the correct order to avoid foreign key issues
     const userProfilesResult = await initializeUserProfilesTable();
     if (!userProfilesResult.success) {
       return userProfilesResult;
     }
     
-    const pageContentResult = await initializePageContentTable();
-    if (!pageContentResult.success) {
-      return pageContentResult;
-    }
-    
     const pageAssignmentsResult = await initializePageAssignmentsTable();
     if (!pageAssignmentsResult.success) {
       return pageAssignmentsResult;
+    }
+    
+    const pageContentResult = await initializePageContentTable();
+    if (!pageContentResult.success) {
+      return pageContentResult;
     }
     
     const pageAnalyticsResult = await initializePageAnalyticsTable();

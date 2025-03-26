@@ -90,6 +90,62 @@ CREATE TABLE IF NOT EXISTS public.page_content (
 );
 `;
 
+// Basic policies without referencing other tables
+const BASIC_POLICIES_SQL = `
+-- RLS policies for page_content
+ALTER TABLE public.page_content ENABLE ROW LEVEL SECURITY;
+
+-- Create view policy for published content
+CREATE POLICY "Anyone can view published content" 
+  ON public.page_content FOR SELECT 
+  USING (published = true);
+
+-- Create admin view policy
+CREATE POLICY "Admins can view all content" 
+  ON public.page_content FOR SELECT 
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.user_profiles 
+      WHERE id = auth.uid() AND role = 'admin'
+    )
+  );
+
+-- Create admin modify policy
+CREATE POLICY "Admins can modify all content" 
+  ON public.page_content FOR ALL
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.user_profiles 
+      WHERE id = auth.uid() AND role = 'admin'
+    )
+  );
+`;
+
+// Advanced policies that reference page_assignments
+const ADVANCED_POLICIES_SQL = `
+-- Create view policy for assigned editors
+CREATE POLICY "Assigned editors can view all page content" 
+  ON public.page_content FOR SELECT 
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.page_assignments 
+      WHERE page_id = page_content.page_id 
+      AND user_id = auth.uid()
+    )
+  );
+
+-- Create editor modify policy
+CREATE POLICY "Assigned editors can modify content" 
+  ON public.page_content FOR ALL
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.page_assignments 
+      WHERE page_id = page_content.page_id 
+      AND user_id = auth.uid()
+    )
+  );
+`;
+
 /**
  * Creates the page_content table if it doesn't exist
  */
@@ -129,59 +185,8 @@ export const initializePageContentTable = async (): Promise<{ success: boolean; 
           if (tableResponse.ok) {
             console.log('Successfully created page_content table via direct fetch');
             
-            // Now try to add RLS policies
-            const rlsSQL = `
-              ALTER TABLE public.page_content ENABLE ROW LEVEL SECURITY;
-              
-              -- Create view policy for published content
-              CREATE POLICY "Anyone can view published content" 
-                ON public.page_content FOR SELECT 
-                USING (published = true);
-              
-              -- Create view policy for assigned editors
-              CREATE POLICY "Assigned editors can view all page content" 
-                ON public.page_content FOR SELECT 
-                USING (
-                  EXISTS (
-                    SELECT 1 FROM public.page_assignments 
-                    WHERE page_id = page_content.page_id 
-                    AND user_id = auth.uid()
-                  )
-                );
-              
-              -- Create admin view policy
-              CREATE POLICY "Admins can view all content" 
-                ON public.page_content FOR SELECT 
-                USING (
-                  EXISTS (
-                    SELECT 1 FROM public.user_profiles 
-                    WHERE id = auth.uid() AND role = 'admin'
-                  )
-                );
-              
-              -- Create editor modify policy
-              CREATE POLICY "Assigned editors can modify content" 
-                ON public.page_content FOR ALL
-                USING (
-                  EXISTS (
-                    SELECT 1 FROM public.page_assignments 
-                    WHERE page_id = page_content.page_id 
-                    AND user_id = auth.uid()
-                  )
-                );
-              
-              -- Create admin modify policy
-              CREATE POLICY "Admins can modify all content" 
-                ON public.page_content FOR ALL
-                USING (
-                  EXISTS (
-                    SELECT 1 FROM public.user_profiles 
-                    WHERE id = auth.uid() AND role = 'admin'
-                  )
-                );
-            `;
-            
-            const policyResponse = await fetch(`${supabaseUrl}/rest/v1/`, {
+            // Now try to add basic RLS policies first
+            const basicPolicyResponse = await fetch(`${supabaseUrl}/rest/v1/`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -190,15 +195,43 @@ export const initializePageContentTable = async (): Promise<{ success: boolean; 
                 'Prefer': 'return=minimal'
               },
               body: JSON.stringify({ 
-                query: rlsSQL 
+                query: BASIC_POLICIES_SQL 
               })
             });
             
-            if (policyResponse.ok) {
-              return { success: true, message: 'Page content table and policies created successfully' };
+            console.log('Basic policy response:', basicPolicyResponse.ok ? 'successful' : 'failed');
+            
+            // Check if page_assignments exists before adding the policies that depend on it
+            const { error: checkAssignmentsError } = await supabase
+              .from('page_assignments')
+              .select('id')
+              .limit(1);
+            
+            if (!checkAssignmentsError) {
+              console.log('page_assignments table exists, adding advanced policies');
+              
+              // Now try to add advanced policies that depend on page_assignments
+              const advancedPolicyResponse = await fetch(`${supabaseUrl}/rest/v1/`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'apikey': apiKey,
+                  'Authorization': `Bearer ${apiKey}`,
+                  'Prefer': 'return=minimal'
+                },
+                body: JSON.stringify({ 
+                  query: ADVANCED_POLICIES_SQL 
+                })
+              });
+              
+              console.log('Advanced policy response:', advancedPolicyResponse.ok ? 'successful' : 'failed');
             } else {
-              return { success: true, message: 'Page content table created, but policies may need manual setup' };
+              console.log('page_assignments table does not exist yet, skipping advanced policies');
             }
+            
+            return { success: true, message: 'Page content table created successfully' };
+          } else {
+            throw new Error('Failed to create table via direct fetch');
           }
         } catch (error) {
           console.warn('Failed to create table via direct fetch:', error);
