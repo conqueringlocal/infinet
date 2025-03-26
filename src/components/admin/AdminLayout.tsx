@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate, Link, Outlet, useLocation } from 'react-router-dom';
 import { 
@@ -19,8 +18,7 @@ import {
   Settings, 
   LogOut, 
   Users, 
-  Globe,
-  Home
+  Globe
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { useToast } from '@/hooks/use-toast';
@@ -36,11 +34,9 @@ const AdminLayout = () => {
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Check if user is authenticated and admin
   useEffect(() => {
     const isSetupPage = location.pathname === '/admin/setup';
     
-    // If on setup page, no need to check auth
     if (isSetupPage) {
       setIsLoading(false);
       return;
@@ -49,18 +45,15 @@ const AdminLayout = () => {
     const checkAuth = async () => {
       setIsLoading(true);
       
-      // First check localStorage for quicker UI response
       const isAdminAuthenticated = localStorage.getItem('admin_authenticated') === 'true';
       
       if (!user && !isAdminAuthenticated) {
-        // No user and no localStorage authentication
         navigate('/admin/login');
         setIsLoading(false);
         return;
       }
       
       if (user) {
-        // Verify admin role from database
         try {
           const { data: profile, error } = await supabase
             .from('user_profiles')
@@ -111,24 +104,20 @@ const AdminLayout = () => {
     }
   };
 
-  // If on setup page, render only the setup component without the admin layout
   if (location.pathname === '/admin/setup') {
     return <Outlet />;
   }
 
-  // Show loading or redirect if not admin
   if (isLoading) {
     return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
   }
 
   return (
     <div className="min-h-screen bg-gray-100 flex">
-      {/* Desktop Sidebar */}
       <div className="hidden md:block">
         <AdminSidebar onLogout={handleLogout} />
       </div>
       
-      {/* Mobile Navigation */}
       <div className="md:hidden fixed top-0 left-0 right-0 z-30 bg-white border-b p-4 flex items-center justify-between">
         <div className="flex items-center">
           <img 
@@ -155,7 +144,6 @@ const AdminLayout = () => {
         </Sheet>
       </div>
       
-      {/* Main Content */}
       <div className="flex-1 flex flex-col md:ml-64">
         <div className="md:p-8 p-4 pt-16 md:pt-8 flex-1">
           <Outlet />

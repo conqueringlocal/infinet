@@ -1,11 +1,12 @@
+
 import React, { useState, useEffect, useRef } from 'react';
-import { X, Save, LogOut, Edit, Image as ImageIcon, Upload, Download, FileInput, Import, FileDown } from 'lucide-react';
+import { X, Save, LogOut, Edit, Image as ImageIcon, Upload } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { savePageContent, getPageContent, validateContentImport, importPageContent, ContentExport } from '@/lib/content-service';
+import { savePageContent, getPageContent } from '@/lib/content-service';
 import { useAuth } from '@/hooks/use-auth';
 import { hasEditPermission, canEditPage, hasPermission } from '@/lib/user-service';
 
@@ -24,23 +25,16 @@ const getNormalRouteFromPath = (path: string): string => {
 const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
   const [loginDialogOpen, setLoginDialogOpen] = useState(false);
   const [imageDialogOpen, setImageDialogOpen] = useState(false);
-  const [exportDialogOpen, setExportDialogOpen] = useState(false);
-  const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [editMode, setEditMode] = useState(false);
   const [currentImageElement, setCurrentImageElement] = useState<HTMLImageElement | null>(null);
   const [newImageUrl, setNewImageUrl] = useState('');
   const [contentChanged, setContentChanged] = useState(false);
-  const [exportedContent, setExportedContent] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [canEdit, setCanEdit] = useState(false);
-  const [importError, setImportError] = useState<string | null>(null);
-  const [importSuccess, setImportSuccess] = useState<string | null>(null);
-  const [isImporting, setIsImporting] = useState(false);
+  const [savingFeedbackVisible, setSavingFeedbackVisible] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const importFileInputRef = useRef<HTMLInputElement>(null);
-  const exportContentRef = useRef<HTMLTextAreaElement>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
@@ -125,10 +119,6 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
       setTimeout(checkForChanges, 1000);
     }
   }, [editMode]);
-
-  const getNormalRoute = () => {
-    return getNormalRouteFromPath(location.pathname);
-  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -249,14 +239,25 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
 
       toast({
         title: "Image updated",
-        description: "Don't forget to save your changes",
+        description: "Changes will be automatically saved",
       });
+      
+      // Auto-save after a short delay to allow user to make additional changes
+      autoSaveChanges();
     }
+  };
+
+  const autoSaveChanges = () => {
+    // Set a timeout to save changes after a brief delay
+    setTimeout(() => {
+      saveChanges();
+    }, 1000);
   };
 
   const saveChanges = async () => {
     console.log('Saving changes to Supabase...');
     setIsSaving(true);
+    setSavingFeedbackVisible(true);
 
     const editableElements = document.querySelectorAll('[data-editable]');
     console.log(`Found ${editableElements.length} editable elements to save`);
@@ -304,8 +305,10 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
           : "Your changes have been saved as a draft and are awaiting approval",
       });
 
-      prepareExportContent(contentToSave);
-      setExportDialogOpen(true);
+      // Hide the saving feedback after a brief delay
+      setTimeout(() => {
+        setSavingFeedbackVisible(false);
+      }, 2000);
     } catch (error: any) {
       console.error('Error saving content to Supabase:', error);
       toast({
@@ -313,186 +316,14 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
         description: error.message || "There was a problem saving your changes",
         variant: "destructive",
       });
+      setSavingFeedbackVisible(false);
     } finally {
       setIsSaving(false);
       setContentChanged(false);
     }
   };
 
-  const prepareExportContent = (contentData: Record<string, string>) => {
-    const formattedDate = new Date().toISOString().replace(/:/g, '-').slice(0, 19);
-    const exportObject = {
-      version: 1,
-      timestamp: new Date().toISOString(),
-      pageUrl: window.location.pathname,
-      content: contentData
-    };
-
-    setExportedContent(JSON.stringify(exportObject, null, 2));
-  };
-
-  const handleExportDone = () => {
-    setExportDialogOpen(false);
-
-    setEditMode(false);
-    navigateToNonEditVersion();
-  };
-
-  const copyExportedContent = () => {
-    if (exportContentRef.current) {
-      exportContentRef.current.select();
-      document.execCommand('copy');
-
-      toast({
-        title: "Copied to clipboard",
-        description: "The content has been copied to your clipboard",
-      });
-    }
-  };
-
-  const downloadExportedContent = () => {
-    const element = document.createElement('a');
-    const formattedDate = new Date().toISOString().replace(/:/g, '-').slice(0, 19);
-    const pageName = location.pathname.replace(/\//g, '-').replace('edit', '');
-    const fileName = `site-content${pageName ? '-' + pageName : ''}-${formattedDate}.json`;
-
-    const file = new Blob([exportedContent], { type: 'application/json' });
-    element.href = URL.createObjectURL(file);
-    element.download = fileName;
-    document.body.appendChild(element);
-    element.click();
-    document.body.removeChild(element);
-
-    toast({
-      title: "Content downloaded",
-      description: "Save this file for your developer to implement the changes",
-    });
-  };
-
-  const handleImportClick = () => {
-    setImportDialogOpen(true);
-    setImportError(null);
-    setImportSuccess(null);
-  };
-
-  const handleImportFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setImportError(null);
-    setImportSuccess(null);
-    setIsImporting(true);
-
-    const reader = new FileReader();
-    reader.onload = async (event) => {
-      try {
-        if (event.target?.result) {
-          const fileContent = event.target.result as string;
-          const validationResult = validateContentImport(fileContent);
-          
-          if (!validationResult.valid) {
-            setImportError(validationResult.error || 'Invalid file format');
-            setIsImporting(false);
-            return;
-          }
-
-          const importResult = await importPageContent(
-            validationResult.data as ContentExport, 
-            user?.id
-          );
-
-          if (importResult.success) {
-            setImportSuccess(importResult.message);
-            const currentRoute = getNormalRoute();
-            if (validationResult.data?.pageUrl === currentRoute) {
-              await loadPageContent();
-              setContentChanged(true);
-            }
-          } else {
-            setImportError(importResult.message);
-          }
-        }
-      } catch (error: any) {
-        setImportError(error.message || 'Error processing import file');
-        console.error('Import error:', error);
-      } finally {
-        setIsImporting(false);
-      }
-    };
-
-    reader.onerror = () => {
-      setImportError('Error reading file');
-      setIsImporting(false);
-    };
-
-    reader.readAsText(file);
-  };
-
-  const handlePasteImport = async () => {
-    try {
-      const clipboardText = await navigator.clipboard.readText();
-      const validationResult = validateContentImport(clipboardText);
-      
-      if (!validationResult.valid) {
-        setImportError(validationResult.error || 'Invalid clipboard content');
-        return;
-      }
-
-      setIsImporting(true);
-      const importResult = await importPageContent(
-        validationResult.data as ContentExport, 
-        user?.id
-      );
-
-      if (importResult.success) {
-        setImportSuccess(importResult.message);
-        const currentRoute = getNormalRoute();
-        if (validationResult.data?.pageUrl === currentRoute) {
-          await loadPageContent();
-          setContentChanged(true);
-        }
-      } else {
-        setImportError(importResult.message);
-      }
-    } catch (error: any) {
-      setImportError(error.message || 'Error processing clipboard content');
-      console.error('Import error:', error);
-    } finally {
-      setIsImporting(false);
-    }
-  };
-
-  const loadPageContent = async () => {
-    try {
-      const content = await getPageContent(normalRoute);
-
-      if (content) {
-        localStorage.setItem('page_content', JSON.stringify(content));
-        sessionStorage.setItem('page_content', JSON.stringify(content));
-        console.log('Loaded content from Supabase for path:', normalRoute);
-        
-        setTimeout(initializeEditables, 500);
-        return true;
-      }
-    } catch (error) {
-      console.error('Error loading content from Supabase:', error);
-    }
-    return false;
-  };
-
   const shouldShowEditor = isEditUrl || isEnabled;
-  const hasMediaPermission = useRef<boolean>(false);
-
-  useEffect(() => {
-    const checkMediaPermission = async () => {
-      if (user) {
-        const canManageMedia = await hasPermission('manage_media');
-        hasMediaPermission.current = canManageMedia;
-      }
-    };
-    
-    checkMediaPermission();
-  }, [user]);
 
   if (!shouldShowEditor) {
     return null;
@@ -616,129 +447,13 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={exportDialogOpen} onOpenChange={setExportDialogOpen}>
-        <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Your Content Changes</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 pt-4">
-            <p className="text-sm text-gray-700">
-              Your changes have been saved locally. To make them permanent across all devices, 
-              you need to share this content with your developer to apply to the website code.
-            </p>
-            
-            <div className="border rounded p-2 bg-gray-50">
-              <div className="flex justify-between mb-2">
-                <p className="text-sm font-medium text-gray-700">Content JSON:</p>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={copyExportedContent}
-                  className="h-7 text-xs"
-                >
-                  Copy to clipboard
-                </Button>
-              </div>
-              <textarea
-                ref={exportContentRef}
-                value={exportedContent}
-                readOnly
-                className="w-full h-64 p-2 text-xs font-mono bg-gray-100 rounded border border-gray-300"
-              />
-            </div>
-            
-            <div className="flex justify-between items-center pt-2">
-              <Button 
-                variant="outline"
-                onClick={downloadExportedContent}
-                className="flex items-center gap-2"
-              >
-                <Download className="h-4 w-4" />
-                Download JSON File
-              </Button>
-              
-              <Button onClick={handleExportDone}>
-                Done
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={importDialogOpen} onOpenChange={setImportDialogOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Import Content</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 pt-4">
-            <p className="text-sm text-gray-600">
-              Import previously exported content. This will replace the current content for the specified page.
-            </p>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium block">
-                Upload JSON File
-              </label>
-              <div className="flex items-center gap-2">
-                <input
-                  type="file"
-                  ref={importFileInputRef}
-                  onChange={handleImportFileUpload}
-                  accept=".json,application/json"
-                  className="hidden"
-                />
-                <Button 
-                  variant="outline" 
-                  onClick={() => importFileInputRef.current?.click()}
-                  className="w-full flex items-center justify-center gap-2"
-                  disabled={isImporting}
-                >
-                  <FileInput className="h-4 w-4" />
-                  {isImporting ? "Processing..." : "Choose File"}
-                </Button>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2 py-2">
-              <div className="h-px bg-gray-200 flex-1"></div>
-              <span className="text-xs text-gray-500">OR</span>
-              <div className="h-px bg-gray-200 flex-1"></div>
-            </div>
-
-            <Button 
-              variant="outline" 
-              className="w-full"
-              onClick={handlePasteImport}
-              disabled={isImporting}
-            >
-              Paste from Clipboard
-            </Button>
-
-            {importError && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-md text-red-700 text-sm">
-                <p className="font-medium">Import Error</p>
-                <p>{importError}</p>
-              </div>
-            )}
-
-            {importSuccess && (
-              <div className="p-3 bg-green-50 border border-green-200 rounded-md text-green-700 text-sm">
-                <p className="font-medium">Success</p>
-                <p>{importSuccess}</p>
-              </div>
-            )}
-
-            <div className="flex justify-end space-x-2 pt-2">
-              <Button 
-                variant="outline" 
-                onClick={() => setImportDialogOpen(false)}
-              >
-                Close
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* Saving Feedback Toast */}
+      {savingFeedbackVisible && (
+        <div className="fixed top-4 right-4 bg-white rounded-lg shadow-lg p-4 z-50 flex items-center gap-2 animate-in fade-in slide-in-from-top-5">
+          <div className="spinner w-5 h-5 border-2 border-t-blue-500 border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin"></div>
+          <span>{isSaving ? "Saving changes..." : "Changes saved!"}</span>
+        </div>
+      )}
 
       <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 bg-white rounded-lg shadow-lg p-2 flex items-center gap-2">
         {!editMode ? (
@@ -773,19 +488,6 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
               <X className="h-4 w-4 mr-2" />
               Cancel
             </Button>
-            
-            <div className="border-r h-6 mx-1 border-gray-300"></div>
-            
-            {hasMediaPermission.current && (
-              <Button 
-                size="sm" 
-                variant="outline"
-                onClick={handleImportClick}
-                title="Import Content"
-              >
-                <FileDown className="h-4 w-4" />
-              </Button>
-            )}
           </>
         )}
         <Button 
@@ -838,6 +540,23 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
         
         .edit-mode [data-editable]:hover::before {
           opacity: 1;
+        }
+        
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+        
+        .spinner {
+          animation: spin 1s linear infinite;
+        }
+        
+        .animate-in {
+          animation: fadeIn 0.3s ease-out;
+        }
+        
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(-10px); }
+          to { opacity: 1; transform: translateY(0); }
         }
         `}
       </style>
