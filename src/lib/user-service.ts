@@ -1,4 +1,3 @@
-
 import { supabase } from './supabase';
 
 // Enhanced role type
@@ -61,21 +60,18 @@ export const hasPermission = async (permission: Permission): Promise<boolean> =>
         return profile.role === 'admin';
       
       case 'edit_content': {
-        const allowedRoles: UserRole[] = ['admin', 'editor', 'contributor'];
-        return allowedRoles.includes(profile.role);
+        return ['admin', 'editor', 'contributor'].includes(profile.role);
       }
       
       case 'publish_content': {
-        const allowedRoles: UserRole[] = ['admin', 'editor'];
-        return allowedRoles.includes(profile.role);
+        return ['admin', 'editor'].includes(profile.role);
       }
       
       case 'view_content':
         return true; // All authenticated users can view content
       
       case 'manage_media': {
-        const allowedRoles: UserRole[] = ['admin', 'editor'];
-        return allowedRoles.includes(profile.role);
+        return ['admin', 'editor'].includes(profile.role);
       }
       
       default:

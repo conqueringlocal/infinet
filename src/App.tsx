@@ -16,6 +16,7 @@ import { useEffect } from "react";
 import ScrollProgressBar from "./components/ui/ScrollProgressBar";
 import Chatbot from "./components/ui/Chatbot";
 import InPlaceEditor from "./components/editor/InPlaceEditor";
+import { usePageView } from "./hooks/use-page-view";
 
 // Import individual service pages
 import FiberServicePage from "./pages/service/Fiber";
@@ -73,6 +74,9 @@ const ScrollToTop = () => {
 const PageWithEditor = () => {
   const location = useLocation();
   const isEditMode = location.pathname === '/edit' || location.pathname.endsWith('/edit');
+  
+  // Use the page view hook
+  usePageView();
   
   console.log('====== APP ROUTING ======');
   console.log('Current URL path:', location.pathname);

@@ -1,5 +1,4 @@
 import { createClient } from '@supabase/supabase-js';
-import { UserRole } from './user-service';
 
 // Hardcoded Supabase values since environment variables aren't loading correctly
 const supabaseUrl = "https://gqcfneuiruffgpwhkecy.supabase.co";
@@ -30,5 +29,5 @@ export const isAuthenticated = async () => {
 };
 
 // We're using the UserProfile from user-service.ts to keep it DRY
-export { UserRole } from './user-service';
+export { type UserRole } from './user-service';
 export type { UserProfile } from './user-service';
