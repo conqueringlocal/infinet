@@ -36,7 +36,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { getAllUserProfiles, updateUserRole, UserProfile } from "@/lib/user-service";
+import { getAllUserProfiles, updateUserRole } from "@/lib/user-service";
+import type { UserProfile } from "@/lib/supabase";
 import { useAuth } from "@/hooks/use-auth";
 import { ChevronDown, Search, UserPlus, MoreHorizontal, UserCheck, UserX } from 'lucide-react';
 

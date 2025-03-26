@@ -1,14 +1,9 @@
 
 import { createClient } from '@supabase/supabase-js';
 
-// Supabase project URL and Anon Key from environment variables
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-// Validate environment variables
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('Supabase URL and Anon Key must be provided in environment variables');
-}
+// Hardcoded Supabase values since environment variables aren't loading correctly
+const supabaseUrl = "https://gqcfneuiruffgpwhkecy.supabase.co";
+const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdxY2ZuZXVpcnVmZmdwd2hrZWN5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI5NjUyNzAsImV4cCI6MjA1ODU0MTI3MH0.Wm8coMFjXv8TA2bQfiXoDYjzml92iTPSDuZOlPJhD_0";
 
 // Create the Supabase client
 export const supabase = createClient(
@@ -42,4 +37,5 @@ export type UserProfile = {
   avatar_url?: string;
   role: 'admin' | 'editor' | 'viewer';
   created_at: string;
+  updated_at?: string;
 };

@@ -1,6 +1,4 @@
-
-import { supabase } from './supabase';
-import { UserProfile } from './supabase';
+import { supabase, UserProfile } from './supabase';
 
 // Get the current user's profile
 export const getCurrentUserProfile = async (): Promise<UserProfile | null> => {
@@ -131,3 +129,6 @@ export const updateUserRole = async (
     return false;
   }
 };
+
+// Re-export UserProfile type so it can be used elsewhere
+export type { UserProfile };
