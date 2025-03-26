@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -34,6 +33,7 @@ import AdminPages from "./pages/admin/Pages";
 import AdminMedia from "./pages/admin/Media";
 import AdminUsers from "./pages/admin/Users";
 import AdminSettings from "./pages/admin/Settings";
+import SetupPage from '@/components/admin/SetupPage';
 
 const queryClient = new QueryClient();
 
@@ -165,6 +165,7 @@ const AppRoutes = () => {
           <Route path="media" element={<AdminMedia />} />
           <Route path="users" element={<AdminUsers />} />
           <Route path="settings" element={<AdminSettings />} />
+          <Route path="setup" element={<SetupPage />} />
           <Route path="" element={<AdminDashboard />} />
         </Route>
         

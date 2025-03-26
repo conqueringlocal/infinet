@@ -1,315 +1,187 @@
 
 import { supabase } from './supabase';
+import { hasPermission } from './user-service';
 
-export type PageContent = {
-  id?: string;
-  page_path: string;
-  content_data: Record<string, string>;
-  created_at?: string;
-  updated_at?: string;
-  created_by?: string;
-  version?: number;
-  status?: 'draft' | 'published' | 'archived';
-  published_at?: string;
-  published_by?: string;
-};
-
-export type ContentExport = {
+export interface ContentExport {
   version: number;
   timestamp: string;
   pageUrl: string;
   content: Record<string, string>;
-  status?: 'draft' | 'published' | 'archived';
-};
+}
 
-// Get page content from Supabase - now with status filtering
-export const getPageContent = async (
-  pagePath: string, 
-  status: 'draft' | 'published' | 'any' = 'published'
-): Promise<Record<string, string> | null> => {
+/**
+ * Get content for a specific page
+ */
+export const getPageContent = async (pagePath: string): Promise<Record<string, string> | null> => {
   try {
-    let query = supabase
+    // Try to get the latest published version
+    const { data: publishedData, error: publishedError } = await supabase
       .from('page_content')
-      .select('content_data, status')
-      .eq('page_path', pagePath);
+      .select('content')
+      .eq('page_path', pagePath)
+      .eq('published', true)
+      .order('version', { ascending: false })
+      .limit(1)
+      .maybeSingle();
     
-    // Filter by status if not 'any'
-    if (status !== 'any') {
-      query = query.eq('status', status);
-    }
-    
-    // Get latest version
-    query = query.order('version', { ascending: false }).limit(1);
-    
-    const { data, error } = await query;
-    
-    if (error) throw error;
-    
-    // If no data with the specified status, try to get published content
-    if (!data || data.length === 0) {
-      if (status === 'draft') {
-        console.log('No draft found, fetching published version');
-        return getPageContent(pagePath, 'published');
-      }
+    if (publishedError) {
+      console.error('Error getting published content:', publishedError);
       return null;
     }
     
-    console.log(`Retrieved ${data[0].status} content for page: ${pagePath}`);
-    return data[0].content_data || null;
+    if (publishedData) {
+      return publishedData.content as Record<string, string>;
+    }
+    
+    // If user has edit permission, try to get the latest draft
+    const canEdit = await hasPermission('edit_content');
+    
+    if (canEdit) {
+      const { data: draftData, error: draftError } = await supabase
+        .from('page_content')
+        .select('content')
+        .eq('page_path', pagePath)
+        .order('version', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      
+      if (draftError) {
+        console.error('Error getting draft content:', draftError);
+        return null;
+      }
+      
+      if (draftData) {
+        return draftData.content as Record<string, string>;
+      }
+    }
+    
+    return null;
   } catch (error) {
-    console.error('Error fetching page content:', error);
-    throw error;
+    console.error('Error in getPageContent:', error);
+    return null;
   }
 };
 
-// Save page content to Supabase with versioning and status
+/**
+ * Save content for a specific page
+ */
 export const savePageContent = async (
-  pagePath: string, 
-  contentData: Record<string, string>,
-  userId?: string,
-  status: 'draft' | 'published' = 'published'  // Default to published for backward compatibility
-): Promise<PageContent> => {
-  console.log(`Saving ${status} content for page: ${pagePath}`);
-  
+  pagePath: string,
+  content: Record<string, string>,
+  userId?: string
+): Promise<boolean> => {
   try {
-    // First check if content for this page already exists
-    const { data: existingVersions } = await supabase
+    // Check if the user can publish content
+    const canPublish = await hasPermission('publish_content');
+    
+    // Get the latest version number for this page
+    const { data: versionData, error: versionError } = await supabase
       .from('page_content')
-      .select('*')
+      .select('version')
       .eq('page_path', pagePath)
       .order('version', { ascending: false })
-      .limit(1);
+      .limit(1)
+      .maybeSingle();
     
-    const latestVersion = existingVersions && existingVersions.length > 0 
-      ? existingVersions[0] 
-      : null;
-    
-    const newVersion = latestVersion ? (latestVersion.version || 0) + 1 : 1;
-    console.log(`Creating new version: ${newVersion} with status: ${status}`);
-    
-    // Always create a new version - this gives us full version history
-    const timestamp = new Date().toISOString();
-    const newContent: PageContent = {
-      page_path: pagePath,
-      content_data: contentData,
-      created_by: userId,
-      version: newVersion,
-      status: status,
-      created_at: timestamp,
-      updated_at: timestamp,
-    };
-    
-    // Add publishing info if status is 'published'
-    if (status === 'published') {
-      newContent.published_at = timestamp;
-      newContent.published_by = userId;
+    if (versionError) {
+      console.error('Error getting version:', versionError);
+      throw versionError;
     }
     
-    // Insert new version
-    const { data, error } = await supabase
+    const newVersion = versionData ? versionData.version + 1 : 1;
+    
+    // Insert the new version
+    const { error: insertError } = await supabase
       .from('page_content')
-      .insert(newContent)
-      .select()
-      .single();
+      .insert({
+        page_path: pagePath,
+        content,
+        created_by: userId,
+        published: canPublish, // Auto-publish if user has permission
+        version: newVersion
+      });
     
-    if (error) {
-      console.error('Error saving page content:', error);
-      throw error;
+    if (insertError) {
+      console.error('Error saving content:', insertError);
+      throw insertError;
     }
     
-    console.log(`Successfully saved ${status} content for page: ${pagePath}`);
-    return data;
+    return true;
   } catch (error) {
     console.error('Error in savePageContent:', error);
     throw error;
   }
 };
 
-// Get all versions of a page's content
-export const getPageVersions = async (pagePath: string): Promise<PageContent[]> => {
+/**
+ * Validate a content import
+ */
+export const validateContentImport = (jsonData: string): { 
+  valid: boolean; 
+  error?: string;
+  data?: ContentExport;
+} => {
   try {
-    const { data, error } = await supabase
-      .from('page_content')
-      .select('*')
-      .eq('page_path', pagePath)
-      .order('version', { ascending: false });
+    const data = JSON.parse(jsonData);
     
-    if (error) throw error;
-    return data || [];
-  } catch (error) {
-    console.error('Error fetching page versions:', error);
-    return [];
-  }
-};
-
-// Get a specific version of page content
-export const getPageVersion = async (
-  pagePath: string, 
-  version: number
-): Promise<PageContent | null> => {
-  try {
-    const { data, error } = await supabase
-      .from('page_content')
-      .select('*')
-      .eq('page_path', pagePath)
-      .eq('version', version)
-      .single();
-    
-    if (error) throw error;
-    return data;
-  } catch (error) {
-    console.error('Error fetching page version:', error);
-    return null;
-  }
-};
-
-// Publish a draft version
-export const publishPageContent = async (
-  pagePath: string,
-  version: number,
-  userId?: string
-): Promise<boolean> => {
-  try {
-    // Get the specific version
-    const { data: versionData, error: versionError } = await supabase
-      .from('page_content')
-      .select('*')
-      .eq('page_path', pagePath)
-      .eq('version', version)
-      .single();
-    
-    if (versionError || !versionData) {
-      console.error('Error fetching version to publish:', versionError);
-      return false;
+    // Basic validation
+    if (!data.version) {
+      return { valid: false, error: 'Missing version' };
     }
     
-    // Create a new published version
-    const result = await savePageContent(
-      pagePath,
-      versionData.content_data,
-      userId,
-      'published'
-    );
-    
-    return !!result;
-  } catch (error) {
-    console.error('Error publishing page content:', error);
-    return false;
-  }
-};
-
-// Get all pages content for admin
-export const getAllPagesContent = async (
-  status: 'draft' | 'published' | 'archived' | 'any' = 'any'
-): Promise<PageContent[]> => {
-  try {
-    let query = supabase
-      .from('page_content')
-      .select('*');
-    
-    // Filter by status if not 'any'
-    if (status !== 'any') {
-      query = query.eq('status', status);
+    if (!data.timestamp) {
+      return { valid: false, error: 'Missing timestamp' };
     }
     
-    // Get the latest version of each page
-    const { data, error } = await query.order('updated_at', { ascending: false });
+    if (!data.pageUrl) {
+      return { valid: false, error: 'Missing page URL' };
+    }
     
-    if (error) throw error;
+    if (!data.content || typeof data.content !== 'object') {
+      return { valid: false, error: 'Invalid content format' };
+    }
     
-    // Group by page_path and take only the latest version
-    const latestVersions = new Map<string, PageContent>();
-    data?.forEach(item => {
-      const existingItem = latestVersions.get(item.page_path);
-      if (!existingItem || (item.version && existingItem.version && item.version > existingItem.version)) {
-        latestVersions.set(item.page_path, item);
-      }
-    });
-    
-    return Array.from(latestVersions.values());
+    return { valid: true, data };
   } catch (error) {
-    console.error('Error fetching all pages content:', error);
-    return [];
+    return { valid: false, error: 'Invalid JSON format' };
   }
 };
 
-// Import content from a JSON file
+/**
+ * Import page content from an export
+ */
 export const importPageContent = async (
-  importData: ContentExport, 
+  data: ContentExport,
   userId?: string
 ): Promise<{ success: boolean; message: string }> => {
   try {
-    // Validate the import data
-    if (!importData || !importData.version || !importData.pageUrl || !importData.content) {
-      return { 
-        success: false, 
-        message: 'Invalid import file format. Missing required fields.' 
-      };
+    const { pageUrl, content } = data;
+    
+    if (!pageUrl || !content) {
+      return { success: false, message: 'Missing page URL or content' };
     }
     
-    // Default status to published if not specified
-    const status = importData.status || 'published';
+    // Clean up the path
+    let pagePath = pageUrl;
+    if (pagePath.startsWith('/')) {
+      pagePath = pagePath.slice(1);
+    }
+    if (pagePath.endsWith('/')) {
+      pagePath = pagePath.slice(0, -1);
+    }
+    if (pagePath === '') {
+      pagePath = 'index';
+    }
     
     // Save the imported content
-    await savePageContent(
-      importData.pageUrl,
-      importData.content,
-      userId,
-      status as 'draft' | 'published'
-    );
+    await savePageContent(pagePath, content, userId);
     
-    return { 
-      success: true, 
-      message: `Content successfully imported for page: ${importData.pageUrl} as ${status}` 
+    return {
+      success: true,
+      message: `Successfully imported content for "${pagePath}"`
     };
-  } catch (error: any) {
-    console.error('Error importing content:', error);
-    return { 
-      success: false, 
-      message: error.message || 'An error occurred during import' 
-    };
-  }
-};
-
-// Validate content export format
-export const validateContentImport = (jsonData: any): { 
-  valid: boolean; 
-  data?: ContentExport; 
-  error?: string 
-} => {
-  try {
-    // If string was passed, try to parse it
-    const data = typeof jsonData === 'string' ? JSON.parse(jsonData) : jsonData;
-    
-    // Check required fields
-    if (!data.version || !data.timestamp || !data.pageUrl || !data.content) {
-      return { 
-        valid: false, 
-        error: 'Invalid import format: missing required fields' 
-      };
-    }
-    
-    // Check if content is an object
-    if (typeof data.content !== 'object' || data.content === null) {
-      return {
-        valid: false,
-        error: 'Invalid content format: content must be an object'
-      };
-    }
-    
-    // Validate status if present
-    if (data.status && !['draft', 'published', 'archived'].includes(data.status)) {
-      return {
-        valid: false,
-        error: 'Invalid status: must be draft, published, or archived'
-      };
-    }
-    
-    return { valid: true, data: data as ContentExport };
-  } catch (error: any) {
-    return { 
-      valid: false, 
-      error: error.message || 'Invalid JSON format' 
-    };
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error during import';
+    return { success: false, message: errorMessage };
   }
 };
