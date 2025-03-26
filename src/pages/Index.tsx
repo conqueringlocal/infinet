@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
@@ -12,7 +11,6 @@ import Footer from '@/components/layout/Footer';
 import ServiceFinder from '@/components/home/ServiceFinder';
 import NationwideService from '@/components/home/NationwideService';
 import EditableContent from '@/components/editor/EditableContent';
-import FiberCmsInfo from '@/components/home/FiberCmsInfo';
 
 // Export components for use in page editor
 export const HomePageComponents = {
@@ -22,8 +20,7 @@ export const HomePageComponents = {
   ProjectsPreview,
   CtaSection,
   ServiceFinder,
-  NationwideService,
-  FiberCmsInfo
+  NationwideService
 };
 
 // Enhanced Hero component with editable content
@@ -364,7 +361,7 @@ const EditableWhyChooseUs = () => {
             <div className="flex items-center mb-4">
               <div className="h-10 w-10 rounded-full bg-infinetYellow-100 flex items-center justify-center mr-3">
                 <svg className="h-5 w-5 text-infinet-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+                  <path d="M12 2L2 7l10 5 10-5M2 12l10 5 10-5"></path>
                 </svg>
               </div>
               <EditableContent id="advantage-6-title" tag="h3" className="text-xl font-semibold text-gray-900">
@@ -490,7 +487,6 @@ const Index = () => {
         <EditableWhyChooseUs />
         <ProjectsPreview />
         <EditableCta />
-        <FiberCmsInfo />
       </main>
       <Footer />
     </div>
