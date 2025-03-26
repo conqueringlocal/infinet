@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { 
   FileText, 
   Search, 
@@ -21,17 +22,20 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const Pages = () => {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
+  const [editingPage, setEditingPage] = useState<any>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   
   const pages = [
-    { id: 1, title: 'Home', slug: '/', lastEdited: '2 hours ago', status: 'Published' },
-    { id: 2, title: 'About Us', slug: '/about', lastEdited: 'Yesterday', status: 'Published' },
-    { id: 3, title: 'Services', slug: '/services', lastEdited: '3 days ago', status: 'Published' },
-    { id: 4, title: 'Projects', slug: '/projects', lastEdited: '1 week ago', status: 'Published' },
-    { id: 5, title: 'Contact', slug: '/contact', lastEdited: '2 weeks ago', status: 'Published' },
+    { id: 1, title: 'Home', slug: '/', lastEdited: '2 hours ago', status: 'Published', content: '<h1>Welcome to Infi-NET</h1><p>Your trusted provider of fiber and low-voltage solutions.</p>' },
+    { id: 2, title: 'About Us', slug: '/about', lastEdited: 'Yesterday', status: 'Published', content: '<h1>About Infi-NET</h1><p>Learn about our company history and mission.</p>' },
+    { id: 3, title: 'Services', slug: '/services', lastEdited: '3 days ago', status: 'Published', content: '<h1>Our Services</h1><p>Discover our range of professional services.</p>' },
+    { id: 4, title: 'Projects', slug: '/projects', lastEdited: '1 week ago', status: 'Published', content: '<h1>Projects</h1><p>View our portfolio of completed projects.</p>' },
+    { id: 5, title: 'Contact', slug: '/contact', lastEdited: '2 weeks ago', status: 'Published', content: '<h1>Contact Us</h1><p>Get in touch with our team today.</p>' },
   ];
 
   const filteredPages = pages.filter(page => 
@@ -39,11 +43,18 @@ const Pages = () => {
     page.slug.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleEditPage = (pageId: number) => {
+  const handleEditPage = (page: any) => {
+    setEditingPage(page);
+    setIsEditDialogOpen(true);
+  };
+
+  const handleSavePage = () => {
+    // In a real application, this would save to a database
     toast({
-      title: "Edit page",
-      description: `Editing page ID: ${pageId}`,
+      title: "Page updated",
+      description: `Successfully updated ${editingPage.title}`,
     });
+    setIsEditDialogOpen(false);
   };
 
   const handleViewPage = (slug: string) => {
@@ -60,7 +71,7 @@ const Pages = () => {
               <Plus className="h-4 w-4 mr-2" /> New Page
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="sm:max-w-[800px]">
             <DialogHeader>
               <DialogTitle>Create new page</DialogTitle>
               <DialogDescription>
@@ -152,7 +163,7 @@ const Pages = () => {
                       <Button 
                         variant="ghost" 
                         size="icon"
-                        onClick={() => handleEditPage(page.id)}
+                        onClick={() => handleEditPage(page)}
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
@@ -167,6 +178,148 @@ const Pages = () => {
           </table>
         </div>
       </div>
+
+      {/* Page Editor Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="sm:max-w-[900px] max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Page: {editingPage?.title}</DialogTitle>
+            <DialogDescription>
+              Make changes to the page content. Click save when you're done.
+            </DialogDescription>
+          </DialogHeader>
+          
+          {editingPage && (
+            <Tabs defaultValue="content" className="w-full">
+              <TabsList className="mb-4">
+                <TabsTrigger value="content">Content</TabsTrigger>
+                <TabsTrigger value="seo">SEO</TabsTrigger>
+                <TabsTrigger value="settings">Settings</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="content" className="space-y-4">
+                <div className="space-y-2">
+                  <label htmlFor="pageTitle" className="text-sm font-medium">
+                    Page Title
+                  </label>
+                  <Input 
+                    id="pageTitle" 
+                    value={editingPage.title} 
+                    onChange={(e) => setEditingPage({...editingPage, title: e.target.value})}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <label htmlFor="pageContent" className="text-sm font-medium">
+                    Content
+                  </label>
+                  <div className="border rounded-md p-4 min-h-[300px] bg-white">
+                    <Textarea 
+                      id="pageContent"
+                      value={editingPage.content}
+                      onChange={(e) => setEditingPage({...editingPage, content: e.target.value})}
+                      className="min-h-[250px] w-full border-0 focus-visible:ring-0 focus-visible:ring-offset-0 resize-none"
+                    />
+                  </div>
+                  <p className="text-xs text-gray-500">
+                    Use HTML tags for formatting. For example, &lt;h1&gt;Title&lt;/h1&gt; for headings.
+                  </p>
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="seo" className="space-y-4">
+                <div className="space-y-2">
+                  <label htmlFor="metaTitle" className="text-sm font-medium">
+                    Meta Title
+                  </label>
+                  <Input id="metaTitle" placeholder="Meta Title for Search Engines" />
+                </div>
+                
+                <div className="space-y-2">
+                  <label htmlFor="metaDescription" className="text-sm font-medium">
+                    Meta Description
+                  </label>
+                  <Textarea 
+                    id="metaDescription" 
+                    placeholder="Description for search engine results"
+                    className="min-h-[100px]"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <label htmlFor="ogImage" className="text-sm font-medium">
+                    Social Share Image
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <Input id="ogImage" placeholder="URL to image" className="flex-1" />
+                    <Button variant="outline">Select Image</Button>
+                  </div>
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="settings" className="space-y-4">
+                <div className="space-y-2">
+                  <label htmlFor="pageSlug" className="text-sm font-medium">
+                    URL Slug
+                  </label>
+                  <Input 
+                    id="pageSlug" 
+                    value={editingPage.slug} 
+                    onChange={(e) => setEditingPage({...editingPage, slug: e.target.value})}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">
+                    Page Status
+                  </label>
+                  <div className="flex gap-4">
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="radio"
+                        id="published"
+                        name="status"
+                        value="published"
+                        checked={editingPage.status === "Published"}
+                        onChange={() => setEditingPage({...editingPage, status: "Published"})}
+                        className="h-4 w-4 text-blue-600"
+                      />
+                      <label htmlFor="published">Published</label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="radio"
+                        id="draft"
+                        name="status"
+                        value="draft"
+                        checked={editingPage.status === "Draft"}
+                        onChange={() => setEditingPage({...editingPage, status: "Draft"})}
+                        className="h-4 w-4 text-blue-600"
+                      />
+                      <label htmlFor="draft">Draft</label>
+                    </div>
+                  </div>
+                </div>
+              </TabsContent>
+            </Tabs>
+          )}
+          
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setIsEditDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button 
+              className="bg-[#003366] hover:bg-[#002244]"
+              onClick={handleSavePage}
+            >
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
