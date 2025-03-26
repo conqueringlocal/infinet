@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -57,7 +58,7 @@ const ScrollToTop = () => {
       }
     } else if (pathname.includes("/admin")) {
       pageTitle = "Admin Dashboard | Conquering Local CMS";
-    } else if (pathname === "/edit") {
+    } else if (pathname === "/edit" || pathname.endsWith("/edit")) {
       pageTitle = "Edit Mode | Infi-NET LLC";
     }
     
@@ -70,8 +71,10 @@ const ScrollToTop = () => {
 const PageWrapper = ({ Component }: { Component: React.ComponentType<any> }) => {
   const location = useLocation();
   
+  // Check if we're in edit mode (URL ends with /edit)
   const isEditPath = location.pathname === '/edit' || location.pathname.endsWith('/edit');
   
+  // Determine the base path (the path without /edit) for rendering the correct component
   const basePath = location.pathname === '/edit' 
     ? '/' 
     : isEditPath 
@@ -87,6 +90,7 @@ const PageWrapper = ({ Component }: { Component: React.ComponentType<any> }) => 
   return (
     <>
       <Component />
+      {/* Pass isEnabled prop to InPlaceEditor based on URL */}
       <InPlaceEditor isEnabled={isEditPath} />
     </>
   );
@@ -95,8 +99,10 @@ const PageWrapper = ({ Component }: { Component: React.ComponentType<any> }) => 
 const AppRoutes = () => {
   const location = useLocation();
   
+  // Check if we're in edit mode
   const isEditPath = location.pathname === '/edit' || location.pathname.endsWith('/edit');
   
+  // Get the base path for routing
   const basePath = location.pathname === '/edit'
     ? '/'
     : isEditPath

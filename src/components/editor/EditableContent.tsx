@@ -12,9 +12,9 @@ const EditableContent: React.FC<EditableContentProps> = ({
   id, 
   children, 
   className = '', 
-  tag: Tag = 'div' 
+  tag = 'div' 
 }) => {
-  const contentRef = useRef<HTMLElement>(null);
+  const contentRef = useRef<HTMLElement | null>(null);
   const [initialContentSet, setInitialContentSet] = useState(false);
   
   useEffect(() => {
@@ -39,14 +39,17 @@ const EditableContent: React.FC<EditableContentProps> = ({
     setInitialContentSet(true);
   }, [id, initialContentSet]);
 
+  // Create the element with the correct tag
+  const TagName = tag as React.ElementType;
+
   return (
-    <Tag
+    <TagName
       data-editable={id}
       className={className}
       ref={contentRef}
     >
       {children}
-    </Tag>
+    </TagName>
   );
 };
 
