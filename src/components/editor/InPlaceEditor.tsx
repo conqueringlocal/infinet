@@ -13,6 +13,14 @@ interface InPlaceEditorProps {
   isEnabled: boolean;
 }
 
+const getNormalRouteFromPath = (path: string): string => {
+  if (path === '/edit') return '/';
+  if (path.endsWith('/edit')) {
+    return path.slice(0, -5);
+  }
+  return path;
+};
+
 const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
   const [loginDialogOpen, setLoginDialogOpen] = useState(false);
   const [imageDialogOpen, setImageDialogOpen] = useState(false);
@@ -39,7 +47,7 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
   const { user, signIn, signOut } = useAuth();
 
   const isEditUrl = location.pathname === '/edit' || location.pathname.endsWith('/edit');
-  const normalRoute = getNormalRoute();
+  const normalRoute = getNormalRouteFromPath(location.pathname);
 
   useEffect(() => {
     console.log('==== EDITOR MOUNT EFFECT ====');
@@ -119,11 +127,7 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
   }, [editMode]);
 
   const getNormalRoute = () => {
-    if (location.pathname === '/edit') return '/';
-    if (location.pathname.endsWith('/edit')) {
-      return location.pathname.slice(0, -5);
-    }
-    return location.pathname;
+    return getNormalRouteFromPath(location.pathname);
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -172,16 +176,7 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
   };
 
   const navigateToNonEditVersion = () => {
-    const currentPath = location.pathname;
-    let basePath = currentPath;
-
-    if (currentPath === '/edit') {
-      basePath = '/';
-    } else if (currentPath.endsWith('/edit')) {
-      basePath = currentPath.slice(0, -5);
-    }
-
-    navigate(basePath);
+    navigate(normalRoute);
   };
 
   const initializeEditables = () => {

@@ -1,11 +1,23 @@
-
-import { supabase, UserProfile } from './supabase';
+import { supabase } from './supabase';
 
 // Enhanced role type
 export type UserRole = 'admin' | 'editor' | 'contributor' | 'viewer';
 
 // Permission types for different actions
 export type Permission = 'manage_users' | 'edit_content' | 'publish_content' | 'view_content' | 'manage_media';
+
+// User profile interface
+export interface UserProfile {
+  id: string;
+  email: string;
+  display_name?: string;
+  role: UserRole;
+  created_at?: string;
+  updated_at?: string;
+  avatar_url?: string;
+  bio?: string;
+  settings?: Record<string, any>;
+}
 
 // Get the current user's profile
 export const getCurrentUserProfile = async (): Promise<UserProfile | null> => {
@@ -47,16 +59,16 @@ export const hasPermission = async (permission: Permission): Promise<boolean> =>
         return profile.role === 'admin';
       
       case 'edit_content':
-        return ['admin', 'editor', 'contributor'].includes(profile.role as UserRole);
+        return ['admin', 'editor', 'contributor'].includes(profile.role);
       
       case 'publish_content':
-        return ['admin', 'editor'].includes(profile.role as UserRole);
+        return ['admin', 'editor'].includes(profile.role);
       
       case 'view_content':
-        return ['admin', 'editor', 'contributor', 'viewer'].includes(profile.role as UserRole);
+        return true; // All authenticated users can view content
       
       case 'manage_media':
-        return ['admin', 'editor'].includes(profile.role as UserRole);
+        return ['admin', 'editor'].includes(profile.role);
       
       default:
         return false;
