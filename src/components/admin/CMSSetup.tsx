@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { setupCMS } from '@/lib/database';
 import { Button } from '@/components/ui/Button';
@@ -102,7 +101,13 @@ USING (
     SELECT 1 FROM public.user_profiles 
     WHERE id = auth.uid() AND role = 'admin'
   )
-);`
+);
+
+-- Create insert policy for initialization
+CREATE POLICY "Allow authenticated users to create their profile" 
+ON public.user_profiles FOR INSERT 
+USING (auth.uid() = id);
+`
       },
       {
         name: 'page_assignments',
@@ -245,6 +250,24 @@ CREATE POLICY "Admins can modify analytics"
       WHERE id = auth.uid() AND role = 'admin'
     )
   );`
+      },
+      {
+        name: 'create_admin_function',
+        sql: `-- Create a function to bypass RLS for admin user creation
+CREATE OR REPLACE FUNCTION create_admin_user(user_id UUID, user_email TEXT)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER -- This runs with the privileges of the function creator
+AS $$
+BEGIN
+  INSERT INTO public.user_profiles (id, email, role, created_at, updated_at)
+  VALUES (user_id, user_email, 'admin', NOW(), NOW())
+  ON CONFLICT (id) 
+  DO UPDATE SET 
+    role = 'admin',
+    updated_at = NOW();
+END;
+$$;`
       }
     ];
   };
@@ -366,6 +389,7 @@ CREATE POLICY "Admins can modify analytics"
                   <li>Create the page_assignments table (depends on user_profiles)</li>
                   <li>Create the page_content table (depends on user_profiles)</li>
                   <li>Create the page_analytics table (depends on page_content)</li>
+                  <li>Create the admin function (needed to bypass RLS for admin creation)</li>
                 </ol>
               </div>
               
@@ -382,7 +406,7 @@ CREATE POLICY "Admins can modify analytics"
               </div>
               
               <div className="space-y-4">
-                {tables.map((table, index) => (
+                {getTables().map((table, index) => (
                   <div key={table.name} className="border border-gray-200 rounded-md overflow-hidden">
                     <div className="bg-gray-50 px-4 py-2 flex justify-between items-center">
                       <div className="flex items-center">
@@ -424,11 +448,12 @@ CREATE POLICY "Admins can modify analytics"
               </div>
               
               <div className="bg-yellow-50 border border-yellow-100 rounded-md p-4">
-                <h3 className="text-sm font-medium text-yellow-800 mb-2">Troubleshooting</h3>
+                <h3 className="text-sm font-medium text-yellow-800 mb-2">Troubleshooting RLS Issues</h3>
                 <ul className="list-disc text-xs text-yellow-700 pl-5 space-y-1">
-                  <li>If you get syntax errors, try running the CREATE TABLE statement first, then the ALTER TABLE statement, then each CREATE POLICY statement one by one.</li>
-                  <li>If a policy already exists, you might need to remove the "IF NOT EXISTS" from the CREATE POLICY statement.</li>
-                  <li>Once all tables are created, return to the Automatic Setup tab to create the admin user.</li>
+                  <li>The error "Error creating user profile: new row violates row-level security policy for table 'user_profiles'" means RLS policies are preventing profile creation.</li>
+                  <li>Make sure you've created the admin function (step 5) which allows bypassing RLS for the initial admin user.</li>
+                  <li>Alternatively, you can temporarily disable RLS on the user_profiles table: <code>ALTER TABLE public.user_profiles DISABLE ROW LEVEL SECURITY;</code> and then re-enable after setup.</li>
+                  <li>You can also create the admin user directly in the Supabase dashboard under Authentication → Users.</li>
                 </ul>
               </div>
             </div>

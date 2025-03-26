@@ -1,4 +1,3 @@
-
 import { supabase } from '../../supabase';
 import { executeSql, executeRawSql, executeDirectSql, createTable, createTableWithSql } from '../utils';
 
@@ -32,6 +31,11 @@ CREATE POLICY "Users can update own profile"
 ON public.user_profiles FOR UPDATE 
 USING (auth.uid() = id);
 
+-- Create insert policy for initialization
+CREATE POLICY "Allow authenticated users to create their profile" 
+ON public.user_profiles FOR INSERT 
+USING (auth.uid() = id);
+
 -- Create admin policy
 CREATE POLICY "Admins can update any profile" 
 ON public.user_profiles FOR UPDATE 
@@ -41,6 +45,22 @@ USING (
     WHERE id = auth.uid() AND role = 'admin'
   )
 );
+
+-- Create admin RPC function to bypass RLS
+CREATE OR REPLACE FUNCTION create_admin_user(user_id UUID, user_email TEXT)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER -- This runs with the privileges of the function creator
+AS $$
+BEGIN
+  INSERT INTO public.user_profiles (id, email, role, created_at, updated_at)
+  VALUES (user_id, user_email, 'admin', NOW(), NOW())
+  ON CONFLICT (id) 
+  DO UPDATE SET 
+    role = 'admin',
+    updated_at = NOW();
+END;
+$$;
 `;
 
 // Simpler SQL definition that only creates the table (no policies)
@@ -57,6 +77,27 @@ CREATE TABLE IF NOT EXISTS public.user_profiles (
   bio TEXT,
   settings JSONB
 );
+
+-- Create an insert policy so users can create their profiles
+CREATE POLICY IF NOT EXISTS "Allow authenticated users to create their profile" 
+ON public.user_profiles FOR INSERT 
+USING (auth.uid() = id);
+
+-- Create admin RPC function
+CREATE OR REPLACE FUNCTION create_admin_user(user_id UUID, user_email TEXT)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+  INSERT INTO public.user_profiles (id, email, role, created_at, updated_at)
+  VALUES (user_id, user_email, 'admin', NOW(), NOW())
+  ON CONFLICT (id) 
+  DO UPDATE SET 
+    role = 'admin',
+    updated_at = NOW();
+END;
+$$;
 `;
 
 /**
@@ -111,17 +152,22 @@ export const initializeUserProfilesTable = async (): Promise<{ success: boolean;
             ALTER TABLE public.user_profiles ENABLE ROW LEVEL SECURITY;
             
             -- Create view policy
-            CREATE POLICY "Users can view all profiles" 
+            CREATE POLICY IF NOT EXISTS "Users can view all profiles" 
             ON public.user_profiles FOR SELECT 
             USING (true);
             
             -- Create update policy
-            CREATE POLICY "Users can update own profile" 
+            CREATE POLICY IF NOT EXISTS "Users can update own profile" 
             ON public.user_profiles FOR UPDATE 
             USING (auth.uid() = id);
             
+            -- Create insert policy
+            CREATE POLICY IF NOT EXISTS "Allow authenticated users to create their profile" 
+            ON public.user_profiles FOR INSERT 
+            USING (auth.uid() = id);
+            
             -- Create admin policy
-            CREATE POLICY "Admins can update any profile" 
+            CREATE POLICY IF NOT EXISTS "Admins can update any profile" 
             ON public.user_profiles FOR UPDATE 
             USING (
               EXISTS (
