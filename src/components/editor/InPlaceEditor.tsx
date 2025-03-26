@@ -86,15 +86,18 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
   useEffect(() => {
     const loadContent = async () => {
       try {
+        console.log('Loading content from Supabase for path:', normalRoute);
         const content = await getPageContent(normalRoute);
 
         if (content) {
+          console.log('Content loaded from Supabase:', Object.keys(content).length, 'elements');
           localStorage.setItem('page_content', JSON.stringify(content));
           sessionStorage.setItem('page_content', JSON.stringify(content));
-          console.log('Loaded content from Supabase for path:', normalRoute);
           
           setTimeout(initializeEditables, 500);
           return true;
+        } else {
+          console.log('No content found in Supabase for path:', normalRoute);
         }
       } catch (error) {
         console.error('Error loading content from Supabase:', error);
@@ -293,10 +296,12 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
 
     try {
       const pagePath = getNormalRouteFromPath(location.pathname);
+      console.log('Saving content to Supabase for path:', pagePath);
       
       const canPublish = await hasPermission('publish_content');
       
       await savePageContent(pagePath, contentToSave, user?.id);
+      console.log('Content saved successfully to Supabase');
 
       toast({
         title: canPublish ? "Changes saved and published" : "Changes saved as draft",

@@ -39,7 +39,7 @@ const EditableContent: React.FC<EditableContentProps> = ({
     if (initialContentSet) return;
     
     try {
-      // Get stored content from localStorage
+      // Get stored content from localStorage first
       const savedContent = localStorage.getItem('page_content');
       console.log(`Checking for saved content for "${id}"`);
       
@@ -55,16 +55,17 @@ const EditableContent: React.FC<EditableContentProps> = ({
             console.log(`Loaded saved image source for "${id}"`);
           }
         } else {
-          console.log(`No saved content for "${id}"`);
+          console.log(`No saved content for "${id}" in localStorage`);
         }
       } else {
         console.log('No saved content found in localStorage');
       }
+      
+      setInitialContentSet(true);
     } catch (e) {
       console.error('Error parsing saved content', e);
+      setInitialContentSet(true);
     }
-    
-    setInitialContentSet(true);
   }, [id, initialContentSet, type]);
 
   // Create the element with the correct tag

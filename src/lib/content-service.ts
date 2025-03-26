@@ -14,6 +14,8 @@ export interface ContentExport {
  */
 export const getPageContent = async (pageId: string): Promise<Record<string, string> | null> => {
   try {
+    console.log(`Fetching content for page: ${pageId}`);
+    
     // Try to get the latest published version
     const { data: publishedData, error: publishedError } = await supabase
       .from('page_content')
@@ -30,6 +32,7 @@ export const getPageContent = async (pageId: string): Promise<Record<string, str
     }
     
     if (publishedData) {
+      console.log(`Found published content for page: ${pageId}`);
       return publishedData.content_data as Record<string, string>;
     }
     
@@ -51,10 +54,12 @@ export const getPageContent = async (pageId: string): Promise<Record<string, str
       }
       
       if (draftData) {
+        console.log(`Found draft content for page: ${pageId}`);
         return draftData.content_data as Record<string, string>;
       }
     }
     
+    console.log(`No content found for page: ${pageId}`);
     return null;
   } catch (error) {
     console.error('Error in getPageContent:', error);
@@ -71,8 +76,11 @@ export const savePageContent = async (
   userId?: string
 ): Promise<boolean> => {
   try {
+    console.log(`Saving content for page: ${pageId}`);
+    
     // Check if the user can publish content
     const canPublish = await hasPermission('publish_content');
+    console.log(`User can publish content: ${canPublish}`);
     
     // Generate a unique content_id for this content
     const contentId = `content_${Date.now()}`;
@@ -92,9 +100,10 @@ export const savePageContent = async (
     }
     
     const newVersion = versionData ? versionData.version + 1 : 1;
+    console.log(`Creating new version: ${newVersion} for page: ${pageId}`);
     
     // Insert the new version
-    const { error: insertError } = await supabase
+    const { data, error: insertError } = await supabase
       .from('page_content')
       .insert({
         page_id: pageId,
@@ -105,13 +114,15 @@ export const savePageContent = async (
         updated_by: userId,
         published: canPublish, // Auto-publish if user has permission
         version: newVersion
-      });
+      })
+      .select();
     
     if (insertError) {
       console.error('Error saving content:', insertError);
       throw insertError;
     }
     
+    console.log(`Content saved successfully for page: ${pageId}`, data);
     return true;
   } catch (error) {
     console.error('Error in savePageContent:', error);
