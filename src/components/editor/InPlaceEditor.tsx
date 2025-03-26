@@ -198,7 +198,8 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
       </div>
 
       {/* Add styles for editable content */}
-      <style jsx global>{`
+      <style>
+        {`
         .edit-mode [data-editable] {
           outline: 2px dashed #0070f3;
           position: relative;
@@ -232,7 +233,8 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
         .edit-mode [data-editable]:hover::before {
           opacity: 1;
         }
-      `}</style>
+        `}
+      </style>
     </>
   );
 };
