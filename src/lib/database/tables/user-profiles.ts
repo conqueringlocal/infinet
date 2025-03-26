@@ -163,12 +163,16 @@ export const initializeUserProfilesTable = async (): Promise<{ success: boolean;
       
       // Approach 4: Try using the REST API directly
       try {
-        const response = await fetch(`${supabase.supabaseUrl}/rest/v1/rpc/execute_sql`, {
+        // Get the URL and API key from environment variables or configuration
+        const url = import.meta.env.VITE_SUPABASE_URL || 'https://gqcfneuiruffgpwhkecy.supabase.co';
+        const apiKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdxY2ZuZXVpcnVmZmdwd2hrZWN5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI5NjUyNzAsImV4cCI6MjA1ODU0MTI3MH0.Wm8coMFjXv8TA2bQfiXoDYjzml92iTPSDuZOlPJhD_0';
+        
+        const response = await fetch(`${url}/rest/v1/rpc/execute_sql`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'apikey': supabase.supabaseKey,
-            'Authorization': `Bearer ${supabase.supabaseKey}`
+            'apikey': apiKey,
+            'Authorization': `Bearer ${apiKey}`
           },
           body: JSON.stringify({ sql_query: SIMPLE_USER_PROFILES_SQL })
         });

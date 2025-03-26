@@ -1,4 +1,3 @@
-
 import { supabase } from '../supabase';
 
 /**
@@ -62,24 +61,14 @@ export const executeRawSql = async (sqlQuery: string): Promise<{ success: boolea
 };
 
 /**
- * Execute SQL using direct query approach
+ * Execute SQL using direct query approach - removed since rpc is not available on _sql
  */
 export const executeDirectSql = async (sqlQuery: string): Promise<{ success: boolean; message: string }> => {
   try {
     console.log('Executing SQL via direct query:', sqlQuery.substring(0, 100) + '...');
     
-    // Execute the SQL directly
-    const { data, error } = await supabase.from('_sql').rpc('execute', { query: sqlQuery });
-
-    if (error) {
-      console.error('Error in direct SQL execution:', error);
-      return { 
-        success: false, 
-        message: `Error executing SQL: ${error.message}` 
-      };
-    }
-
-    return { success: true, message: 'SQL executed successfully' };
+    // Since we can't use the rpc method directly, we'll use the regular RPC method instead
+    return await executeRawSql(sqlQuery);
   } catch (error) {
     console.error('Error executing direct SQL:', error);
     return { 
@@ -238,14 +227,18 @@ export const createTableWithSql = async (
       console.warn('Failed to create table via direct SQL:', e);
     }
     
-    // Approach 4: Using REST API
+    // Approach 4: Using REST API with fetch
     try {
-      const response = await fetch(`${supabase.supabaseUrl}/rest/v1/rpc/execute_sql`, {
+      // Get the URL and API key from environment variables or configuration
+      const url = import.meta.env.VITE_SUPABASE_URL || 'https://gqcfneuiruffgpwhkecy.supabase.co';
+      const apiKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdxY2ZuZXVpcnVmZmdwd2hrZWN5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI5NjUyNzAsImV4cCI6MjA1ODU0MTI3MH0.Wm8coMFjXv8TA2bQfiXoDYjzml92iTPSDuZOlPJhD_0';
+      
+      const response = await fetch(`${url}/rest/v1/rpc/execute_sql`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'apikey': supabase.supabaseKey,
-          'Authorization': `Bearer ${supabase.supabaseKey}`
+          'apikey': apiKey,
+          'Authorization': `Bearer ${apiKey}`
         },
         body: JSON.stringify({ sql_query: sqlDefinition })
       });
