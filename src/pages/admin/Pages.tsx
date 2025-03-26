@@ -49,7 +49,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Card, CardContent } from "@/components/ui/card";
 import { HomePageComponents } from '@/pages/Index';
-import { WhyChooseUs } from '@/components/home/WhyChooseUs';
+import WhyChooseUs from '@/components/home/WhyChooseUs';
 
 const Pages = () => {
   const { toast } = useToast();
