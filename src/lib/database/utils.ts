@@ -7,13 +7,17 @@ import { supabase } from '../supabase';
  */
 export const executeSql = async (sqlQuery: string): Promise<{ success: boolean; message: string }> => {
   try {
+    // Get the Supabase URL and key from our configuration
+    const supabaseUrl = "https://gqcfneuiruffgpwhkecy.supabase.co";
+    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdxY2ZuZXVpcnVmZmdwd2hrZWN5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI5NjUyNzAsImV4cCI6MjA1ODU0MTI3MH0.Wm8coMFjXv8TA2bQfiXoDYjzml92iTPSDuZOlPJhD_0";
+
     // Using the REST API for raw SQL execution
-    const response = await fetch(`${supabase.supabaseUrl}/rest/v1/`, {
+    const response = await fetch(`${supabaseUrl}/rest/v1/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'apikey': supabase.supabaseKey,
-        'Authorization': `Bearer ${supabase.supabaseKey}`,
+        'apikey': supabaseKey,
+        'Authorization': `Bearer ${supabaseKey}`,
         'Prefer': 'return=minimal'
       },
       body: JSON.stringify({
