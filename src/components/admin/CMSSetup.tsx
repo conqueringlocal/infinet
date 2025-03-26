@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { setupCMS } from '@/lib/database';
 import { Button } from '@/components/ui/Button';
@@ -22,7 +23,7 @@ const CMSSetup: React.FC = () => {
       setSetupError(null);
       setSetupMessage(null);
 
-      const result = await setupCMS();
+      const result = await setupCMS(email, password);
       
       if (result.success) {
         setSetupComplete(true);

@@ -47,7 +47,10 @@ export const initializeDatabase = async (): Promise<{ success: boolean; message:
 /**
  * Performs a complete CMS setup
  */
-export const setupCMS = async (): Promise<{ success: boolean; message: string }> => {
+export const setupCMS = async (
+  email: string = 'admin@example.com',
+  password: string = 'admin123'
+): Promise<{ success: boolean; message: string }> => {
   try {
     // Initialize the database
     const dbResult = await initializeDatabase();
@@ -56,7 +59,7 @@ export const setupCMS = async (): Promise<{ success: boolean; message: string }>
     }
     
     // Create the default admin user
-    const adminResult = await createDefaultAdminUser();
+    const adminResult = await createDefaultAdminUser(email, password);
     if (!adminResult.success) {
       return adminResult;
     }
