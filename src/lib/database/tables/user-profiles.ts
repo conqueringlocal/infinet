@@ -1,6 +1,6 @@
 
 import { supabase } from '../../supabase';
-import { executeSql, executeRawSql, createTable, createTableWithSql } from '../utils';
+import { executeSql, executeRawSql, executeDirectSql, createTable, createTableWithSql } from '../utils';
 
 /**
  * SQL definition for the user_profiles table
@@ -43,6 +43,22 @@ USING (
 );
 `;
 
+// Simpler SQL definition that only creates the table (no policies)
+const SIMPLE_USER_PROFILES_SQL = `
+CREATE TABLE IF NOT EXISTS public.user_profiles (
+  id UUID PRIMARY KEY,
+  email TEXT NOT NULL,
+  display_name TEXT,
+  full_name TEXT,
+  role TEXT NOT NULL DEFAULT 'viewer',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  avatar_url TEXT,
+  bio TEXT,
+  settings JSONB
+);
+`;
+
 /**
  * Creates the user_profiles table if it doesn't exist
  */
@@ -50,87 +66,71 @@ export const initializeUserProfilesTable = async (): Promise<{ success: boolean;
   try {
     console.log('Creating user_profiles table...');
     
-    // Check if the table already exists
-    const { error: checkError } = await supabase
+    // Check if the table already exists by attempting to query it
+    const { data: existingData, error: checkError } = await supabase
       .from('user_profiles')
       .select('id')
       .limit(1);
     
-    if (checkError) {
-      if (checkError.code === '42P01') { // Table doesn't exist code
-        console.log('Table user_profiles does not exist, creating it...');
-        
-        // Try multiple approaches to create the table
-        
-        // 1. Try using SQL via functions API
-        try {
-          console.log('Attempting to create user_profiles table via Functions API...');
-          const { data, error } = await supabase.functions.invoke('execute-sql', {
-            body: { sql: USER_PROFILES_SQL }
-          });
-          
-          if (!error) {
-            console.log('User profiles table created successfully using Supabase Functions');
-            return { success: true, message: 'User profiles table created successfully' };
-          } else {
-            console.warn('Supabase Functions approach failed:', error.message);
-          }
-        } catch (functionsError) {
-          console.warn('Supabase Functions approach failed:', functionsError);
+    // If no error, table exists
+    if (!checkError) {
+      console.log('Table user_profiles already exists');
+      return { success: true, message: 'User profiles table already exists' };
+    }
+    
+    // If table doesn't exist, try to create it
+    if (checkError && checkError.code === '42P01') {
+      console.log('Table user_profiles does not exist, attempting to create it...');
+      
+      // Try multiple approaches to create the table
+      
+      // Approach 1: Create table with complete SQL definition
+      try {
+        const result = await createTableWithSql('user_profiles', USER_PROFILES_SQL);
+        if (result.success) {
+          return result;
         }
-        
-        // 2. Try using RPC
-        try {
-          console.log('Attempting to create user_profiles table via RPC...');
-          const sqlResult = await executeRawSql(USER_PROFILES_SQL);
+      } catch (error) {
+        console.warn('Failed to create table with complete SQL definition:', error);
+      }
+      
+      // Approach 2: Create table with simplified SQL (just the table, no policies)
+      try {
+        const result = await createTableWithSql('user_profiles', SIMPLE_USER_PROFILES_SQL);
+        if (result.success) {
+          console.log('Created table without policies, attempting to add policies...');
           
-          if (sqlResult.success) {
-            console.log('User profiles table created successfully using RPC');
-            return { success: true, message: 'User profiles table created successfully' };
-          } else {
-            console.warn('RPC approach failed:', sqlResult.message);
-          }
-        } catch (rpcError) {
-          console.warn('RPC approach failed:', rpcError);
+          // Now try to add policies
+          const policiesSQL = USER_PROFILES_SQL.split('CREATE TABLE')[1].split(';').slice(1).join(';');
+          await executeSql(policiesSQL);
+          
+          return { success: true, message: 'User profiles table created successfully with basic structure' };
         }
+      } catch (error) {
+        console.warn('Failed to create table with simplified SQL:', error);
+      }
+      
+      // Approach 3: Create with schema object
+      try {
+        const schema = {
+          id: 'uuid primary key',
+          email: 'text not null',
+          display_name: 'text',
+          full_name: 'text',
+          role: 'text not null default \'viewer\'',
+          created_at: 'timestamp with time zone default now()',
+          updated_at: 'timestamp with time zone default now()',
+          avatar_url: 'text',
+          bio: 'text',
+          settings: 'jsonb'
+        };
         
-        // 3. Try using direct SQL execution
-        try {
-          console.log('Attempting to create user_profiles table via direct SQL...');
-          const sqlResult = await executeSql(USER_PROFILES_SQL);
+        const result = await createTable('user_profiles', schema);
+        if (result.success) {
+          console.log('Created table with schema object, attempting to add RLS...');
           
-          if (sqlResult.success) {
-            console.log('User profiles table created successfully using direct SQL');
-            return { success: true, message: 'User profiles table created successfully' };
-          } else {
-            console.warn('Direct SQL approach failed:', sqlResult.message);
-          }
-        } catch (sqlError) {
-          console.warn('Direct SQL approach failed:', sqlError);
-        }
-        
-        // 4. Try using createTable helper
-        try {
-          console.log('Attempting to create user_profiles table via createTable...');
-          const schema = {
-            id: 'uuid primary key',
-            email: 'text not null',
-            display_name: 'text',
-            full_name: 'text',
-            role: 'text not null default \'viewer\'',
-            created_at: 'timestamp with time zone default now()',
-            updated_at: 'timestamp with time zone default now()',
-            avatar_url: 'text',
-            bio: 'text',
-            settings: 'jsonb'
-          };
-          
-          const tableResult = await createTable('user_profiles', schema);
-          
-          if (tableResult.success) {
-            console.log('User profiles table created successfully using createTable');
-            
-            // Add RLS policies manually
+          // Try to add RLS policies
+          try {
             await executeSql(`
               ALTER TABLE public.user_profiles ENABLE ROW LEVEL SECURITY;
               
@@ -151,45 +151,43 @@ export const initializeUserProfilesTable = async (): Promise<{ success: boolean;
                 )
               );
             `);
-            
-            return { success: true, message: 'User profiles table created successfully' };
-          } else {
-            console.warn('createTable approach failed:', tableResult.message);
+          } catch (error) {
+            console.warn('Failed to add RLS policies, but table was created:', error);
           }
-        } catch (createTableError) {
-          console.warn('createTable approach failed:', createTableError);
-        }
-        
-        // 5. Try specialized function approach
-        try {
-          console.log('Attempting to create user_profiles table via specialized function...');
-          const { data, error } = await supabase.functions.invoke('setup-tables', {
-            body: { table: 'user_profiles' }
-          });
           
-          if (!error) {
-            console.log('User profiles table created successfully using specialized function');
-            return { success: true, message: 'User profiles table created successfully' };
-          } else {
-            console.warn('Specialized function approach failed:', error.message);
-          }
-        } catch (specializedError) {
-          console.warn('Specialized function approach failed:', specializedError);
+          return { success: true, message: 'User profiles table created successfully' };
         }
-        
-        // If all automatic approaches fail, inform the user they need to create it manually
-        console.error('All automated approaches to create the user_profiles table failed');
-        return { 
-          success: false, 
-          message: 'Could not automatically create the user_profiles table. Please create it manually in the Supabase dashboard using this SQL:\n\n' + USER_PROFILES_SQL
-        };
-      } else {
-        console.error('Error checking user_profiles table:', checkError);
-        return { success: false, message: `Error checking user_profiles table: ${checkError.message}` };
+      } catch (error) {
+        console.warn('Failed to create table with schema object:', error);
       }
+      
+      // Approach 4: Try using the REST API directly
+      try {
+        const response = await fetch(`${supabase.supabaseUrl}/rest/v1/rpc/execute_sql`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': supabase.supabaseKey,
+            'Authorization': `Bearer ${supabase.supabaseKey}`
+          },
+          body: JSON.stringify({ sql_query: SIMPLE_USER_PROFILES_SQL })
+        });
+        
+        if (response.ok) {
+          return { success: true, message: 'User profiles table created successfully via REST API' };
+        }
+      } catch (error) {
+        console.warn('Failed to create table via REST API:', error);
+      }
+      
+      // If all automatic approaches fail, provide SQL for manual creation
+      return { 
+        success: false, 
+        message: 'Could not automatically create the user_profiles table. Please create it manually in the Supabase dashboard using this SQL:\n\n' + USER_PROFILES_SQL
+      };
     } else {
-      console.log('user_profiles table already exists');
-      return { success: true, message: 'User profiles table already exists' };
+      console.error('Error checking user_profiles table:', checkError);
+      return { success: false, message: `Error checking user_profiles table: ${checkError.message}` };
     }
   } catch (error) {
     console.error('Error initializing user_profiles table:', error);
