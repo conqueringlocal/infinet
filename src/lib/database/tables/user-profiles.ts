@@ -21,80 +21,84 @@ export const initializeUserProfilesTable = async (): Promise<{ success: boolean;
         
         // Try multiple approaches to create the table
         
-        // 1. Try using the .query() method if available
+        // 1. Try using direct SQL execution via Supabase Functions
         try {
-          console.log('Trying direct SQL query...');
-          const { data, error } = await supabase.query(`
-            CREATE TABLE IF NOT EXISTS public.user_profiles (
-              id UUID PRIMARY KEY,
-              email TEXT NOT NULL,
-              display_name TEXT,
-              full_name TEXT,
-              role TEXT NOT NULL DEFAULT 'viewer',
-              created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-              updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-              avatar_url TEXT,
-              bio TEXT,
-              settings JSONB
-            );
-            
-            -- RLS policies for user_profiles
-            ALTER TABLE public.user_profiles ENABLE ROW LEVEL SECURITY;
-            
-            -- Create view policy
-            DO $$
-            BEGIN
-              IF NOT EXISTS (
-                SELECT 1 FROM pg_policies WHERE tablename = 'user_profiles' AND policyname = 'Users can view all profiles'
-              ) THEN
-                CREATE POLICY "Users can view all profiles" 
-                ON public.user_profiles FOR SELECT 
-                USING (true);
-              END IF;
-            END
-            $$;
-            
-            -- Create update policy
-            DO $$
-            BEGIN
-              IF NOT EXISTS (
-                SELECT 1 FROM pg_policies WHERE tablename = 'user_profiles' AND policyname = 'Users can update own profile'
-              ) THEN
-                CREATE POLICY "Users can update own profile" 
-                ON public.user_profiles FOR UPDATE 
-                USING (auth.uid() = id);
-              END IF;
-            END
-            $$;
-            
-            -- Create admin policy
-            DO $$
-            BEGIN
-              IF NOT EXISTS (
-                SELECT 1 FROM pg_policies WHERE tablename = 'user_profiles' AND policyname = 'Admins can update any profile'
-              ) THEN
-                CREATE POLICY "Admins can update any profile" 
-                ON public.user_profiles FOR UPDATE 
-                USING (
-                  EXISTS (
-                    SELECT 1 FROM public.user_profiles 
-                    WHERE id = auth.uid() AND role = 'admin'
-                  )
+          console.log('Trying direct SQL execution via Functions API...');
+          const { data, error } = await supabase.functions.invoke('execute-sql', {
+            body: {
+              sql: `
+                CREATE TABLE IF NOT EXISTS public.user_profiles (
+                  id UUID PRIMARY KEY,
+                  email TEXT NOT NULL,
+                  display_name TEXT,
+                  full_name TEXT,
+                  role TEXT NOT NULL DEFAULT 'viewer',
+                  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                  avatar_url TEXT,
+                  bio TEXT,
+                  settings JSONB
                 );
-              END IF;
-            END
-            $$;
-          `);
+                
+                -- RLS policies for user_profiles
+                ALTER TABLE public.user_profiles ENABLE ROW LEVEL SECURITY;
+                
+                -- Create view policy
+                DO $$
+                BEGIN
+                  IF NOT EXISTS (
+                    SELECT 1 FROM pg_policies WHERE tablename = 'user_profiles' AND policyname = 'Users can view all profiles'
+                  ) THEN
+                    CREATE POLICY "Users can view all profiles" 
+                    ON public.user_profiles FOR SELECT 
+                    USING (true);
+                  END IF;
+                END
+                $$;
+                
+                -- Create update policy
+                DO $$
+                BEGIN
+                  IF NOT EXISTS (
+                    SELECT 1 FROM pg_policies WHERE tablename = 'user_profiles' AND policyname = 'Users can update own profile'
+                  ) THEN
+                    CREATE POLICY "Users can update own profile" 
+                    ON public.user_profiles FOR UPDATE 
+                    USING (auth.uid() = id);
+                  END IF;
+                END
+                $$;
+                
+                -- Create admin policy
+                DO $$
+                BEGIN
+                  IF NOT EXISTS (
+                    SELECT 1 FROM pg_policies WHERE tablename = 'user_profiles' AND policyname = 'Admins can update any profile'
+                  ) THEN
+                    CREATE POLICY "Admins can update any profile" 
+                    ON public.user_profiles FOR UPDATE 
+                    USING (
+                      EXISTS (
+                        SELECT 1 FROM public.user_profiles 
+                        WHERE id = auth.uid() AND role = 'admin'
+                      )
+                    );
+                  END IF;
+                END
+                $$;
+              `
+            }
+          });
           
           if (!error) {
-            console.log('User profiles table created successfully using direct query');
+            console.log('User profiles table created successfully using Supabase Functions');
             return { success: true, message: 'User profiles table created successfully' };
           } else {
-            console.warn('Direct query method failed:', error.message);
+            console.warn('Supabase Functions approach failed:', error.message);
             // Continue to next approach
           }
-        } catch (directQueryError) {
-          console.warn('Direct query approach failed:', directQueryError);
+        } catch (functionsError) {
+          console.warn('Supabase Functions approach failed:', functionsError);
           // Continue to next approach
         }
         
@@ -147,29 +151,24 @@ export const initializeUserProfilesTable = async (): Promise<{ success: boolean;
           // Continue to next approach
         }
         
-        // 3. Try using the Functions API approach
+        // 3. Try using the Functions API approach with a dedicated function
         try {
-          console.log('Trying Functions API approach...');
-          const functionResult = await fetch('https://gqcfneuiruffgpwhkecy.supabase.co/functions/v1/setup-tables', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${supabase.auth.session()?.access_token}`
-            },
-            body: JSON.stringify({
+          console.log('Trying dedicated Function API approach...');
+          const { data, error } = await supabase.functions.invoke('setup-tables', {
+            body: {
               table: 'user_profiles'
-            })
+            }
           });
           
-          if (functionResult.ok) {
-            console.log('User profiles table created successfully using Functions API');
+          if (!error) {
+            console.log('User profiles table created successfully using dedicated Functions API');
             return { success: true, message: 'User profiles table created successfully' };
           } else {
-            console.warn('Functions API approach failed:', await functionResult.text());
+            console.warn('Dedicated Functions API approach failed:', error.message);
             // Continue to next approach
           }
         } catch (functionsError) {
-          console.warn('Functions API approach failed:', functionsError);
+          console.warn('Dedicated Functions API approach failed:', functionsError);
           // Continue to next approach
         }
         

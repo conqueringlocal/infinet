@@ -138,13 +138,16 @@ export const createTable = async (tableName: string, schema: Record<string, stri
 };
 
 /**
- * Simple function to execute direct SQL using the Supabase client's query method
- * This is the most straightforward approach but requires a newer version of Supabase client
+ * Simple function to execute direct SQL using the Supabase REST API
+ * This is more reliable but requires proper authentication
  */
 export const executeSqlDirect = async (sqlQuery: string): Promise<{ success: boolean; message: string }> => {
   try {
-    // Use the .query() method which is available in newer Supabase client versions
-    const { data, error } = await supabase.query(sqlQuery);
+    // Instead of using the .query() method which doesn't exist,
+    // we'll use a custom Supabase Edge Function or send to an RPC
+    const { data, error } = await supabase.functions.invoke('execute-sql', {
+      body: { sql: sqlQuery }
+    });
     
     if (error) {
       console.error('Error executing SQL directly:', error);
