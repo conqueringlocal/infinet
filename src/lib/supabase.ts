@@ -11,18 +11,35 @@ if (!supabaseUrl || !supabaseAnonKey) {
   // Consider adding a more visible error message in the app UI if needed
 }
 
-// Create the Supabase client with proper error handling
-export const supabase = createClient(
-  supabaseUrl,
-  supabaseAnonKey,
-  {
-    auth: {
-      autoRefreshToken: true,
-      persistSession: true,
-      detectSessionInUrl: true,
-    }
-  }
-);
+// Create a mock client or the real Supabase client based on available credentials
+export const supabase = (supabaseUrl && supabaseAnonKey) 
+  ? createClient(
+      supabaseUrl,
+      supabaseAnonKey,
+      {
+        auth: {
+          autoRefreshToken: true,
+          persistSession: true,
+          detectSessionInUrl: true,
+        }
+      }
+    )
+  : {
+      // Mock client methods that return consistent values to prevent runtime errors
+      auth: {
+        getSession: async () => ({ data: { session: null }, error: null }),
+        signInWithPassword: async () => ({ data: { session: null }, error: { message: 'Missing Supabase credentials' } }),
+        signUp: async () => ({ data: { session: null }, error: { message: 'Missing Supabase credentials' } }),
+        signOut: async () => ({ error: null }),
+        onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
+      },
+      from: () => ({
+        select: () => ({ eq: () => ({ maybeSingle: () => ({ data: null, error: null }) }) }),
+        insert: () => ({ select: () => ({ single: () => ({ data: null, error: { message: 'Missing Supabase credentials' } }) }) }),
+        update: () => ({ eq: () => ({ select: () => ({ single: () => ({ data: null, error: { message: 'Missing Supabase credentials' } }) }) }) }),
+        order: () => ({ data: null, error: null }),
+      }),
+    };
 
 // Helper function to check if user is authenticated
 export const isAuthenticated = async () => {
