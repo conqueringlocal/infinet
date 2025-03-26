@@ -29,11 +29,6 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
   // Check if we're on an edit URL (ends with /edit)
   const isEditUrl = location.pathname === '/edit' || location.pathname.endsWith('/edit');
   
-  console.log('==== EDITOR INIT ====');
-  console.log('Current path:', location.pathname);
-  console.log('isEditUrl detected:', isEditUrl);
-  console.log('isEnabled prop value:', isEnabled);
-  
   // Set up the editor on initial load
   useEffect(() => {
     console.log('==== EDITOR MOUNT EFFECT ====');
@@ -302,17 +297,11 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
 
   // Determine if editor should be shown (based on URL or prop)
   const shouldShowEditor = isEditUrl || isEnabled;
-  
-  console.log('==== RENDER DECISION ====');
-  console.log('Should show editor?', shouldShowEditor);
 
   // Don't render anything if we shouldn't show the editor
   if (!shouldShowEditor) {
-    console.log('Not rendering editor component');
     return null;
   }
-  
-  console.log('Rendering editor component and UI');
   
   return (
     <>

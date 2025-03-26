@@ -98,26 +98,6 @@ const FiberCmsInfo = () => {
           </div>
         </div>
       </div>
-
-      <div className="absolute top-14 right-20 rounded-xl overflow-hidden shadow-lg transform rotate-3 z-10 hidden lg:block">
-        <EditableContent
-          id="fiber-cms-image-1"
-          type="image"
-          imageSrc="/lovable-uploads/9197edbf-232c-40b9-844b-12a37c0bbe4a.png"
-          imageAlt="CMS Preview 1"
-          className="w-72 h-auto object-cover"
-        />
-      </div>
-
-      <div className="absolute bottom-14 left-20 rounded-xl overflow-hidden shadow-lg transform -rotate-3 z-10 hidden lg:block">
-        <EditableContent
-          id="fiber-cms-image-2"
-          type="image"
-          imageSrc="/lovable-uploads/f3e6c9f7-b849-4255-84ee-0d5681586a86.png"
-          imageAlt="CMS Preview 2"
-          className="w-72 h-auto object-cover"
-        />
-      </div>
     </section>
   );
 };

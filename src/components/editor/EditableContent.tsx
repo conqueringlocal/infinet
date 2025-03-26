@@ -50,7 +50,7 @@ const EditableContent: React.FC<EditableContentProps> = ({
           if (type === 'text' && contentRef.current) {
             contentRef.current.innerHTML = contentMap[id];
             console.log(`Loaded saved text content for "${id}"`);
-          } else if (type === 'image' && (contentMap[id].startsWith('data:image') || contentMap[id].startsWith('http'))) {
+          } else if (type === 'image' && contentMap[id]) {
             setImageSource(contentMap[id]);
             console.log(`Loaded saved image source for "${id}"`);
           }
