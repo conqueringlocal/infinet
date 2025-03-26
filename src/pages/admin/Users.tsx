@@ -1,40 +1,60 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/input';
-import { Search, UserPlus, MoreHorizontal } from 'lucide-react';
+import { 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
+} from '@/components/ui/table';
+import { Search, UserPlus, MoreHorizontal, CheckCircle, XCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/hooks/use-auth';
+import { UserProfile } from '@/lib/supabase';
+import { useQuery } from '@tanstack/react-query';
+
+const fetchUsers = async (): Promise<UserProfile[]> => {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .order('created_at', { ascending: false });
+  
+  if (error) {
+    throw new Error(error.message);
+  }
+  
+  return data || [];
+};
 
 const Users = () => {
   const { toast } = useToast();
+  const { user } = useAuth();
+  const [searchQuery, setSearchQuery] = useState('');
   
-  // Sample users - in a real application, this would come from your database
-  const users = [
-    { 
-      id: 1, 
-      name: 'Admin User', 
-      email: 'admin@conqueringlocal.com', 
-      role: 'Administrator',
-      status: 'Active',
-      lastActive: 'Just now'
-    },
-    { 
-      id: 2, 
-      name: 'Jane Smith', 
-      email: 'jane@conqueringlocal.com', 
-      role: 'Editor',
-      status: 'Active',
-      lastActive: '2 hours ago'
-    },
-    { 
-      id: 3, 
-      name: 'Bob Johnson', 
-      email: 'bob@conqueringlocal.com', 
-      role: 'Viewer',
-      status: 'Inactive',
-      lastActive: '1 week ago'
+  const { data: users = [], isLoading, error, refetch } = useQuery({
+    queryKey: ['users'],
+    queryFn: fetchUsers,
+  });
+  
+  useEffect(() => {
+    if (error) {
+      toast({
+        title: "Error loading users",
+        description: (error as Error).message,
+        variant: "destructive",
+      });
     }
-  ];
+  }, [error, toast]);
+
+  const filteredUsers = searchQuery
+    ? users.filter(user => 
+        user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (user.full_name && user.full_name.toLowerCase().includes(searchQuery.toLowerCase())))
+    : users;
 
   const handleAddUser = () => {
     toast({
@@ -62,60 +82,76 @@ const Users = () => {
           <Input
             placeholder="Search users..."
             className="pl-10"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
       </div>
 
       <div className="bg-white rounded-lg shadow">
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b">
-                <th className="text-left p-4 font-medium text-gray-500">Name</th>
-                <th className="text-left p-4 font-medium text-gray-500">Email</th>
-                <th className="text-left p-4 font-medium text-gray-500">Role</th>
-                <th className="text-left p-4 font-medium text-gray-500">Status</th>
-                <th className="text-left p-4 font-medium text-gray-500">Last Active</th>
-                <th className="text-right p-4 font-medium text-gray-500">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.map((user) => (
-                <tr key={user.id} className="border-b hover:bg-gray-50">
-                  <td className="p-4">
-                    <div className="font-medium">{user.name}</div>
-                  </td>
-                  <td className="p-4 text-gray-500">{user.email}</td>
-                  <td className="p-4">
-                    <span className={`px-2 py-1 text-xs rounded-full ${
-                      user.role === 'Administrator' 
-                        ? 'bg-purple-100 text-purple-700' 
-                        : user.role === 'Editor'
-                        ? 'bg-blue-100 text-blue-700'
-                        : 'bg-gray-100 text-gray-700'
-                    }`}>
-                      {user.role}
-                    </span>
-                  </td>
-                  <td className="p-4">
-                    <span className={`px-2 py-1 text-xs rounded-full ${
-                      user.status === 'Active' 
-                        ? 'bg-green-100 text-green-700' 
-                        : 'bg-red-100 text-red-700'
-                    }`}>
-                      {user.status}
-                    </span>
-                  </td>
-                  <td className="p-4 text-gray-500">{user.lastActive}</td>
-                  <td className="p-4 text-right">
-                    <Button variant="ghost" size="icon">
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Role</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {isLoading ? (
+                <TableRow>
+                  <TableCell colSpan={5} className="text-center py-8">
+                    Loading users...
+                  </TableCell>
+                </TableRow>
+              ) : filteredUsers.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={5} className="text-center py-8">
+                    No users found
+                  </TableCell>
+                </TableRow>
+              ) : (
+                filteredUsers.map((user) => (
+                  <TableRow key={user.id} className="hover:bg-gray-50">
+                    <TableCell className="font-medium">
+                      {user.full_name || 'Unnamed User'}
+                    </TableCell>
+                    <TableCell>{user.email}</TableCell>
+                    <TableCell>
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        user.role === 'admin' 
+                          ? 'bg-purple-100 text-purple-700' 
+                          : user.role === 'editor'
+                          ? 'bg-blue-100 text-blue-700'
+                          : 'bg-gray-100 text-gray-700'
+                      }`}>
+                        {user.role}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      {user.id ? (
+                        <span className="flex items-center px-2 py-1 text-xs rounded-full bg-green-100 text-green-700">
+                          <CheckCircle className="h-3 w-3 mr-1" /> Active
+                        </span>
+                      ) : (
+                        <span className="flex items-center px-2 py-1 text-xs rounded-full bg-red-100 text-red-700">
+                          <XCircle className="h-3 w-3 mr-1" /> Inactive
+                        </span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button variant="ghost" size="icon">
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
         </div>
       </div>
     </div>

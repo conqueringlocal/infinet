@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { X, Save, LogOut, Edit, Image as ImageIcon, Upload, Download } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -6,13 +5,14 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { savePageContent, getPageContent } from '@/lib/content-service';
+import { useAuth } from '@/hooks/use-auth';
 
 interface InPlaceEditorProps {
   isEnabled: boolean;
 }
 
 const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loginDialogOpen, setLoginDialogOpen] = useState(false);
   const [imageDialogOpen, setImageDialogOpen] = useState(false);
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
@@ -23,67 +23,52 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
   const [newImageUrl, setNewImageUrl] = useState('');
   const [contentChanged, setContentChanged] = useState(false);
   const [exportedContent, setExportedContent] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const exportContentRef = useRef<HTMLTextAreaElement>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, signIn, signOut } = useAuth();
 
-  // Check if we're on an edit URL (ends with /edit)
   const isEditUrl = location.pathname === '/edit' || location.pathname.endsWith('/edit');
-  
-  // Set up the editor on initial load
+
   useEffect(() => {
     console.log('==== EDITOR MOUNT EFFECT ====');
-    
-    // Detect edit mode from URL or prop
+
     const shouldEnableEditMode = isEditUrl || isEnabled;
     console.log('Should enable edit mode?', shouldEnableEditMode);
-    
-    // Check if user is authenticated for editing
-    const authStatus = localStorage.getItem('edit_authenticated');
-    const isAuthenticated = authStatus === 'true';
-    setIsLoggedIn(isAuthenticated);
-    console.log('Is authenticated?', isAuthenticated);
-    
-    // If edit mode should be enabled and user is logged in
-    if (shouldEnableEditMode && isAuthenticated) {
+
+    if (shouldEnableEditMode && user) {
       console.log('Auto-activating edit mode');
       setEditMode(true);
-      
-      // Initialize editables with a delay to ensure DOM is ready
+
       setTimeout(initializeEditables, 500);
-    }
-    // If edit mode should be enabled but user is not logged in
-    else if (shouldEnableEditMode && !isAuthenticated) {
+    } else if (shouldEnableEditMode && !user) {
       console.log('Opening login dialog for edit mode');
       setLoginDialogOpen(true);
     }
-  }, [isEditUrl, isEnabled]);
+  }, [isEditUrl, isEnabled, user]);
 
-  // Effect for handling edit mode changes
   useEffect(() => {
-    console.log('==== EDIT MODE CHANGED ====');
-    console.log('Edit mode active?', editMode);
-    console.log('User is logged in?', isLoggedIn);
-    
-    if (editMode && isLoggedIn) {
-      console.log('Adding edit-mode class to body');
-      document.body.classList.add('edit-mode');
-      
-      // Initialize editables whenever edit mode is activated
-      setTimeout(initializeEditables, 500);
-    } else {
-      console.log('Removing edit-mode class from body');
-      document.body.classList.remove('edit-mode');
-    }
-    
-    return () => {
-      document.body.classList.remove('edit-mode');
-    };
-  }, [editMode, isLoggedIn]);
+    const loadContent = async () => {
+      try {
+        const normalRoute = getNormalRoute();
+        const content = await getPageContent(normalRoute);
 
-  // Periodically check for changes to mark content as changed
+        if (content) {
+          localStorage.setItem('page_content', JSON.stringify(content));
+          sessionStorage.setItem('page_content', JSON.stringify(content));
+          console.log('Loaded content from Supabase for path:', normalRoute);
+        }
+      } catch (error) {
+        console.error('Error loading content from Supabase:', error);
+      }
+    };
+
+    loadContent();
+  }, [location.pathname]);
+
   useEffect(() => {
     if (editMode) {
       const checkForChanges = () => {
@@ -94,99 +79,85 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
           });
         });
       };
-      
-      // Add change detection after elements are initialized
+
       setTimeout(checkForChanges, 1000);
     }
   }, [editMode]);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const getNormalRoute = () => {
+    if (location.pathname === '/edit') return '/';
+    if (location.pathname.endsWith('/edit')) {
+      return location.pathname.slice(0, -5);
+    }
+    return location.pathname;
+  };
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     console.log('Login attempt with:', email);
-    
-    // Simple mock login - would connect to auth system in production
-    if (email === 'admin@conqueringlocal.com' && password === 'admin123') {
-      localStorage.setItem('edit_authenticated', 'true');
-      setIsLoggedIn(true);
+
+    try {
+      await signIn(email, password);
       setLoginDialogOpen(false);
-      setEditMode(true); // Automatically enable edit mode after login
-      
-      toast({
-        title: "Login successful",
-        description: "You can now edit the page content",
-      });
-      
-      // Initialize editables after login
+      setEditMode(true);
+
       setTimeout(initializeEditables, 500);
-    } else {
-      toast({
-        title: "Login failed",
-        description: "Invalid email or password",
-        variant: "destructive",
-      });
+    } catch (error) {
+      console.error('Login error:', error);
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('edit_authenticated');
-    setIsLoggedIn(false);
-    setEditMode(false);
-    
-    toast({
-      title: "Logged out",
-      description: "You've been logged out successfully",
-    });
-    
-    // Navigate to the non-edit version of the page
-    navigateToNonEditVersion();
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      setEditMode(false);
+      navigateToNonEditVersion();
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
   };
 
   const navigateToNonEditVersion = () => {
     const currentPath = location.pathname;
     let basePath = currentPath;
-    
+
     if (currentPath === '/edit') {
       basePath = '/';
     } else if (currentPath.endsWith('/edit')) {
       basePath = currentPath.slice(0, -5);
     }
-      
+
     navigate(basePath);
   };
 
   const initializeEditables = () => {
     console.log('==== INITIALIZING EDITABLES ====');
-    
-    // Find all editable elements
+
     const editableElements = document.querySelectorAll('[data-editable]');
     console.log(`Found ${editableElements.length} editable elements`);
-    
+
     if (editableElements.length === 0) {
       console.warn('No editable elements found. Are EditableContent components rendered?');
       return;
     }
-    
+
     editableElements.forEach(el => {
       const id = el.getAttribute('data-editable');
       const type = el.getAttribute('data-editable-type') || 'text';
       console.log(`Setting up editable: ${id} (${type})`);
-      
+
       if (type === 'text') {
-        // Make text editable
         el.setAttribute('contenteditable', 'true');
         el.classList.add('editable-content');
-        
-        // Add focus/blur styling
+
         el.addEventListener('focus', () => el.classList.add('editing'));
         el.addEventListener('blur', () => el.classList.remove('editing'));
-        
-        // Mark content as changed when edited
+
         el.addEventListener('input', () => setContentChanged(true));
-        
+
         console.log(`Element ${id} is now editable as text`);
       } else if (type === 'image') {
-        // For images, we need click handler to open image dialog
         el.classList.add('editable-image');
         el.addEventListener('click', (e) => {
           if (editMode) {
@@ -195,11 +166,11 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
             openImageDialog(el as HTMLImageElement);
           }
         });
-        
+
         console.log(`Element ${id} is now editable as image`);
       }
     });
-    
+
     console.log('All elements are now editable');
   };
 
@@ -212,7 +183,7 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    
+
     const reader = new FileReader();
     reader.onload = (event) => {
       if (event.target?.result) {
@@ -227,7 +198,7 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
       currentImageElement.src = newImageUrl;
       setImageDialogOpen(false);
       setContentChanged(true);
-      
+
       toast({
         title: "Image updated",
         description: "Don't forget to save your changes",
@@ -235,15 +206,15 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
     }
   };
 
-  const saveChanges = () => {
-    console.log('Saving changes...');
-    
+  const saveChanges = async () => {
+    console.log('Saving changes to Supabase...');
+    setIsSaving(true);
+
     const editableElements = document.querySelectorAll('[data-editable]');
     console.log(`Found ${editableElements.length} editable elements to save`);
-    
+
     const contentToSave: Record<string, string> = {};
-    
-    // First load any existing saved content
+
     try {
       const existingSaved = localStorage.getItem('page_content');
       if (existingSaved) {
@@ -252,12 +223,11 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
     } catch (e) {
       console.error('Error loading existing saved content', e);
     }
-    
-    // Now update with the current page's content
+
     editableElements.forEach(el => {
       const id = el.getAttribute('data-editable');
       const type = el.getAttribute('data-editable-type') || 'text';
-      
+
       if (id) {
         if (type === 'text') {
           contentToSave[id] = el.innerHTML;
@@ -268,32 +238,32 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
         }
       }
     });
-    
-    // Save to localStorage
+
     localStorage.setItem('page_content', JSON.stringify(contentToSave));
-    
+    sessionStorage.setItem('page_content', JSON.stringify(contentToSave));
+
     try {
-      // Also save to sessionStorage for redundancy
-      sessionStorage.setItem('page_content', JSON.stringify(contentToSave));
-      
-      // Show export dialog to download changes
+      const pagePath = getNormalRoute();
+      await savePageContent(pagePath, contentToSave, user?.id);
+
+      toast({
+        title: "Changes saved",
+        description: "Your content has been updated and stored in the database",
+      });
+
       prepareExportContent(contentToSave);
       setExportDialogOpen(true);
-      
-      // Send to server if this were a real CMS
-      // For now we'll just simulate a server save with a delay
-      setTimeout(() => {
-        console.log('Content saved to "server"');
-        toast({
-          title: "Changes saved",
-          description: "Your content has been updated successfully",
-        });
-      }, 800);
-    } catch (e) {
-      console.error('Error saving content', e);
+    } catch (error: any) {
+      console.error('Error saving content to Supabase:', error);
+      toast({
+        title: "Error saving changes",
+        description: error.message || "There was a problem saving your changes",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+      setContentChanged(false);
     }
-    
-    setContentChanged(false);
   };
 
   const prepareExportContent = (contentData: Record<string, string>) => {
@@ -304,17 +274,14 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
       pageUrl: window.location.pathname,
       content: contentData
     };
-    
+
     setExportedContent(JSON.stringify(exportObject, null, 2));
   };
 
   const handleExportDone = () => {
     setExportDialogOpen(false);
-    
-    // Turn off edit mode after saving
+
     setEditMode(false);
-    
-    // Navigate to the non-edit version
     navigateToNonEditVersion();
   };
 
@@ -322,7 +289,7 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
     if (exportContentRef.current) {
       exportContentRef.current.select();
       document.execCommand('copy');
-      
+
       toast({
         title: "Copied to clipboard",
         description: "The content has been copied to your clipboard",
@@ -335,31 +302,28 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
     const formattedDate = new Date().toISOString().replace(/:/g, '-').slice(0, 19);
     const pageName = location.pathname.replace(/\//g, '-').replace('edit', '');
     const fileName = `site-content${pageName ? '-' + pageName : ''}-${formattedDate}.json`;
-    
-    const file = new Blob([exportedContent], {type: 'application/json'});
+
+    const file = new Blob([exportedContent], { type: 'application/json' });
     element.href = URL.createObjectURL(file);
     element.download = fileName;
     document.body.appendChild(element);
     element.click();
     document.body.removeChild(element);
-    
+
     toast({
       title: "Content downloaded",
       description: "Save this file for your developer to implement the changes",
     });
   };
 
-  // Determine if editor should be shown (based on URL or prop)
   const shouldShowEditor = isEditUrl || isEnabled;
 
-  // Don't render anything if we shouldn't show the editor
   if (!shouldShowEditor) {
     return null;
   }
-  
+
   return (
     <>
-      {/* Login Dialog */}
       <Dialog open={loginDialogOpen} onOpenChange={setLoginDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
@@ -373,7 +337,7 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@conqueringlocal.com"
+                placeholder="admin@example.com"
                 required
               />
             </div>
@@ -387,9 +351,6 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
                 placeholder="••••••••"
                 required
               />
-              <p className="text-xs text-gray-500">
-                For demo: admin@conqueringlocal.com / admin123
-              </p>
             </div>
             <div className="flex justify-end">
               <Button type="submit">Login</Button>
@@ -398,7 +359,6 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
         </DialogContent>
       </Dialog>
 
-      {/* Image Edit Dialog */}
       <Dialog open={imageDialogOpen} onOpenChange={setImageDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
@@ -480,7 +440,6 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
         </DialogContent>
       </Dialog>
 
-      {/* Export Content Dialog */}
       <Dialog open={exportDialogOpen} onOpenChange={setExportDialogOpen}>
         <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
@@ -530,13 +489,13 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
         </DialogContent>
       </Dialog>
 
-      {/* Editor Controls */}
       <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 bg-white rounded-lg shadow-lg p-2 flex items-center gap-2">
         {!editMode ? (
           <Button 
             size="sm" 
             onClick={() => setEditMode(true)}
             className="bg-blue-600 hover:bg-blue-700"
+            disabled={!user}
           >
             <Edit className="h-4 w-4 mr-2" />
             Edit Page
@@ -547,10 +506,10 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
               size="sm" 
               onClick={saveChanges}
               className="bg-green-600 hover:bg-green-700"
-              disabled={!contentChanged}
+              disabled={!contentChanged || isSaving}
             >
               <Save className="h-4 w-4 mr-2" />
-              {contentChanged ? "Save Changes" : "No Changes"}
+              {isSaving ? "Saving..." : contentChanged ? "Save Changes" : "No Changes"}
             </Button>
             <Button 
               size="sm" 
@@ -575,7 +534,6 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
         </Button>
       </div>
 
-      {/* Styles for editable content */}
       <style>
         {`
         .edit-mode [data-editable] {

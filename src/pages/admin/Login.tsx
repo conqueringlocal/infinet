@@ -1,9 +1,11 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/use-auth';
+import { supabase } from '@/lib/supabase';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -11,33 +13,54 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { signIn, user } = useAuth();
 
-  // Simple mock login - in a real app, this would connect to your auth system
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      navigate('/admin/dashboard');
+    }
+  }, [user, navigate]);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
-    // Mock credentials for demo - in production use proper authentication
-    if (email === 'admin@conqueringlocal.com' && password === 'admin123') {
-      // Set mock auth in localStorage (use a proper auth system in production)
-      localStorage.setItem('admin_authenticated', 'true');
+    try {
+      await signIn(email, password);
       
-      toast({
-        title: "Login successful",
-        description: "Welcome to the Conquering Local CMS",
-      });
+      // Fetch user profile to check if admin
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user?.id)
+        .single();
+      
+      if (error) {
+        throw new Error('Could not verify admin permissions');
+      }
+      
+      if (profile?.role !== 'admin') {
+        await supabase.auth.signOut();
+        toast({
+          title: "Access denied",
+          description: "You don't have admin privileges",
+          variant: "destructive",
+        });
+        return;
+      }
       
       // Navigate to dashboard
       navigate('/admin/dashboard');
-    } else {
+    } catch (error: any) {
       toast({
         title: "Login failed",
-        description: "Invalid email or password",
+        description: error.message || "Invalid email or password",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
-    
-    setIsLoading(false);
   };
 
   return (
@@ -64,7 +87,7 @@ const Login = () => {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@conqueringlocal.com"
+                placeholder="admin@example.com"
                 required
                 className="w-full"
               />
@@ -83,9 +106,6 @@ const Login = () => {
                 required
                 className="w-full"
               />
-              <p className="text-xs text-gray-500 mt-1">
-                For demo: admin@conqueringlocal.com / admin123
-              </p>
             </div>
             
             <Button
