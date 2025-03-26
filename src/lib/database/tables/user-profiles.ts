@@ -151,28 +151,11 @@ export const initializeUserProfilesTable = async (): Promise<{ success: boolean;
         console.warn('Failed to create table via direct fetch:', error);
       }
       
-      // Approach 2: Try using the Supabase SQL editor URL
-      try {
-        const message = 'Could not automatically create the user_profiles table. Please create it manually in the Supabase dashboard using this SQL:\n\n' + USER_PROFILES_SQL;
-        
-        // Extract the Supabase project ID from the URL
-        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://gqcfneuiruffgpwhkecy.supabase.co';
-        const projectId = supabaseUrl.replace('https://', '').split('.')[0];
-        
-        // Construct a direct link to the SQL editor
-        const sqlEditorUrl = `https://app.supabase.com/project/${projectId}/sql`;
-        
-        return { 
-          success: false, 
-          message: `${message}\n\nYou can run this SQL directly in your Supabase SQL editor: ${sqlEditorUrl}`
-        };
-      } catch (error) {
-        // If creating the link fails, fall back to just the SQL
-        return { 
-          success: false, 
-          message: 'Could not automatically create the user_profiles table. Please create it manually in the Supabase dashboard using this SQL:\n\n' + USER_PROFILES_SQL
-        };
-      }
+      // If all automated approaches fail, return the COMPLETE SQL for manual creation
+      return { 
+        success: false, 
+        message: 'Could not automatically create the user_profiles table. Please create it manually in the Supabase dashboard using this SQL:\n\n' + USER_PROFILES_SQL
+      };
     } else {
       console.error('Error checking user_profiles table:', checkError);
       return { success: false, message: `Error checking user_profiles table: ${checkError.message}` };

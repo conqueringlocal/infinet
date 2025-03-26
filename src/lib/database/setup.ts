@@ -18,14 +18,14 @@ export const initializeDatabase = async (): Promise<{ success: boolean; message:
       return userProfilesResult;
     }
     
-    const pageAssignmentsResult = await initializePageAssignmentsTable();
-    if (!pageAssignmentsResult.success) {
-      return pageAssignmentsResult;
-    }
-    
     const pageContentResult = await initializePageContentTable();
     if (!pageContentResult.success) {
       return pageContentResult;
+    }
+    
+    const pageAssignmentsResult = await initializePageAssignmentsTable();
+    if (!pageAssignmentsResult.success) {
+      return pageAssignmentsResult;
     }
     
     const pageAnalyticsResult = await initializePageAnalyticsTable();

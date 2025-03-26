@@ -19,9 +19,13 @@ const CMSSetup: React.FC = () => {
   const sqlRef = useRef<HTMLPreElement>(null);
 
   const extractSqlFromErrorMessage = (message: string) => {
-    if (message.includes('CREATE TABLE IF NOT EXISTS')) {
-      const sqlStart = message.indexOf('CREATE TABLE');
-      return message.substring(sqlStart);
+    // Try to find SQL section in the error message
+    if (message.includes('CREATE TABLE')) {
+      const sqlStartIdx = message.indexOf('CREATE TABLE');
+      let sql = message.substring(sqlStartIdx);
+      
+      // Make sure we're returning the complete SQL block
+      return sql;
     }
     return null;
   };
@@ -140,7 +144,7 @@ const CMSSetup: React.FC = () => {
                     </Button>
                   </div>
                 </div>
-                <div className="bg-gray-50 rounded-md border border-gray-200 p-3 overflow-auto max-h-40">
+                <div className="bg-gray-50 rounded-md border border-gray-200 p-3 overflow-auto max-h-64">
                   <pre ref={sqlRef} className="text-xs whitespace-pre-wrap text-gray-800">{sql}</pre>
                 </div>
                 <p className="text-xs text-gray-500 mt-2">
