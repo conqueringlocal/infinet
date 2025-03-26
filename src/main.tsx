@@ -5,8 +5,10 @@ import './index.css'
 
 // Polyfill for requestIdleCallback for browsers that don't support it
 if (!window.requestIdleCallback) {
-  window.requestIdleCallback = function(callback, opts) {
+  window.requestIdleCallback = function(callback, options) {
     const start = Date.now();
+    // setTimeout returns a number ID when used in Node.js or a Timeout object in the browser
+    // We need to return a number to match the type definition
     return setTimeout(function() {
       callback({
         didTimeout: false,
@@ -14,7 +16,7 @@ if (!window.requestIdleCallback) {
           return Math.max(0, 50 - (Date.now() - start));
         }
       });
-    }, opts?.timeout || 1);
+    }, options?.timeout || 1) as unknown as number; // Cast to number to satisfy TypeScript
   };
 }
 
