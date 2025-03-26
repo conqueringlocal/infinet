@@ -1,6 +1,18 @@
 
 import { useEffect, useState } from 'react';
 
+// Define the NetworkInformation interface that's missing in the standard lib
+interface NetworkInformation {
+  effectiveType: string;
+  addEventListener: (type: string, listener: EventListener) => void;
+  removeEventListener: (type: string, listener: EventListener) => void;
+}
+
+// Extend Navigator to include connection property
+interface NavigatorWithConnection extends Navigator {
+  connection?: NetworkInformation;
+}
+
 interface PerformanceOptions {
   lazyLoadImages?: boolean;
   disableAnimationsOnLowPower?: boolean;
@@ -21,8 +33,9 @@ export const usePerformance = ({
   useEffect(() => {
     // Detect connection type if available
     if ('connection' in navigator) {
-      // @ts-ignore - Connection API not in standard lib
-      const connection = navigator.connection;
+      const nav = navigator as NavigatorWithConnection;
+      const connection = nav.connection;
+      
       if (connection) {
         setConnectionType(connection.effectiveType);
         
@@ -38,23 +51,33 @@ export const usePerformance = ({
   }, []);
   
   useEffect(() => {
-    // Check for low power mode or slow connection
+    // Fix for Battery API - use feature detection and handle errors
     if ('getBattery' in navigator) {
-      // @ts-ignore - Battery API not in standard lib
-      navigator.getBattery().then((battery) => {
-        const checkPowerMode = () => {
-          setIsLowPowerMode(battery.level < 0.2 && !battery.charging);
-        };
+      try {
+        // @ts-ignore - Battery API not in standard lib
+        const batteryPromise = navigator.getBattery();
         
-        checkPowerMode();
-        battery.addEventListener('levelchange', checkPowerMode);
-        battery.addEventListener('chargingchange', checkPowerMode);
-        
-        return () => {
-          battery.removeEventListener('levelchange', checkPowerMode);
-          battery.removeEventListener('chargingchange', checkPowerMode);
-        };
-      });
+        if (batteryPromise && typeof batteryPromise.then === 'function') {
+          batteryPromise.then((battery: any) => {
+            const checkPowerMode = () => {
+              setIsLowPowerMode(battery.level < 0.2 && !battery.charging);
+            };
+            
+            checkPowerMode();
+            battery.addEventListener('levelchange', checkPowerMode);
+            battery.addEventListener('chargingchange', checkPowerMode);
+            
+            return () => {
+              battery.removeEventListener('levelchange', checkPowerMode);
+              battery.removeEventListener('chargingchange', checkPowerMode);
+            };
+          }).catch(err => {
+            console.warn('Battery API error:', err);
+          });
+        }
+      } catch (e) {
+        console.warn('Battery API not fully supported:', e);
+      }
     }
   }, []);
   

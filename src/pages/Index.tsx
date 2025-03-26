@@ -13,6 +13,19 @@ import { useSEO } from '@/hooks/use-seo';
 import { usePerformance, preloadRoutes } from '@/hooks/use-performance';
 import { usePageView } from '@/hooks/use-page-view';
 
+// Create and export the list of components for the admin page editor
+export const HomePageComponents = [
+  Hero,
+  ServicesSection,
+  ServiceFinder,
+  AboutPreview,
+  WhyChooseUs,
+  FiberInfo,
+  NationwideService,
+  ProjectsPreview,
+  CtaSection
+];
+
 const Index = () => {
   // Track page view for analytics
   usePageView();
