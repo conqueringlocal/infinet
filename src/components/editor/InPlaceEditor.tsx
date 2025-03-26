@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { X, Save, LogOut, Edit, Image as ImageIcon, Upload } from 'lucide-react';
+import { X, Save, LogOut, Edit, Image as ImageIcon, Upload, Download } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/input';
@@ -15,13 +15,16 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loginDialogOpen, setLoginDialogOpen] = useState(false);
   const [imageDialogOpen, setImageDialogOpen] = useState(false);
+  const [exportDialogOpen, setExportDialogOpen] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [editMode, setEditMode] = useState(false);
   const [currentImageElement, setCurrentImageElement] = useState<HTMLImageElement | null>(null);
   const [newImageUrl, setNewImageUrl] = useState('');
   const [contentChanged, setContentChanged] = useState(false);
+  const [exportedContent, setExportedContent] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const exportContentRef = useRef<HTMLTextAreaElement>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
@@ -273,6 +276,10 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
       // Also save to sessionStorage for redundancy
       sessionStorage.setItem('page_content', JSON.stringify(contentToSave));
       
+      // Show export dialog to download changes
+      prepareExportContent(contentToSave);
+      setExportDialogOpen(true);
+      
       // Send to server if this were a real CMS
       // For now we'll just simulate a server save with a delay
       setTimeout(() => {
@@ -287,12 +294,59 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
     }
     
     setContentChanged(false);
+  };
+
+  const prepareExportContent = (contentData: Record<string, string>) => {
+    const formattedDate = new Date().toISOString().replace(/:/g, '-').slice(0, 19);
+    const exportObject = {
+      version: 1,
+      timestamp: new Date().toISOString(),
+      pageUrl: window.location.pathname,
+      content: contentData
+    };
+    
+    setExportedContent(JSON.stringify(exportObject, null, 2));
+  };
+
+  const handleExportDone = () => {
+    setExportDialogOpen(false);
     
     // Turn off edit mode after saving
     setEditMode(false);
     
     // Navigate to the non-edit version
     navigateToNonEditVersion();
+  };
+
+  const copyExportedContent = () => {
+    if (exportContentRef.current) {
+      exportContentRef.current.select();
+      document.execCommand('copy');
+      
+      toast({
+        title: "Copied to clipboard",
+        description: "The content has been copied to your clipboard",
+      });
+    }
+  };
+
+  const downloadExportedContent = () => {
+    const element = document.createElement('a');
+    const formattedDate = new Date().toISOString().replace(/:/g, '-').slice(0, 19);
+    const pageName = location.pathname.replace(/\//g, '-').replace('edit', '');
+    const fileName = `site-content${pageName ? '-' + pageName : ''}-${formattedDate}.json`;
+    
+    const file = new Blob([exportedContent], {type: 'application/json'});
+    element.href = URL.createObjectURL(file);
+    element.download = fileName;
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+    
+    toast({
+      title: "Content downloaded",
+      description: "Save this file for your developer to implement the changes",
+    });
   };
 
   // Determine if editor should be shown (based on URL or prop)
@@ -420,6 +474,56 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
               </Button>
               <Button onClick={updateImage}>
                 Update Image
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Content Dialog */}
+      <Dialog open={exportDialogOpen} onOpenChange={setExportDialogOpen}>
+        <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Your Content Changes</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-4">
+            <p className="text-sm text-gray-700">
+              Your changes have been saved locally. To make them permanent across all devices, 
+              you need to share this content with your developer to apply to the website code.
+            </p>
+            
+            <div className="border rounded p-2 bg-gray-50">
+              <div className="flex justify-between mb-2">
+                <p className="text-sm font-medium text-gray-700">Content JSON:</p>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={copyExportedContent}
+                  className="h-7 text-xs"
+                >
+                  Copy to clipboard
+                </Button>
+              </div>
+              <textarea
+                ref={exportContentRef}
+                value={exportedContent}
+                readOnly
+                className="w-full h-64 p-2 text-xs font-mono bg-gray-100 rounded border border-gray-300"
+              />
+            </div>
+            
+            <div className="flex justify-between items-center pt-2">
+              <Button 
+                variant="outline"
+                onClick={downloadExportedContent}
+                className="flex items-center gap-2"
+              >
+                <Download className="h-4 w-4" />
+                Download JSON File
+              </Button>
+              
+              <Button onClick={handleExportDone}>
+                Done
               </Button>
             </div>
           </div>
