@@ -1,6 +1,5 @@
-
-import React, { useState, useEffect } from 'react';
-import { setupCMS } from '@/lib/database-setup';
+import React, { useState } from 'react';
+import { setupCMS } from '@/lib/database';
 import { Button } from '@/components/ui/Button';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
