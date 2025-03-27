@@ -17,11 +17,11 @@ const Footer = () => {
             <div className="space-y-2">
               <div className="flex items-start">
                 <MapPin className="h-5 w-5 text-infinet-500 mr-2 mt-0.5" />
-                <span className="text-gray-400">123 Network Lane, Suite 100<br />Atlanta, GA 30303</span>
+                <span className="text-gray-400">Nationwide Service<br />Based in Lakeland, Florida with projects across the United States</span>
               </div>
               <div className="flex items-center">
                 <Phone className="h-5 w-5 text-infinet-500 mr-2" />
-                <span className="text-gray-400">(555) 123-4567</span>
+                <span className="text-gray-400">(727) 417-7050</span>
               </div>
               <div className="flex items-center">
                 <Mail className="h-5 w-5 text-infinet-500 mr-2" />
@@ -158,4 +158,3 @@ const Footer = () => {
 };
 
 export default Footer;
-

@@ -1,8 +1,5 @@
-
 import React, { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom'; // Added missing import
-import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
+import { Link } from 'react-router-dom';
 import { Phone, Mail, MapPin, CheckCircle, Send, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
@@ -86,7 +83,7 @@ const Contact = () => {
 
   return (
     <div className="min-h-screen flex flex-col" ref={pageRef}>
-      <Navbar />
+      
       
       <main className="flex-grow pt-20">
         {/* Page Header */}
@@ -168,6 +165,7 @@ const Contact = () => {
                     <h2 className="text-2xl font-bold text-gray-900 mb-6">Send Us a Message</h2>
                     
                     <form onSubmit={handleSubmit} className="space-y-6">
+                      
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                           <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
@@ -358,7 +356,7 @@ const Contact = () => {
         </section>
       </main>
       
-      <Footer />
+      
     </div>
   );
 };
