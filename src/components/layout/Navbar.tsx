@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, ChevronDown } from 'lucide-react';
@@ -84,10 +85,12 @@ const Navbar = () => {
                 <NavigationMenu key={link.path}>
                   <NavigationMenuList>
                     <NavigationMenuItem>
-                      <NavigationMenuTrigger className={cn(
-                        'px-3 py-2 text-sm font-medium transition-colors hover:text-infinet-600 hover:bg-transparent',
-                        location.pathname.includes('/service/') ? 'text-infinet-600' : 'text-gray-800'
-                      )}>
+                      <NavigationMenuTrigger 
+                        className={cn(
+                          'px-3 py-2 text-sm font-medium transition-colors hover:text-infinet-600 bg-transparent hover:bg-transparent',
+                          location.pathname.includes('/service/') ? 'text-infinet-600' : 'text-gray-800'
+                        )}
+                      >
                         {link.label}
                       </NavigationMenuTrigger>
                       <NavigationMenuContent>
