@@ -17,7 +17,7 @@ const Footer = () => {
             <div className="space-y-2">
               <div className="flex items-start">
                 <MapPin className="h-5 w-5 text-infinet-500 mr-2 mt-0.5" />
-                <span className="text-gray-400">Nationwide Service<br />Based in Lakeland, Florida with projects across the United States</span>
+                <span className="text-gray-400">Nationwide Service</span>
               </div>
               <div className="flex items-center">
                 <Phone className="h-5 w-5 text-infinet-500 mr-2" />
