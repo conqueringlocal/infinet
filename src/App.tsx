@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -25,6 +26,7 @@ import StructuredCablingPage from "./pages/service/Structured";
 import WirelessPage from "./pages/service/Wireless";
 import PointToPointPage from "./pages/service/PointToPoint";
 import NetworkPage from "./pages/service/Network";
+import UndergroundServicePage from "./pages/service/Underground";
 
 // Import admin pages
 import AdminLogin from "./pages/admin/Login";
@@ -115,6 +117,7 @@ const PageContent = () => {
       case '/service/wireless': return <WirelessPage />;
       case '/service/ptp': return <PointToPointPage />;
       case '/service/network': return <NetworkPage />;
+      case '/service/underground': return <UndergroundServicePage />;
       default: return <NotFound />;
     }
   };
@@ -166,6 +169,7 @@ const AppRoutes = () => {
             <Route path="/service/wireless" element={<PageContent />} />
             <Route path="/service/ptp" element={<PageContent />} />
             <Route path="/service/network" element={<PageContent />} />
+            <Route path="/service/underground" element={<PageContent />} />
             
             <Route path="/edit" element={<PageContent />} />
             <Route path="/:page/edit" element={<PageContent />} />

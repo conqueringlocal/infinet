@@ -1,7 +1,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Network, Cable, Radio, ExternalLink } from 'lucide-react';
+import { ArrowRight, Network, Cable, Radio, Construction, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
 
@@ -21,6 +21,14 @@ const services = [
     icon: Cable,
     color: 'bg-green-50 text-green-600',
     link: '/service/structured'
+  },
+  {
+    id: 'underground',
+    title: 'Underground Services',
+    description: 'Professional underground utility installation, directional boring, and trenching with minimal disruption to surrounding areas.',
+    icon: Construction,
+    color: 'bg-amber-50 text-amber-600',
+    link: '/service/underground'
   },
   {
     id: 'ptp',

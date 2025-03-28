@@ -1,7 +1,8 @@
+
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/Button';
-import { Cable, Network, Radio, Wifi, Server, CheckCircle, ArrowRight } from 'lucide-react';
+import { Cable, Network, Radio, Wifi, Server, Construction, CheckCircle, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Link } from 'react-router-dom';
 
@@ -70,6 +71,20 @@ const services: ServiceOption[] = [
       'Rapid deployment options'
     ],
     path: '/service/ptp'
+  },
+  {
+    id: 'underground',
+    title: 'Underground Services',
+    description: 'Professional underground utility installation with minimal disruption.',
+    icon: Construction,
+    features: [
+      'Directional boring',
+      'Trenching services',
+      'Conduit installation',
+      'Underground pathways',
+      'Full restoration'
+    ],
+    path: '/service/underground'
   },
   {
     id: 'network',

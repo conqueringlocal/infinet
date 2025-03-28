@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef } from 'react';
 import { Cable, Network, Radio, Building, Construction, Wifi, CheckCircle, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
@@ -55,6 +56,23 @@ const serviceCategories = [
     ],
     image: 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
     path: '/service/ptp'
+  },
+  {
+    id: 'underground',
+    icon: Construction,
+    title: 'Underground Services',
+    description: 'Professional underground utility installation, directional boring, and trenching solutions with minimal disruption.',
+    color: 'text-amber-600 bg-amber-100',
+    features: [
+      'Directional boring and horizontal drilling',
+      'Trenching and excavation services',
+      'Utility locating and mapping',
+      'Conduit and duct bank installation',
+      'Underground fiber optic pathways',
+      'Complete restoration services'
+    ],
+    image: 'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+    path: '/service/underground'
   },
   {
     id: 'greenfield',

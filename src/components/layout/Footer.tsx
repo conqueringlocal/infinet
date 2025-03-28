@@ -1,3 +1,4 @@
+
 import { Link } from 'react-router-dom';
 import { MapPin, Phone, Mail, Facebook, Twitter, Instagram, Linkedin, ChevronRight } from 'lucide-react';
 
@@ -55,6 +56,12 @@ const Footer = () => {
                 <Link to="/service/ptp" className="text-gray-400 hover:text-white transition-colors flex items-center">
                   <ChevronRight className="h-4 w-4 mr-1" />
                   Point-to-Point Connectivity
+                </Link>
+              </li>
+              <li>
+                <Link to="/service/underground" className="text-gray-400 hover:text-white transition-colors flex items-center">
+                  <ChevronRight className="h-4 w-4 mr-1" />
+                  Underground Services
                 </Link>
               </li>
               <li>
