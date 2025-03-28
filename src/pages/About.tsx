@@ -1,7 +1,4 @@
-
 import React, { useEffect, useRef } from 'react';
-import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
 import { CheckCircle, Users, Award, Star, Target, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Link } from 'react-router-dom';
@@ -38,9 +35,7 @@ const About = () => {
 
   return (
     <div className="min-h-screen flex flex-col" ref={pageRef}>
-      <Navbar />
-      
-      <main className="flex-grow pt-20">
+      <main className="flex-grow">
         {/* Page Header */}
         <section className="bg-gradient-to-r from-infinet-800 to-infinet-950 py-16 md:py-20 text-white">
           <div className="container mx-auto px-4 md:px-6">
@@ -198,8 +193,6 @@ const About = () => {
           </div>
         </section>
       </main>
-      
-      <Footer />
     </div>
   );
 };
