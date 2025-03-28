@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, ChevronDown } from 'lucide-react';
@@ -137,11 +136,9 @@ const Navbar = () => {
               )
             )}
             <Button variant="accent" size="sm" className="ml-3 bg-infinet-500 hover:bg-infinet-600 text-white" onClick={() => window.location.href = '/contact'}>Get in Touch</Button>
-            <Button variant="outline" size="sm" className="ml-2 border-infinet-500 text-infinet-500 hover:bg-infinet-50" onClick={() => window.location.href = '/admin/login'}>Login</Button>
           </nav>
 
           <div className="md:hidden flex items-center">
-            <Button variant="outline" size="sm" className="mr-2 border-infinet-500 text-infinet-500 hover:bg-infinet-50" onClick={() => window.location.href = '/admin/login'}>Login</Button>
             <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-gray-800 hover:text-infinet-600" aria-label="Toggle menu">
               {isMenuOpen ? <X size={24} className="transition-transform duration-300 transform rotate-90" /> : <Menu size={24} className="transition-transform duration-300" />}
             </button>

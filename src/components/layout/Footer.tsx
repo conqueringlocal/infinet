@@ -1,6 +1,6 @@
 
 import { Link } from 'react-router-dom';
-import { MapPin, Phone, Mail, Facebook, Twitter, Instagram, Linkedin, ChevronRight, LockKeyhole } from 'lucide-react';
+import { MapPin, Phone, Mail, Facebook, Twitter, Instagram, Linkedin, ChevronRight } from 'lucide-react';
 
 const Footer = () => {
   const year = new Date().getFullYear();
@@ -106,12 +106,6 @@ const Footer = () => {
                   <ChevronRight className="h-4 w-4 mr-1" />
                   Terms of Service
                 </a>
-              </li>
-              <li>
-                <Link to="/admin/login" className="text-gray-400 hover:text-white transition-colors flex items-center">
-                  <LockKeyhole className="h-4 w-4 mr-1" />
-                  Admin Login
-                </Link>
               </li>
             </ul>
           </div>
