@@ -13,7 +13,7 @@ const FiberCmsInfo = () => {
           <div className="order-2 md:order-1">
             <div className="space-y-6">
               <EditableContent id="cms-subtitle" tag="span" className="text-sm font-semibold text-[#003366] uppercase tracking-wider">
-                Managed By Conquering Local
+                Content Management System
               </EditableContent>
               
               <EditableContent id="cms-title" tag="h2" className="text-3xl md:text-4xl font-bold text-gray-900">
@@ -91,7 +91,7 @@ const FiberCmsInfo = () => {
                 id="cms-main-image" 
                 type="image" 
                 imageSrc="/lovable-uploads/82c5769b-887a-49f8-a103-392bb5e996d5.png"
-                imageAlt="Conquering Local CMS" 
+                imageAlt="CMS Dashboard" 
                 className="relative bg-white rounded-lg shadow-lg p-6 w-full max-w-md"
               />
             </div>

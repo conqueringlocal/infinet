@@ -146,11 +146,6 @@ const Footer = () => {
           <p className="text-gray-500 text-sm mb-2 md:mb-0">
             &copy; {year} Infi-NET LLC. All rights reserved.
           </p>
-          <div>
-            <p className="text-gray-500 text-sm">
-              Website managed by <a href="https://conqueringlocal.com" target="_blank" rel="noopener noreferrer" className="text-infinet-400 hover:text-infinet-300">Conquering Local</a>
-            </p>
-          </div>
         </div>
       </div>
     </footer>
