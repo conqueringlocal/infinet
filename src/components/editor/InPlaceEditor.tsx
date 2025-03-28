@@ -187,7 +187,7 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
       toast({
         title: "No editable content found",
         description: "This page doesn't have any editable content sections configured.",
-        variant: "warning",
+        variant: "destructive",
       });
       return;
     }

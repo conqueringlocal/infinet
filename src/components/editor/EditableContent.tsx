@@ -11,6 +11,7 @@ interface EditableContentProps {
   type?: 'text' | 'image';
   imageSrc?: string;
   imageAlt?: string;
+  defaultContent?: string; // Adding defaultContent as optional for backward compatibility
 }
 
 const EditableContent: React.FC<EditableContentProps> = ({ 
@@ -20,12 +21,21 @@ const EditableContent: React.FC<EditableContentProps> = ({
   tag = 'div',
   type = 'text',
   imageSrc,
-  imageAlt = ''
+  imageAlt = '',
+  defaultContent // For backward compatibility
 }) => {
   const contentRef = useRef<HTMLElement | null>(null);
   const [initialContentSet, setInitialContentSet] = useState(false);
   const [imageSource, setImageSource] = useState(imageSrc);
   const location = useLocation();
+  
+  // Handle defaultContent (for backward compatibility)
+  useEffect(() => {
+    if (defaultContent && !children && type === 'text' && contentRef.current && !initialContentSet) {
+      // Only use defaultContent if there are no children and content hasn't been set yet
+      contentRef.current.innerHTML = defaultContent;
+    }
+  }, [defaultContent, children, type, initialContentSet]);
   
   // Debug logging - only in development mode
   useEffect(() => {

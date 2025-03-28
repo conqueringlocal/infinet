@@ -2,7 +2,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/Button';
-import { ArrowRight, CheckCircle } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import EditableContent from '@/components/editor/EditableContent';
 
 const AboutPreview = () => {
@@ -44,15 +44,23 @@ const AboutPreview = () => {
               <div className="absolute -top-4 -left-4 w-32 h-32 bg-infinet-100 rounded-lg -z-10"></div>
               <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-infinet-50 rounded-lg -z-10"></div>
               <div className="bg-gray-50 rounded-lg overflow-hidden shadow-xl border border-infinet-100">
-                <img 
-                  src="/lovable-uploads/169d5fd5-78b8-499f-bad0-6aea1ccb4938.png" 
-                  alt="Digital infrastructure and connectivity visualization"
+                <EditableContent 
+                  id="about-preview-image" 
+                  type="image" 
+                  imageSrc="/lovable-uploads/169d5fd5-78b8-499f-bad0-6aea1ccb4938.png" 
+                  imageAlt="Digital infrastructure and connectivity visualization"
                   className="w-full h-auto object-cover object-center"
                 />
                 <div className="p-4 bg-infinetYellow-50 border-t border-infinet-100">
-                  <h3 className="text-lg font-medium text-gray-900">Advanced Connectivity Solutions</h3>
+                  <h3 className="text-lg font-medium text-gray-900">
+                    <EditableContent id="about-preview-card-title">
+                      Advanced Connectivity Solutions
+                    </EditableContent>
+                  </h3>
                   <p className="text-sm text-gray-600 mt-1">
-                    Explore our cutting-edge network infrastructure and fiber optic technologies.
+                    <EditableContent id="about-preview-card-description">
+                      Explore our cutting-edge network infrastructure and fiber optic technologies.
+                    </EditableContent>
                   </p>
                 </div>
               </div>
@@ -76,20 +84,30 @@ const AboutPreview = () => {
             </div>
 
             <div className="reveal space-y-3">
-              {[
-                "Certified fiber optic specialists with extensive field experience",
-                "Client-first approach with customized solutions for every project",
-                "Commitment to quality, safety, and industry best practices"
-              ].map((item, index) => (
-                <div key={index} className="flex items-start">
-                  <div className="h-6 w-6 rounded-full bg-infinetYellow-100 flex items-center justify-center mt-1 mr-2 flex-shrink-0">
-                    <span className="text-infinet-600 font-bold">✓</span>
-                  </div>
-                  <EditableContent id={`about-bullet-${index+1}`} tag="p" className="text-gray-700">
-                    {item}
-                  </EditableContent>
+              <div className="flex items-start">
+                <div className="h-6 w-6 rounded-full bg-infinetYellow-100 flex items-center justify-center mt-1 mr-2 flex-shrink-0">
+                  <span className="text-infinet-600 font-bold">✓</span>
                 </div>
-              ))}
+                <EditableContent id="about-bullet-1" tag="p" className="text-gray-700">
+                  Certified fiber optic specialists with extensive field experience
+                </EditableContent>
+              </div>
+              <div className="flex items-start">
+                <div className="h-6 w-6 rounded-full bg-infinetYellow-100 flex items-center justify-center mt-1 mr-2 flex-shrink-0">
+                  <span className="text-infinet-600 font-bold">✓</span>
+                </div>
+                <EditableContent id="about-bullet-2" tag="p" className="text-gray-700">
+                  Client-first approach with customized solutions for every project
+                </EditableContent>
+              </div>
+              <div className="flex items-start">
+                <div className="h-6 w-6 rounded-full bg-infinetYellow-100 flex items-center justify-center mt-1 mr-2 flex-shrink-0">
+                  <span className="text-infinet-600 font-bold">✓</span>
+                </div>
+                <EditableContent id="about-bullet-3" tag="p" className="text-gray-700">
+                  Commitment to quality, safety, and industry best practices
+                </EditableContent>
+              </div>
             </div>
 
             <div className="reveal pt-4">
@@ -97,7 +115,9 @@ const AboutPreview = () => {
                 <Button 
                   className="w-full md:w-auto flex items-center justify-center"
                 >
-                  Learn More About Us
+                  <EditableContent id="about-cta-text">
+                    Learn More About Us
+                  </EditableContent>
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>

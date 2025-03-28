@@ -3,6 +3,7 @@ import React, { useEffect, useRef } from 'react';
 import { ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Link } from 'react-router-dom';
+import EditableContent from '@/components/editor/EditableContent';
 
 const Hero = () => {
   const heroRef = useRef<HTMLDivElement>(null);
@@ -49,28 +50,35 @@ const Hero = () => {
           <div className="text-center space-y-8">
             {/* Tagline Chip */}
             <div className="reveal inline-block bg-infinetYellow-200 text-gray-800 px-4 py-1 rounded-full text-sm font-medium mb-6">
-              Fiber & Low-Voltage Solutions You Can Trust
+              <EditableContent id="hero-tagline" className="text-sm">
+                Fiber & Low-Voltage Solutions You Can Trust
+              </EditableContent>
             </div>
             
             {/* Main Headline */}
             <h1 className="reveal text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight md:leading-tight lg:leading-tight text-balance">
-              Building the Infrastructure <br className="hidden md:block" />
-              <span className="text-infinet-600">for Tomorrow's Connectivity</span>
+              <EditableContent id="hero-heading-1" tag="span">Building the Infrastructure </EditableContent>
+              <br className="hidden md:block" />
+              <span className="text-infinet-600">
+                <EditableContent id="hero-heading-2" tag="span">for Tomorrow's Connectivity</EditableContent>
+              </span>
             </h1>
             
             {/* Subheadline */}
             <p className="reveal text-lg md:text-xl text-gray-600 max-w-2xl mx-auto">
-              With over 35 years of combined experience, we deliver high-quality fiber optic and low-voltage installations that meet the highest industry standards.
+              <EditableContent id="hero-subheading">
+                With over 35 years of combined experience, we deliver high-quality fiber optic and low-voltage installations that meet the highest industry standards.
+              </EditableContent>
             </p>
             
             {/* CTA Buttons */}
             <div className="reveal flex flex-col sm:flex-row items-center justify-center gap-4 mt-8">
               <Button size="lg" variant="default" onClick={() => window.location.href = '/contact'}>
-                Get in Touch
+                <EditableContent id="hero-cta-primary">Get in Touch</EditableContent>
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
               <Button variant="accent" size="lg" onClick={() => window.location.href = '/services'}>
-                Explore Our Services
+                <EditableContent id="hero-cta-secondary">Explore Our Services</EditableContent>
               </Button>
             </div>
           </div>
