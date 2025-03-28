@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { CheckCircle, Users, Award, Star, Target, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Link } from 'react-router-dom';
+import EditableContent from '@/components/editor/EditableContent';
 
 const About = () => {
   const pageRef = useRef<HTMLDivElement>(null);
@@ -67,9 +68,13 @@ const About = () => {
                   <p className="text-gray-600 text-lg mt-4">
                     Our team has over 35 years of combined experience in the fiber optic and low-voltage industry, having worked on projects ranging from small office installations to large-scale enterprise networks and campus-wide infrastructure deployments.
                   </p>
-                  <p className="text-gray-600 text-lg mt-4">
-                    Today, we continue to provide the highest standard of service to clients throughout Florida, combining traditional values of craftsmanship and integrity with cutting-edge technology and innovation.
-                  </p>
+                  <EditableContent 
+                    id="about-nationwide-paragraph" 
+                    tag="p" 
+                    className="text-gray-600 text-lg mt-4"
+                  >
+                    Today, we continue to provide the highest standard of service nationwide, leveraging our technical expertise, traditional values of craftsmanship, and commitment to innovation to serve businesses across the United States.
+                  </EditableContent>
                 </div>
               </div>
 
