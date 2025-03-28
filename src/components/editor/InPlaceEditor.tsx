@@ -33,6 +33,8 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
   const [isSaving, setIsSaving] = useState(false);
   const [canEdit, setCanEdit] = useState(false);
   const [savingFeedbackVisible, setSavingFeedbackVisible] = useState(false);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -91,11 +93,9 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
         if (content) {
           console.log('Content loaded from Supabase:', Object.keys(content).length, 'elements');
           
-          // Store in both localStorage and sessionStorage for fallback
           localStorage.setItem('page_content', JSON.stringify(content));
           sessionStorage.setItem('page_content', JSON.stringify(content));
           
-          // Re-initialize editables to apply the content
           if (editMode) {
             setTimeout(initializeEditables, 500);
           }
@@ -109,7 +109,6 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
       return false;
     };
 
-    // Load content whenever the route changes
     loadContent();
   }, [location.pathname, editMode]);
 
@@ -185,8 +184,15 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
 
     if (editableElements.length === 0) {
       console.warn('No editable elements found. Are EditableContent components rendered?');
+      toast({
+        title: "No editable content found",
+        description: "This page doesn't have any editable content sections configured.",
+        variant: "warning",
+      });
       return;
     }
+
+    document.body.classList.add('edit-mode');
 
     editableElements.forEach(el => {
       const id = el.getAttribute('data-editable');
@@ -205,7 +211,25 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
         console.log(`Element ${id} is now editable as text`);
       } else if (type === 'image') {
         el.classList.add('editable-image');
+        
+        const overlay = document.createElement('div');
+        overlay.className = 'image-edit-overlay';
+        overlay.innerHTML = '<div class="image-edit-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>';
+        
+        const rect = (el as HTMLElement).getBoundingClientRect();
+        if (rect.width > 0 && rect.height > 0) {
+          el.parentNode?.appendChild(overlay);
+        }
+        
         el.addEventListener('click', (e) => {
+          if (editMode) {
+            e.preventDefault();
+            e.stopPropagation();
+            openImageDialog(el as HTMLImageElement);
+          }
+        });
+        
+        overlay.addEventListener('click', (e) => {
           if (editMode) {
             e.preventDefault();
             e.stopPropagation();
@@ -223,18 +247,36 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
   const openImageDialog = (imgElement: HTMLImageElement) => {
     setCurrentImageElement(imgElement);
     setNewImageUrl(imgElement.src);
+    setPreviewImage(imgElement.src);
+    setUploadError(null);
     setImageDialogOpen(true);
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    
+    setUploadError(null);
+    
+    if (file.size > 5 * 1024 * 1024) {
+      setUploadError("File is too large. Please choose an image under 5MB.");
+      return;
+    }
+    
+    if (!['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'].includes(file.type)) {
+      setUploadError("Unsupported file type. Please use JPEG, PNG, GIF, WEBP, or SVG.");
+      return;
+    }
 
     const reader = new FileReader();
     reader.onload = (event) => {
       if (event.target?.result) {
+        setPreviewImage(event.target.result as string);
         setNewImageUrl(event.target.result as string);
       }
+    };
+    reader.onerror = () => {
+      setUploadError("Failed to read the selected file. Please try again.");
     };
     reader.readAsDataURL(file);
   };
@@ -250,13 +292,11 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
         description: "Changes will be automatically saved",
       });
       
-      // Auto-save after a short delay to allow user to make additional changes
       autoSaveChanges();
     }
   };
 
   const autoSaveChanges = () => {
-    // Set a timeout to save changes after a brief delay
     setTimeout(() => {
       saveChanges();
     }, 1000);
@@ -293,13 +333,11 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
       
       const canPublish = await hasPermission('publish_content');
       
-      // Save to Supabase
       const saveResult = await savePageContent(pagePath, contentToSave, user?.id);
       
       if (saveResult) {
         console.log('Content saved successfully to Supabase');
         
-        // Update localStorage after successful save to Supabase
         localStorage.setItem('page_content', JSON.stringify(contentToSave));
         sessionStorage.setItem('page_content', JSON.stringify(contentToSave));
 
@@ -313,7 +351,6 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
         throw new Error("Failed to save content to Supabase");
       }
 
-      // Hide the saving feedback after a brief delay
       setTimeout(() => {
         setSavingFeedbackVisible(false);
       }, 2000);
@@ -330,6 +367,33 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
       setContentChanged(false);
     }
   };
+
+  const cleanupEditMode = () => {
+    document.body.classList.remove('edit-mode');
+    
+    const overlays = document.querySelectorAll('.image-edit-overlay');
+    overlays.forEach(overlay => overlay.remove());
+    
+    const editableElements = document.querySelectorAll('[data-editable]');
+    editableElements.forEach(el => {
+      const type = el.getAttribute('data-editable-type') || 'text';
+      if (type === 'text') {
+        el.removeAttribute('contenteditable');
+      }
+    });
+  };
+  
+  useEffect(() => {
+    if (!editMode) {
+      cleanupEditMode();
+    }
+  }, [editMode]);
+  
+  useEffect(() => {
+    return () => {
+      cleanupEditMode();
+    };
+  }, []);
 
   const shouldShowEditor = isEditUrl || isEnabled;
 
@@ -411,6 +475,10 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
                     Choose File
                   </Button>
                 </div>
+                
+                {uploadError && (
+                  <p className="text-sm text-red-500 mt-2">{uploadError}</p>
+                )}
               </div>
               
               <div className="space-y-2">
@@ -419,16 +487,19 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
                   id="imageUrl"
                   type="url"
                   value={newImageUrl}
-                  onChange={(e) => setNewImageUrl(e.target.value)}
+                  onChange={(e) => {
+                    setNewImageUrl(e.target.value);
+                    setPreviewImage(e.target.value);
+                  }}
                   placeholder="https://example.com/image.jpg"
                 />
               </div>
               
-              {newImageUrl && newImageUrl !== currentImageElement?.src && (
+              {previewImage && previewImage !== currentImageElement?.src && (
                 <div className="border rounded p-2">
                   <p className="text-sm text-gray-500 mb-2">Preview:</p>
                   <img 
-                    src={newImageUrl} 
+                    src={previewImage} 
                     alt="Preview" 
                     className="w-full h-40 object-contain"
                     onError={() => {
@@ -437,6 +508,7 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
                         description: "The URL might be invalid or the image is not accessible",
                         variant: "destructive"
                       });
+                      setPreviewImage(null);
                     }}
                   />
                 </div>
@@ -447,7 +519,10 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
               <Button variant="outline" onClick={() => setImageDialogOpen(false)}>
                 Cancel
               </Button>
-              <Button onClick={updateImage}>
+              <Button 
+                onClick={updateImage}
+                disabled={!previewImage || previewImage === currentImageElement?.src}
+              >
                 Update Image
               </Button>
             </div>
@@ -455,7 +530,6 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
         </DialogContent>
       </Dialog>
 
-      {/* Saving Feedback Toast */}
       {savingFeedbackVisible && (
         <div className="fixed top-4 right-4 bg-white rounded-lg shadow-lg p-4 z-50 flex items-center gap-2 animate-in fade-in slide-in-from-top-5">
           <div className="spinner w-5 h-5 border-2 border-t-blue-500 border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin"></div>
@@ -529,6 +603,7 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
         
         .edit-mode [data-editable-type="image"] {
           cursor: pointer !important;
+          position: relative;
         }
         
         .edit-mode [data-editable]::before {
@@ -548,6 +623,33 @@ const InPlaceEditor = ({ isEnabled }: InPlaceEditorProps) => {
         
         .edit-mode [data-editable]:hover::before {
           opacity: 1;
+        }
+        
+        .edit-mode .image-edit-overlay {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background-color: rgba(0, 0, 0, 0.4);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 10;
+          transition: opacity 0.2s;
+          cursor: pointer;
+        }
+        
+        .edit-mode .image-edit-icon {
+          color: white;
+          background-color: rgba(0, 112, 243, 0.8);
+          border-radius: 50%;
+          padding: 8px;
+          width: 40px;
+          height: 40px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
         
         @keyframes spin {
