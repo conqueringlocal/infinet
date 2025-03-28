@@ -72,11 +72,10 @@ const UndergroundServicePage = () => {
               <div className="reveal space-y-6">
                 <EditableContent
                   id="underground-overview"
-                  defaultContent={`
-                    <p>Our underground services provide a comprehensive solution for installing telecommunications, data, and power infrastructure beneath the surface. Using advanced directional boring and trenching technologies, we ensure minimal disruption to existing landscaping, pavements, and structures while establishing reliable underground pathways for essential utilities.</p>
-                    <p>Whether you need to connect multiple buildings across a campus, establish new infrastructure for a commercial development, or upgrade existing underground systems, our teams deliver precise, code-compliant installations that meet the highest industry standards.</p>
-                  `}
-                />
+                >
+                  <p>Our underground services provide a comprehensive solution for installing telecommunications, data, and power infrastructure beneath the surface. Using advanced directional boring and trenching technologies, we ensure minimal disruption to existing landscaping, pavements, and structures while establishing reliable underground pathways for essential utilities.</p>
+                  <p>Whether you need to connect multiple buildings across a campus, establish new infrastructure for a commercial development, or upgrade existing underground systems, our teams deliver precise, code-compliant installations that meet the highest industry standards.</p>
+                </EditableContent>
               </div>
             </div>
           </div>
@@ -93,64 +92,60 @@ const UndergroundServicePage = () => {
                   <h3 className="text-xl font-semibold text-gray-900 mb-4">Directional Boring</h3>
                   <EditableContent
                     id="directional-boring"
-                    defaultContent={`
-                      <p>Our directional boring (horizontal drilling) services allow for the installation of underground utilities with minimal surface disruption:</p>
-                      <ul class="list-disc pl-5 mt-2 space-y-2">
-                        <li>Precise installation under roads, sidewalks, landscaping, and waterways</li>
-                        <li>Reduced restoration costs compared to traditional trenching</li>
-                        <li>Environmentally friendly approach with minimal ecosystem impact</li>
-                        <li>Ideal for congested areas with existing underground utilities</li>
-                      </ul>
-                    `}
-                  />
+                  >
+                    <p>Our directional boring (horizontal drilling) services allow for the installation of underground utilities with minimal surface disruption:</p>
+                    <ul className="list-disc pl-5 mt-2 space-y-2">
+                      <li>Precise installation under roads, sidewalks, landscaping, and waterways</li>
+                      <li>Reduced restoration costs compared to traditional trenching</li>
+                      <li>Environmentally friendly approach with minimal ecosystem impact</li>
+                      <li>Ideal for congested areas with existing underground utilities</li>
+                    </ul>
+                  </EditableContent>
                 </div>
                 
                 <div className="reveal bg-white p-6 rounded-lg shadow-md">
                   <h3 className="text-xl font-semibold text-gray-900 mb-4">Trenching & Excavation</h3>
                   <EditableContent
                     id="trenching-excavation"
-                    defaultContent={`
-                      <p>When open trenching is the most appropriate method, our teams provide:</p>
-                      <ul class="list-disc pl-5 mt-2 space-y-2">
-                        <li>Precise excavation with minimal footprint</li>
-                        <li>Proper bedding and backfill procedures</li>
-                        <li>Conduit and cable installation to exact specifications</li>
-                        <li>Full surface restoration including asphalt, concrete, and landscaping</li>
-                      </ul>
-                    `}
-                  />
+                  >
+                    <p>When open trenching is the most appropriate method, our teams provide:</p>
+                    <ul className="list-disc pl-5 mt-2 space-y-2">
+                      <li>Precise excavation with minimal footprint</li>
+                      <li>Proper bedding and backfill procedures</li>
+                      <li>Conduit and cable installation to exact specifications</li>
+                      <li>Full surface restoration including asphalt, concrete, and landscaping</li>
+                    </ul>
+                  </EditableContent>
                 </div>
                 
                 <div className="reveal bg-white p-6 rounded-lg shadow-md">
                   <h3 className="text-xl font-semibold text-gray-900 mb-4">Utility Locating & Mapping</h3>
                   <EditableContent
                     id="utility-locating"
-                    defaultContent={`
-                      <p>Before any underground work begins, we utilize advanced utility locating tools:</p>
-                      <ul class="list-disc pl-5 mt-2 space-y-2">
-                        <li>Ground-penetrating radar (GPR) surveys</li>
-                        <li>Electromagnetic detection systems</li>
-                        <li>Comprehensive mapping of existing underground infrastructure</li>
-                        <li>3D visualization of underground conditions</li>
-                      </ul>
-                    `}
-                  />
+                  >
+                    <p>Before any underground work begins, we utilize advanced utility locating tools:</p>
+                    <ul className="list-disc pl-5 mt-2 space-y-2">
+                      <li>Ground-penetrating radar (GPR) surveys</li>
+                      <li>Electromagnetic detection systems</li>
+                      <li>Comprehensive mapping of existing underground infrastructure</li>
+                      <li>3D visualization of underground conditions</li>
+                    </ul>
+                  </EditableContent>
                 </div>
                 
                 <div className="reveal bg-white p-6 rounded-lg shadow-md">
                   <h3 className="text-xl font-semibold text-gray-900 mb-4">Conduit & Duct Bank Installation</h3>
                   <EditableContent
                     id="conduit-installation"
-                    defaultContent={`
-                      <p>We install robust underground pathways for your infrastructure:</p>
-                      <ul class="list-disc pl-5 mt-2 space-y-2">
-                        <li>PVC, HDPE, and flexible conduit systems</li>
-                        <li>Multi-conduit duct bank configurations</li>
-                        <li>Reinforced concrete encasement where required</li>
-                        <li>Pull boxes, hand holes, and access points for maintenance</li>
-                      </ul>
-                    `}
-                  />
+                  >
+                    <p>We install robust underground pathways for your infrastructure:</p>
+                    <ul className="list-disc pl-5 mt-2 space-y-2">
+                      <li>PVC, HDPE, and flexible conduit systems</li>
+                      <li>Multi-conduit duct bank configurations</li>
+                      <li>Reinforced concrete encasement where required</li>
+                      <li>Pull boxes, hand holes, and access points for maintenance</li>
+                    </ul>
+                  </EditableContent>
                 </div>
               </div>
             </div>
