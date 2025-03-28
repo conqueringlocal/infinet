@@ -1,10 +1,7 @@
-
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Wifi, ArrowRight, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
 
 const WirelessPage = () => {
   useEffect(() => {
@@ -14,9 +11,7 @@ const WirelessPage = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar />
-      
-      <main className="flex-grow pt-20">
+      <main className="flex-grow">
         {/* Hero Section */}
         <section className="bg-gradient-to-r from-infinet-800 to-infinet-950 py-16 md:py-24 text-white">
           <div className="container mx-auto px-4 md:px-6">
@@ -177,8 +172,6 @@ const WirelessPage = () => {
           </div>
         </section>
       </main>
-      
-      <Footer />
     </div>
   );
 };
