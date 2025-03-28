@@ -72,7 +72,8 @@ const ScrollToTop = () => {
   return null;
 };
 
-const PageWithEditor = () => {
+// Component to render page content without duplicating the Footer
+const PageContent = () => {
   const location = useLocation();
   const isEditMode = location.pathname === '/edit' || location.pathname.endsWith('/edit');
   
@@ -159,21 +160,21 @@ const AppRoutes = () => {
       <div className="pt-20">
         <PageTransition>
           <Routes>
-            <Route path="/" element={<PageWithEditor />} />
-            <Route path="/about" element={<PageWithEditor />} />
-            <Route path="/services" element={<PageWithEditor />} />
-            <Route path="/projects" element={<PageWithEditor />} />
-            <Route path="/contact" element={<PageWithEditor />} />
-            <Route path="/service/fiber" element={<PageWithEditor />} />
-            <Route path="/service/structured" element={<PageWithEditor />} />
-            <Route path="/service/wireless" element={<PageWithEditor />} />
-            <Route path="/service/ptp" element={<PageWithEditor />} />
-            <Route path="/service/network" element={<PageWithEditor />} />
-            <Route path="/service/maintenance" element={<PageWithEditor />} />
+            <Route path="/" element={<PageContent />} />
+            <Route path="/about" element={<PageContent />} />
+            <Route path="/services" element={<PageContent />} />
+            <Route path="/projects" element={<PageContent />} />
+            <Route path="/contact" element={<PageContent />} />
+            <Route path="/service/fiber" element={<PageContent />} />
+            <Route path="/service/structured" element={<PageContent />} />
+            <Route path="/service/wireless" element={<PageContent />} />
+            <Route path="/service/ptp" element={<PageContent />} />
+            <Route path="/service/network" element={<PageContent />} />
+            <Route path="/service/maintenance" element={<PageContent />} />
             
-            <Route path="/edit" element={<PageWithEditor />} />
-            <Route path="/:page/edit" element={<PageWithEditor />} />
-            <Route path="/service/:service/edit" element={<PageWithEditor />} />
+            <Route path="/edit" element={<PageContent />} />
+            <Route path="/:page/edit" element={<PageContent />} />
+            <Route path="/service/:service/edit" element={<PageContent />} />
             
             <Route path="*" element={<NotFound />} />
           </Routes>
