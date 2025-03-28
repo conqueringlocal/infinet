@@ -35,8 +35,7 @@ const serviceLinks = [
   { path: '/service/structured', label: 'Structured Cabling' },
   { path: '/service/wireless', label: 'Wireless Solutions' },
   { path: '/service/ptp', label: 'Point-to-Point' },
-  { path: '/service/network', label: 'Network Design' },
-  { path: '/service/maintenance', label: 'Maintenance & Support' },
+  { path: '/service/network', label: 'Network Design' }
 ];
 
 const Navbar = () => {

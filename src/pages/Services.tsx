@@ -101,11 +101,10 @@ const serviceCategories = [
       'Equipment mounting and configuration',
       'Cable management solutions',
       'Infrastructure documentation',
-      'Maintenance and support plans',
       'Site surveys and assessments'
     ],
     image: 'https://images.unsplash.com/photo-1605810230434-7631ac76ec81?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
-    path: '/service/maintenance'
+    path: '/service/network'
   }
 ];
 

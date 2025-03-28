@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/Button';
-import { Cable, Network, Radio, Wifi, Server, RefreshCw, CheckCircle, ArrowRight } from 'lucide-react';
+import { Cable, Network, Radio, Wifi, Server, CheckCircle, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Link } from 'react-router-dom';
 
@@ -84,20 +84,6 @@ const services: ServiceOption[] = [
       'Documentation & training'
     ],
     path: '/service/network'
-  },
-  {
-    id: 'maintenance',
-    title: 'Maintenance & Support',
-    description: 'Ongoing monitoring, maintenance, and rapid issue resolution.',
-    icon: RefreshCw,
-    features: [
-      '24/7 monitoring options',
-      'Preventative maintenance',
-      'Rapid emergency response',
-      'Regular performance testing',
-      'System upgrades & patches'
-    ],
-    path: '/service/maintenance'
   }
 ];
 
