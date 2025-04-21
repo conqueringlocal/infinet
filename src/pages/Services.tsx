@@ -188,12 +188,12 @@ const Services = () => {
               <div 
                 key={service.id} 
                 id={service.id}
-                className={cn(
-                  "reveal mb-20 last:mb-0 scroll-mt-24",
-                  index % 2 === 1 ? "" : "lg:flex-row-reverse"
-                )}
+                className="reveal mb-20 last:mb-0 scroll-mt-24"
               >
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div className={cn(
+                  "grid grid-cols-1 lg:grid-cols-2 gap-12 items-center",
+                  index % 2 === 0 ? "" : "lg:flex-row-reverse"
+                )}>
                   <div className="space-y-6">
                     <div className="flex items-center">
                       <div className={cn("w-12 h-12 rounded-lg flex items-center justify-center mr-4", service.color)}>
@@ -226,11 +226,11 @@ const Services = () => {
                   <div className="relative">
                     <div className={cn(
                       "absolute -z-10 rounded-lg",
-                      index % 2 === 1 ? "-top-4 -right-4 w-32 h-32 bg-infinet-100" : "-top-4 -left-4 w-32 h-32 bg-infinet-100"
+                      index % 2 === 0 ? "-top-4 -right-4 w-32 h-32 bg-infinet-100" : "-top-4 -left-4 w-32 h-32 bg-infinet-100"
                     )}></div>
                     <div className={cn(
                       "absolute -z-10 rounded-lg",
-                      index % 2 === 1 ? "-bottom-4 -left-4 w-32 h-32 bg-infinet-50" : "-bottom-4 -right-4 w-32 h-32 bg-infinet-50"
+                      index % 2 === 0 ? "-bottom-4 -left-4 w-32 h-32 bg-infinet-50" : "-bottom-4 -right-4 w-32 h-32 bg-infinet-50"
                     )}></div>
                     <div className="bg-white rounded-lg overflow-hidden shadow-xl">
                       <img 
