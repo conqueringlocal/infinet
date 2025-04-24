@@ -1,6 +1,5 @@
-
 import { Link } from 'react-router-dom';
-import { MapPin, Phone, Mail, Facebook, Twitter, Instagram, Linkedin, ChevronRight } from 'lucide-react';
+import { MapPin, Phone, Mail, Linkedin, ChevronRight } from 'lucide-react';
 
 const Footer = () => {
   const year = new Date().getFullYear();
@@ -115,19 +114,12 @@ const Footer = () => {
             <h3 className="text-xl font-bold mb-4">Stay Connected</h3>
             <p className="text-gray-400 mb-4">Follow us on social media for industry news and updates.</p>
             <div className="flex space-x-3 mb-6">
-              <a href="#facebook" className="bg-blue-600 hover:bg-blue-700 p-2 rounded-full transition-colors">
-                <Facebook className="h-5 w-5" />
-                <span className="sr-only">Facebook</span>
-              </a>
-              <a href="#twitter" className="bg-blue-400 hover:bg-blue-500 p-2 rounded-full transition-colors">
-                <Twitter className="h-5 w-5" />
-                <span className="sr-only">Twitter</span>
-              </a>
-              <a href="#instagram" className="bg-pink-600 hover:bg-pink-700 p-2 rounded-full transition-colors">
-                <Instagram className="h-5 w-5" />
-                <span className="sr-only">Instagram</span>
-              </a>
-              <a href="#linkedin" className="bg-blue-800 hover:bg-blue-900 p-2 rounded-full transition-colors">
+              <a 
+                href="https://www.linkedin.com/company/infi-net-llc" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="bg-blue-800 hover:bg-blue-900 p-2 rounded-full transition-colors"
+              >
                 <Linkedin className="h-5 w-5" />
                 <span className="sr-only">LinkedIn</span>
               </a>
